@@ -26,12 +26,12 @@ function App() {
         <div className="absolute inset-0 pointer-events-none">
           <Prism
             animationType="rotate"
-            timeScale={0.35}
+            timeScale={0.7}
             height={3.5}
             baseWidth={5.5}
             scale={3.6}
             noise={0}
-            glow={1}
+            glow={1.2}
             suspendWhenOffscreen={true}
           />
         </div>
@@ -172,10 +172,10 @@ function App() {
         {/* Silk background (unchanged) */}
         <div className="absolute inset-0 pointer-events-none">
           <Silk
-            speed={8}
-            scale={1.1}
+            speed={10}
+            scale={1.3}
             color="#7B7481"
-            noiseIntensity={1.2}
+            noiseIntensity={1}
             rotation={0}
           />
         </div>
