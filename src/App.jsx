@@ -1,11 +1,20 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Prism from "./Prism";
 import Silk from "./Silk";
 
 function App() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
-  // 🔘 Unified button system (content-sized, pill)
+  // 📱 detect mobile safely
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  // 🔘 Unified button system
   const btnPrimary =
     "inline-flex items-center justify-center px-6 md:px-8 py-2.5 md:py-3 " +
     "rounded-full bg-white text-black font-medium whitespace-nowrap cursor-pointer " +
@@ -22,25 +31,40 @@ function App() {
       {/* 🔮 HERO */}
       <div className="relative h-screen w-screen overflow-hidden">
 
-        {/* Prism background */}
+        {/* 🌌 BACKGROUND (Mobile → Silk | Desktop → Prism) */}
         <div className="absolute inset-0 pointer-events-none">
-          <Prism
-            animationType="rotate"
-            timeScale={0.7}
-            height={3.5}
-            baseWidth={5.5}
-            scale={3.6}
-            noise={0}
-            glow={1.2}
-            suspendWhenOffscreen={true}
-          />
+          {isMobile ? (
+            <Silk
+              speed={6}
+              scale={1.15}
+              color="#6B7280"
+              noiseIntensity={0.8}
+              rotation={0}
+            />
+          ) : (
+            <Prism
+              animationType="rotate"
+              timeScale={0.7}
+              height={3.5}
+              baseWidth={5.5}
+              scale={3.6}
+              noise={0}
+              glow={1.2}
+              suspendWhenOffscreen={true}
+            />
+          )}
         </div>
 
         {/* Readability overlay */}
         <div className="absolute inset-0 bg-black/55 pointer-events-none" />
 
         {/* 🧭 NAVBAR */}
-        <nav className="absolute top-0 left-0 z-30 w-full px-5 md:px-14 py-5 flex items-center justify-between animate-[fadeDown_0.8s_ease-out]">
+        <nav className="absolute top-0 left-0 z-30 w-full
+                        px-5 md:px-14 py-5
+                        flex items-center justify-between
+                        bg-black/5 backdrop-blur-sm
+                        border-b border-white/10
+                        animate-[fadeDown_0.8s_ease-out]">
           <div className="text-lg md:text-xl font-semibold tracking-wide">
             ParthRahi
           </div>
@@ -109,7 +133,6 @@ function App() {
               safe, affordable, and transparent rides across Bihar.
             </p>
 
-            {/* CTA */}
             <div className="flex sm:flex-row flex-col items-center gap-4 justify-center mb-8">
               <button
                 onClick={() => window.open("https://trend-ride.onrender.com/", "_blank")}
@@ -126,12 +149,11 @@ function App() {
               </button>
             </div>
 
-
           </div>
         </section>
       </div>
 
-      {/* 🚀 WHY PARTHRAHI */}
+{/* 🚀 WHY PARTHRAHI */}
       <section className="min-h-[80vh] py-24 px-6 md:px-16 bg-neutral-950 flex items-center">
         <div className="max-w-6xl mx-auto w-full">
 
@@ -361,7 +383,6 @@ function App() {
           </div>
         </div>
       </footer>
-
 
       <style>{`
         @keyframes fadeDown {
