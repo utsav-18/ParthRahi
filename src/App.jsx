@@ -126,6 +126,7 @@ function App() {
               </button>
             </div>
 
+
           </div>
         </section>
       </div>
@@ -165,9 +166,10 @@ function App() {
         </div>
       </section>
 
-      {/* 🟣 BOOK A RIDE NOW */}
-      <section className="relative h-[80vh] w-screen flex items-center justify-center overflow-hidden">
+      {/* 🟣 ABOUT US */}
+      <section className="relative min-h-[80vh] w-screen flex items-center overflow-hidden">
 
+        {/* Silk background (unchanged) */}
         <div className="absolute inset-0 pointer-events-none">
           <Silk
             speed={8}
@@ -178,34 +180,187 @@ function App() {
           />
         </div>
 
+        {/* Overlay */}
         <div className="absolute inset-0 bg-black/65 pointer-events-none" />
 
-        <div className="relative z-20 text-center px-6">
-          <h2 className="text-3xl md:text-5xl font-bold mb-6">
-            Book a Ride Now
-          </h2>
+        {/* Content */}
+        <div
+          className="
+            relative z-20 max-w-7xl mx-auto
+            px-6 sm:px-8 md:px-16
+            py-16 md:py-0
+            grid gap-14 md:grid-cols-2 items-center
+          "
+        >
 
-          <p className="text-base md:text-lg text-white/80 max-w-xl mx-auto mb-10">
-            Get safe, affordable, and reliable rides anywhere in Bihar.
-            Start your journey today.
-          </p>
+          {/* LEFT — TEXT */}
+          <div className="space-y-6 animate-[fadeUp_0.8s_ease-out]">
+            <p className="text-xs uppercase tracking-widest text-white/60">
+              About ParthRahi
+            </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <button
-              onClick={() => window.open("https://trend-ride.onrender.com/", "_blank")}
-              className={btnPrimary}
-            >
-              Book Ride
-            </button>
+            <h2 className="text-3xl md:text-5xl font-bold leading-tight">
+              Built for Bihar,
+              <span className="block text-white/80">
+                Powered by Local Trust
+              </span>
+            </h2>
 
-            <button className={btnSecondary}>
-              Download App
-            </button>
+            <p className="text-base md:text-lg text-white/80 leading-relaxed max-w-xl">
+              ParthRahi is a Bihar-first ride-hailing platform built to solve
+              real local mobility problems — with fair pricing, trusted drivers,
+              and transparent rides.
+            </p>
+
+            <p className="text-sm text-white/65 max-w-xl">
+              Our mission is simple: empower local drivers and give passengers
+              a service they can truly rely on.
+            </p>
+
           </div>
+
+        {/* RIGHT — LOGO / IMAGE */}
+          <div className="flex justify-center md:justify-end animate-[fadeIn_1s_ease-out]">
+            <div
+              className="
+                relative
+                w-[180px] h-[180px]
+                sm:w-[200px] sm:h-[200px]
+                md:w-[250px] md:h-[250px]
+              "
+            >
+              {/* 🔆 BACK SOFT BLUE */}
+              <div
+                className="
+                  absolute -inset-5 rounded-full -z-10
+                  bg-[radial-gradient(circle_at_center,rgba(80,160,255,0.35),transparent_60%)]
+                  blur-xl
+                "
+              />
+
+              {/* 🔵 LOGO WITH REAL BLUE GLOW */}
+              <img
+                src="/logo.png"
+                alt="ParthRahi Logo"
+                className="
+                  w-full h-full object-cover rounded-full
+                  border border-sky-400/60
+                  shadow-[0_0_0_3px_rgba(80,160,255,0.25),0_0_45px_rgba(80,160,255,0.45),0_25px_70px_rgba(0,0,0,0.7)]
+                  hover:scale-[1.04]
+                  transition-all duration-300
+                  relative z-10
+                "
+              />
+            </div>
+          </div>
+
+
         </div>
       </section>
 
+
       {/* 🧾 FOOTER */}
+      <footer className="relative bg-neutral-950 border-t border-white/10">
+        <div className="max-w-7xl mx-auto px-6 md:px-16 py-16 grid gap-12 md:grid-cols-4">
+
+          {/* Brand */}
+          <div className="space-y-4">
+            <h3 className="text-xl font-semibold tracking-wide">
+              ParthRahi
+            </h3>
+            <p className="text-sm text-white/70 leading-relaxed">
+              Reliable, affordable ride-hailing built specifically for Bihar.
+              Empowering local drivers, serving local communities.
+            </p>
+          </div>
+
+          {/* Quick Links */}
+          <div>
+            <h4 className="text-sm font-semibold mb-4 uppercase tracking-wider text-white/80">
+              Company
+            </h4>
+            <ul className="space-y-3 text-sm text-white/70">
+              {["About", "Features", "Contact", "Careers"].map(item => (
+                <li
+                  key={item}
+                  className="hover:text-white transition cursor-pointer"
+                >
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* For Users */}
+          <div>
+            <h4 className="text-sm font-semibold mb-4 uppercase tracking-wider text-white/80">
+              For You
+            </h4>
+            <ul className="space-y-3 text-sm text-white/70">
+              <li className="hover:text-white transition cursor-pointer">
+                Book a Ride
+              </li>
+              <li className="hover:text-white transition cursor-pointer">
+                Become a Driver
+              </li>
+              <li className="hover:text-white transition cursor-pointer">
+                Safety Guidelines
+              </li>
+              <li className="hover:text-white transition cursor-pointer">
+                Help & Support
+              </li>
+            </ul>
+          </div>
+
+          {/* CTA */}
+          <div className="space-y-5">
+            <h4 className="text-sm font-semibold uppercase tracking-wider text-white/80">
+              Get Started
+            </h4>
+
+                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                  <button
+                    onClick={() => window.open("https://trend-ride.onrender.com/", "_blank")}
+                    className={btnPrimary}
+                  >
+                    Book Ride
+                  </button>
+
+                  <button className={btnSecondary}>
+                    Download App
+                  </button>
+                </div>
+
+            {/* Socials */}
+            <div className="flex gap-4 pt-2">
+              {["X", "Instagram", "LinkedIn"].map(social => (
+                <span
+                  key={social}
+                  className="text-xs text-white/60 hover:text-white cursor-pointer transition"
+                >
+                  {social}
+                </span>
+              ))}
+            </div>
+          </div>
+
+        </div>
+
+        {/* Bottom Bar */}
+        <div className="border-t border-white/10 py-6 px-6 md:px-16 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-white/60">
+          <p>
+            © {new Date().getFullYear()} ParthRahi. Built for Bihar.
+          </p>
+          <div className="flex gap-6">
+            <span className="hover:text-white cursor-pointer transition">
+              Privacy Policy
+            </span>
+            <span className="hover:text-white cursor-pointer transition">
+              Terms of Service
+            </span>
+          </div>
+        </div>
+      </footer>
 
 
       <style>{`
