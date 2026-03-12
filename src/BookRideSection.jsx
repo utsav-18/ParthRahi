@@ -209,7 +209,6 @@ ${mapLink}`;
                 <span className="text-2xl">{icon}</span>
                 <span className={`text-xs font-semibold ${rideType === value ? "text-sky-300" : "text-white/80"}`}>{label}</span>
                 <span className="text-[10px] text-white/40">{desc}</span>
-                <span className={`text-[10px] font-medium ${rideType === value ? "text-sky-400" : "text-white/50"}`}>₹{RATES[value]}/km</span>
                 {rideType === value && <span className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-sky-400" />}
               </button>
             ))}
