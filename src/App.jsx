@@ -1,3 +1,4 @@
+import BookRideSection from "./BookRideSection";
 import { useState, useEffect } from "react";
 import Prism from "./Prism";
 import Silk from "./Silk";
@@ -13,6 +14,19 @@ function App() {
     return () => window.removeEventListener("resize", check);
   }, []);
 
+  const scrollTo = (id) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+    setMenuOpen(false);
+  };
+
+  const navItems = [
+    { label: "Home",     id: "home"     },
+    { label: "Book",     id: "book"     },
+    { label: "About",    id: "about"    },
+    { label: "Features", id: "features" },
+    { label: "Contact",  id: "contact"  },
+  ];
+
   const btnPrimary =
     "inline-flex items-center justify-center px-6 md:px-8 py-2.5 md:py-3 rounded-full bg-white text-black font-medium whitespace-nowrap cursor-pointer transition-all duration-200 hover:bg-gray-200 hover:-translate-y-0.5 active:translate-y-0";
 
@@ -22,30 +36,17 @@ function App() {
   return (
     <div className="relative w-screen min-h-screen bg-black text-white overflow-x-hidden">
 
-      {/* ─────────────────────────────────────────────────────────────
-          GLOBAL MOBILE SILK BACKGROUND
-          Fixed behind everything on mobile only — one instance, no glitch
-      ───────────────────────────────────────────────────────────── */}
+      {/* GLOBAL MOBILE SILK BACKGROUND */}
       {isMobile && (
         <div className="fixed inset-0 z-0 pointer-events-none">
-          <Silk
-            speed={10}
-            scale={1.3}
-            color="#1f45ac"
-            noiseIntensity={1}
-            rotation={0}
-          />
-          {/* Global dark overlay so text stays readable across all sections */}
+          <Silk speed={10} scale={1.3} color="#1f45ac" noiseIntensity={1} rotation={0} />
           <div className="absolute inset-0 bg-black/65" />
         </div>
       )}
 
-      {/* ─────────────────────────────────────────────────────────────
-          🔮 HERO
-      ───────────────────────────────────────────────────────────── */}
-      <div className="relative min-h-screen w-screen overflow-hidden">
+      {/* 🔮 HERO */}
+      <div id="home" className="relative min-h-screen w-screen overflow-hidden">
 
-        {/* Desktop-only Hero background: Prism */}
         {!isMobile && (
           <div className="absolute inset-0 pointer-events-none">
             <Prism
@@ -63,18 +64,22 @@ function App() {
         )}
 
         {/* Navbar */}
-        <nav className="absolute top-0 left-0 z-30 w-full px-6 md:px-14 py-5 flex items-center justify-between bg-black/10 backdrop-blur-md border-b border-white/10">
-          <div className="text-lg md:text-xl font-semibold tracking-wide">
+        <nav className="fixed top-0 left-0 z-50 w-full px-6 md:px-14 py-5 flex items-center justify-between bg-black/10 backdrop-blur-md border-b border-white/10">
+          <div
+            onClick={() => scrollTo("home")}
+            className="text-lg md:text-xl font-semibold tracking-wide cursor-pointer"
+          >
             ParthRahi
           </div>
 
           <ul className="hidden md:flex gap-10 text-sm">
-            {["Home", "About", "Features", "Contact"].map((item) => (
+            {navItems.map((item) => (
               <li
-                key={item}
+                key={item.id}
+                onClick={() => scrollTo(item.id)}
                 className="relative cursor-pointer opacity-80 hover:opacity-100 transition after:absolute after:left-0 after:-bottom-1 after:h-px after:w-0 after:bg-white after:transition-all after:duration-300 hover:after:w-full"
               >
-                {item}
+                {item.label}
               </li>
             ))}
           </ul>
@@ -95,9 +100,13 @@ function App() {
             menuOpen ? "translate-x-0" : "translate-x-full"
           }`}
         >
-          {["Home", "About", "Features", "Contact"].map((item) => (
-            <div key={item} onClick={() => setMenuOpen(false)} className="cursor-pointer hover:scale-110 transition">
-              {item}
+          {navItems.map((item) => (
+            <div
+              key={item.id}
+              onClick={() => scrollTo(item.id)}
+              className="cursor-pointer hover:scale-110 transition"
+            >
+              {item.label}
             </div>
           ))}
         </div>
@@ -107,7 +116,6 @@ function App() {
           <div className="max-w-7xl mx-auto w-full">
             <div className="grid md:grid-cols-2 gap-14 md:gap-16 items-center">
 
-              {/* Text */}
               <div className="text-white text-center md:text-left space-y-5">
                 <p className="text-xs uppercase tracking-[0.25em] text-white/60">
                   PARTHRAHI MOBILITY
@@ -128,23 +136,15 @@ function App() {
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-3 pt-3 justify-center md:justify-start">
-                  <button
-                    onClick={() => window.open("https://trend-ride.onrender.com/", "_blank")}
-                    className={btnPrimary}
-                  >
+                  <button onClick={() => scrollTo("book")} className={btnPrimary}>
                     Book a Ride
                   </button>
-
-                  <button
-                    onClick={() => window.open("https://parthrahi.com/driver", "_blank")}
-                    className={btnSecondary}
-                  >
+                  <button onClick={() => scrollTo("contact")} className={btnSecondary}>
                     Become a Driver
                   </button>
                 </div>
               </div>
 
-              {/* Logo */}
               <div className="flex justify-center pt-10 pb-16 md:pb-0 md:pt-0">
                 <div className="relative w-[160px] h-[160px] sm:w-[210px] sm:h-[210px] md:w-[280px] md:h-[280px] transition-all duration-500 hover:scale-110">
                   <div className="absolute -inset-6 rounded-full bg-[radial-gradient(circle_at_center,rgba(80,160,255,0.35),transparent_65%)] blur-2xl"></div>
@@ -165,12 +165,15 @@ function App() {
       {/* Divider */}
       <div className="relative z-10 w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
 
-      {/* ─────────────────────────────────────────────────────────────
-          🟣 ABOUT PARTHRAHI
-      ───────────────────────────────────────────────────────────── */}
-      <section className="relative py-28 px-6 md:px-16 overflow-hidden">
+      {/* 🚗 BOOK A RIDE */}
+      <BookRideSection isMobile={isMobile} />
 
-        {/* Desktop-only Silk background for this section */}
+      {/* Divider */}
+      <div className="relative z-10 w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+
+      {/* 🟣 ABOUT */}
+      <section id="about" className="relative py-28 px-6 md:px-16 overflow-hidden">
+
         {!isMobile && (
           <div className="absolute inset-0 pointer-events-none">
             <Silk speed={10} scale={1.3} color="#1f45ac" noiseIntensity={1} rotation={0} />
@@ -180,7 +183,6 @@ function App() {
 
         <div className="relative z-10 max-w-7xl mx-auto">
 
-          {/* Heading */}
           <div className="text-center mb-20">
             <p className="text-xs uppercase tracking-[0.3em] text-white/60 mb-3">About Us</p>
             <h2 className="text-3xl md:text-5xl font-bold text-white">A Trusted Mobility Platform</h2>
@@ -190,7 +192,6 @@ function App() {
             </p>
           </div>
 
-          {/* Trust Cards */}
           <div className="grid md:grid-cols-4 gap-6 mb-20">
             {[
               ["🏢", "LLP Registered", "Operated by Parthrahi Smartcab Solutions LLP"],
@@ -209,7 +210,6 @@ function App() {
             ))}
           </div>
 
-          {/* Story */}
           <div className="grid md:grid-cols-2 gap-14 items-center">
             <div>
               <h3 className="text-2xl font-semibold mb-4 text-white">Why We Built ParthRahi</h3>
@@ -222,7 +222,6 @@ function App() {
                 a modern transportation ecosystem that benefits both riders and drivers.
               </p>
             </div>
-
             <div className="space-y-6">
               <div className="bg-white/5 border border-white/10 rounded-xl p-6 backdrop-blur-md hover:bg-white/10 transition">
                 <h4 className="font-semibold text-white mb-2">Our Mission</h4>
@@ -240,7 +239,6 @@ function App() {
             </div>
           </div>
 
-          {/* Support */}
           <div className="text-center mt-20">
             <p className="text-white/60 text-sm mb-2">Customer Support</p>
             <p className="text-lg font-semibold text-white">8252224027 • 9296218764</p>
@@ -249,12 +247,9 @@ function App() {
         </div>
       </section>
 
-      {/* ─────────────────────────────────────────────────────────────
-          👤 FOUNDER SPOTLIGHT
-      ───────────────────────────────────────────────────────────── */}
+      {/* 👤 FOUNDER */}
       <section className="relative py-24 px-6 md:px-16 overflow-hidden border-t border-white/10">
 
-        {/* Desktop-only Silk */}
         {!isMobile && (
           <div className="absolute inset-0 pointer-events-none">
             <Silk speed={10} scale={1.3} color="#1f45ac" noiseIntensity={1} rotation={0} />
@@ -271,7 +266,6 @@ function App() {
 
           <div className="grid md:grid-cols-2 gap-16 items-center">
 
-            {/* Founder Image */}
             <div className="flex justify-center">
               <div className="relative w-[200px] h-[200px] md:w-[260px] md:h-[260px] transition-all duration-500 hover:scale-105">
                 <div className="absolute -inset-6 rounded-full bg-[radial-gradient(circle_at_center,rgba(80,160,255,0.35),transparent_65%)] blur-2xl"></div>
@@ -284,7 +278,6 @@ function App() {
               </div>
             </div>
 
-            {/* Founder Message */}
             <div className="space-y-6 text-center md:text-left">
               <h3 className="text-2xl md:text-3xl font-semibold text-white">Aashish Kumar</h3>
               <p className="text-sm text-white/60">Founder, ParthRahi</p>
@@ -311,12 +304,9 @@ function App() {
         </div>
       </section>
 
-      {/* ─────────────────────────────────────────────────────────────
-          WHY PARTHRAHI
-      ───────────────────────────────────────────────────────────── */}
-      <section className="relative min-h-[80vh] py-24 px-6 md:px-16 flex items-center overflow-hidden border-t border-white/10">
+      {/* ⭐ FEATURES */}
+      <section id="features" className="relative min-h-[80vh] py-24 px-6 md:px-16 flex items-center overflow-hidden border-t border-white/10">
 
-        {/* Desktop-only Silk */}
         {!isMobile && (
           <div className="absolute inset-0 pointer-events-none">
             <Silk speed={10} scale={1.3} color="#1f45ac" noiseIntensity={1} rotation={0} />
@@ -329,7 +319,7 @@ function App() {
             Why Choose ParthRahi
           </h2>
           <p className="text-center text-white/70 max-w-2xl mx-auto mb-16">
-            A technology-driven mobility platform designed to make everyday travel simple, affordable, and reliable for riders and drivers.
+            A technology-driven mobility platform designed to make everyday travel simple, affordable, and reliable.
           </p>
           <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-4">
             {[
@@ -350,12 +340,9 @@ function App() {
         </div>
       </section>
 
-      {/* ─────────────────────────────────────────────────────────────
-          FOOTER
-      ───────────────────────────────────────────────────────────── */}
-      <footer className="relative overflow-hidden border-t border-white/10">
+      {/* FOOTER / CONTACT */}
+      <footer id="contact" className="relative overflow-hidden border-t border-white/10">
 
-        {/* Desktop-only Silk */}
         {!isMobile && (
           <div className="absolute inset-0 pointer-events-none">
             <Silk speed={10} scale={1.3} color="#1f45ac" noiseIntensity={1} rotation={0} />
@@ -378,8 +365,19 @@ function App() {
           <div>
             <h4 className="text-sm font-semibold mb-4 uppercase text-white/80">Company</h4>
             <ul className="space-y-3 text-sm text-white/70">
-              {["About", "Services", "Safety", "Contact"].map((item) => (
-                <li key={item} className="hover:text-white hover:translate-x-1 transition cursor-pointer">{item}</li>
+              {[
+                { label: "About",    id: "about"    },
+                { label: "Features", id: "features" },
+                { label: "Book",     id: "book"     },
+                { label: "Contact",  id: "contact"  },
+              ].map((item) => (
+                <li
+                  key={item.id}
+                  onClick={() => scrollTo(item.id)}
+                  className="hover:text-white hover:translate-x-1 transition cursor-pointer"
+                >
+                  {item.label}
+                </li>
               ))}
             </ul>
           </div>
@@ -387,20 +385,17 @@ function App() {
           <div>
             <h4 className="text-sm font-semibold mb-4 uppercase text-white/80">Riders</h4>
             <ul className="space-y-3 text-sm text-white/70">
-              <li className="hover:text-white hover:translate-x-1 transition cursor-pointer">Book a Ride</li>
-              <li className="hover:text-white hover:translate-x-1 transition cursor-pointer">Become a Driver</li>
-              <li className="hover:text-white hover:translate-x-1 transition cursor-pointer">Safety Guidelines</li>
-              <li className="hover:text-white hover:translate-x-1 transition cursor-pointer">Help & Support</li>
+              <li onClick={() => scrollTo("book")}     className="hover:text-white hover:translate-x-1 transition cursor-pointer">Book a Ride</li>
+              <li onClick={() => scrollTo("book")}     className="hover:text-white hover:translate-x-1 transition cursor-pointer">Become a Driver</li>
+              <li onClick={() => scrollTo("features")} className="hover:text-white hover:translate-x-1 transition cursor-pointer">Safety Guidelines</li>
+              <li onClick={() => scrollTo("contact")}  className="hover:text-white hover:translate-x-1 transition cursor-pointer">Help & Support</li>
             </ul>
           </div>
 
           <div className="space-y-5">
             <h4 className="text-sm font-semibold uppercase text-white/80">Get Started</h4>
             <div className="flex flex-col sm:flex-row gap-4">
-              <button
-                onClick={() => window.open("https://trend-ride.onrender.com/", "_blank")}
-                className={btnPrimary}
-              >
+              <button onClick={() => scrollTo("book")} className={btnPrimary}>
                 Book Ride
               </button>
               <button className={btnSecondary}>Download App</button>
