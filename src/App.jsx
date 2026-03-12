@@ -28,7 +28,7 @@ function App() {
   {/* Background */}
   <div className="absolute inset-0 pointer-events-none">
     {isMobile ? (
-      <Silk speed={10} scale={1.3} color="#132B6B" noiseIntensity={1} rotation={0} />
+      <Silk speed={10} scale={1.3} color="#1f45ac" noiseIntensity={1} rotation={0} />
     ) : (
       <Prism
         animationType="rotate"
@@ -176,7 +176,7 @@ function App() {
     <Silk
       speed={10}
       scale={1.3}
-      color="#132B6B"
+      color="#1f45ac"
       noiseIntensity={1}
       rotation={0}
     />
@@ -304,7 +304,7 @@ function App() {
     <Silk
       speed={10}
       scale={1.3}
-      color="#132B6B"
+      color="#1f45ac"
       noiseIntensity={1}
       rotation={0}
     />
@@ -410,7 +410,7 @@ function App() {
 <section className="relative min-h-[80vh] py-24 px-6 md:px-16 flex items-center overflow-hidden border-t border-white/10">
 
   <div className="absolute inset-0 pointer-events-none">
-    <Silk speed={10} scale={1.3} color="#132B6B" noiseIntensity={1} rotation={0}/>
+    <Silk speed={10} scale={1.3} color="#1f45ac" noiseIntensity={1} rotation={0}/>
   </div>
 
   <div className="absolute inset-0 bg-black/70 pointer-events-none" />
@@ -449,7 +449,7 @@ function App() {
 <footer className="relative overflow-hidden border-t border-white/10">
 
   <div className="absolute inset-0 pointer-events-none">
-    <Silk speed={10} scale={1.3} color="#132B6B" noiseIntensity={1} rotation={0}/>
+    <Silk speed={10} scale={1.3} color="#1f45ac" noiseIntensity={1} rotation={0}/>
   </div>
 
   <div className="absolute inset-0 bg-black/80 pointer-events-none"></div>
