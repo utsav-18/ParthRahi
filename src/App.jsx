@@ -164,6 +164,248 @@ function App() {
 <div className="w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
 
 
+{/* Divider */}
+<div className="w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+
+
+{/* 🟣 ABOUT PARTHRAHI */}
+<section className="relative py-28 px-6 md:px-16 overflow-hidden">
+
+  {/* Background */}
+  <div className="absolute inset-0 pointer-events-none">
+    <Silk
+      speed={10}
+      scale={1.3}
+      color="#132B6B"
+      noiseIntensity={1}
+      rotation={0}
+    />
+  </div>
+
+  <div className="absolute inset-0 bg-black/70"></div>
+
+  <div className="relative z-10 max-w-7xl mx-auto">
+
+    {/* Heading */}
+    <div className="text-center mb-20">
+
+      <p className="text-xs uppercase tracking-[0.3em] text-white/60 mb-3">
+        About Us
+      </p>
+
+      <h2 className="text-3xl md:text-5xl font-bold text-white">
+        A Trusted Mobility Platform
+      </h2>
+
+      <p className="text-white/70 mt-6 max-w-xl mx-auto">
+        ParthRahi connects riders with verified local drivers to deliver
+        safe, affordable and reliable rides for everyday travel.
+      </p>
+
+    </div>
+
+
+    {/* Trust Cards */}
+    <div className="grid md:grid-cols-4 gap-6 mb-20">
+
+      {[
+        ["🏢","LLP Registered","Operated by Parthrahi Smartcab Solutions LLP"],
+        ["🇮🇳","Startup India","DPIIT Recognized Startup"],
+        ["🛡","Driver Verification","Powered by Surepass APIs"],
+        ["🚘","Ride Options","Car • Bike • Auto"]
+      ].map(([icon,title,desc])=>(
+        <div
+          key={title}
+          className="bg-white/5 border border-white/10 backdrop-blur-md p-6 rounded-xl text-center transition hover:bg-white/10 hover:-translate-y-1"
+        >
+          <div className="text-2xl mb-3">{icon}</div>
+          <h3 className="font-semibold text-white mb-1">{title}</h3>
+          <p className="text-xs text-white/60">{desc}</p>
+        </div>
+      ))}
+
+    </div>
+
+
+    {/* Story */}
+    <div className="grid md:grid-cols-2 gap-14 items-center">
+
+      <div>
+
+        <h3 className="text-2xl font-semibold mb-4 text-white">
+          Why We Built ParthRahi
+        </h3>
+
+        <p className="text-white/70 mb-6 leading-relaxed">
+          ParthRahi was created to simplify everyday transportation by
+          connecting passengers with trusted drivers through a
+          technology-powered platform.
+        </p>
+
+        <p className="text-white/70 leading-relaxed">
+          Founded by <strong>Aashish Kumar</strong>, the goal is to build
+          a modern transportation ecosystem that benefits both riders
+          and drivers.
+        </p>
+
+      </div>
+
+
+      {/* Mission Vision */}
+      <div className="space-y-6">
+
+        <div className="bg-white/5 border border-white/10 rounded-xl p-6 backdrop-blur-md hover:bg-white/10 transition">
+          <h4 className="font-semibold text-white mb-2">
+            Our Mission
+          </h4>
+          <p className="text-sm text-white/70">
+            Provide reliable, affordable transportation by connecting
+            riders with verified drivers quickly and safely.
+          </p>
+        </div>
+
+        <div className="bg-white/5 border border-white/10 rounded-xl p-6 backdrop-blur-md hover:bg-white/10 transition">
+          <h4 className="font-semibold text-white mb-2">
+            Our Vision
+          </h4>
+          <p className="text-sm text-white/70">
+            Become a trusted mobility platform that transforms how
+            people travel in cities.
+          </p>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    {/* Support */}
+    <div className="text-center mt-20">
+
+      <p className="text-white/60 text-sm mb-2">
+        Customer Support
+      </p>
+
+      <p className="text-lg font-semibold text-white">
+        8252224027 • 9296218764
+      </p>
+
+    </div>
+
+  </div>
+</section>
+
+
+{/* 👤 FOUNDER SPOTLIGHT */}
+<section className="relative py-24 px-6 md:px-16 overflow-hidden border-t border-white/10">
+
+  {/* Background */}
+  <div className="absolute inset-0 pointer-events-none">
+    <Silk
+      speed={10}
+      scale={1.3}
+      color="#132B6B"
+      noiseIntensity={1}
+      rotation={0}
+    />
+  </div>
+
+  <div className="absolute inset-0 bg-black/70"></div>
+
+  <div className="relative z-10 max-w-7xl mx-auto">
+
+    {/* Heading */}
+    <div className="text-center mb-20">
+
+      <p className="text-xs uppercase tracking-[0.25em] text-white/60 mb-3">
+        Founder
+      </p>
+
+      <h2 className="text-3xl md:text-5xl font-bold text-white">
+        Meet the Founder
+      </h2>
+
+    </div>
+
+
+    <div className="grid md:grid-cols-2 gap-16 items-center">
+
+      {/* Founder Image */}
+      <div className="flex justify-center">
+
+        <div className="relative w-[200px] h-[200px] md:w-[260px] md:h-[260px] transition-all duration-500 hover:scale-105">
+
+          {/* Glow */}
+          <div className="absolute -inset-6 rounded-full bg-[radial-gradient(circle_at_center,rgba(80,160,255,0.35),transparent_65%)] blur-2xl"></div>
+
+          {/* Border */}
+          <div className="absolute inset-0 rounded-full border border-white/20"></div>
+
+          {/* Founder Image */}
+          <img
+            src="/founder.jpeg"   // replace with founder image
+            alt="Founder - Aashish Kumar"
+            className="relative z-10 w-full h-full object-cover rounded-full border border-sky-400/60 shadow-[0_0_50px_rgba(80,160,255,0.35)]"
+          />
+
+        </div>
+
+      </div>
+
+
+      {/* Founder Message */}
+      <div className="space-y-6 text-center md:text-left">
+
+        <h3 className="text-2xl md:text-3xl font-semibold text-white">
+          Aashish Kumar
+        </h3>
+
+        <p className="text-sm text-white/60">
+          Founder, ParthRahi
+        </p>
+
+        <p className="text-white/70 leading-relaxed max-w-lg">
+          ParthRahi was built with a simple vision — to make everyday
+          transportation reliable, affordable and accessible for everyone.
+          Our goal is to connect passengers with trusted drivers while
+          creating new opportunities for local communities.
+        </p>
+
+        <div className="bg-white/5 border border-white/10 backdrop-blur-md p-6 rounded-xl">
+
+          <p className="text-white/80 italic">
+            "Transportation should be simple, transparent and safe for
+            everyone. ParthRahi is built to bring that change."
+          </p>
+
+        </div>
+
+        {/* Trust tags */}
+        <div className="flex flex-wrap gap-3 justify-center md:justify-start">
+
+          <span className="text-xs px-3 py-1 rounded-full bg-white/10 border border-white/20">
+            LLP Registered
+          </span>
+
+          <span className="text-xs px-3 py-1 rounded-full bg-white/10 border border-white/20">
+            Startup India
+          </span>
+
+          <span className="text-xs px-3 py-1 rounded-full bg-white/10 border border-white/20">
+            Verified Drivers
+          </span>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
 {/* WHY PARTHRAHI */}
 <section className="relative min-h-[80vh] py-24 px-6 md:px-16 flex items-center overflow-hidden border-t border-white/10">
 
@@ -201,9 +443,6 @@ function App() {
 
   </div>
 </section>
-
-{/* Divider */}
-<div className="w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
 
 
 {/* FOOTER */}
