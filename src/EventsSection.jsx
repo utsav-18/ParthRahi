@@ -1,21 +1,4 @@
-import { useEffect, useRef } from "react";
-
 export default function EventsSection() {
-  const videoRef = useRef(null);
-
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) video.play().catch(() => {});
-        else video.pause();
-      },
-      { threshold: 0.4 }
-    );
-    observer.observe(video);
-    return () => observer.disconnect();
-  }, []);
 
   const days = [
     { day: "Day 1", date: "Mar 29", plan: "Dumraon → Varanasi Darshan" },
@@ -166,21 +149,16 @@ export default function EventsSection() {
                   Day-wise Plan Video
                 </p>
                 <div className="w-full max-w-[300px] mx-auto rounded-2xl overflow-hidden border border-white/10 bg-black/50 aspect-[9/16] shadow-xl">
-                  <video
-                    ref={videoRef}
-                    className="w-full h-full object-cover"
-                    controls
-                    muted
-                    loop
-                    playsInline
-                    preload="metadata"
-                    poster="/tour-poster.jpg"
-                  >
-                    <source src="/bus.mp4" type="video/mp4" />
-                  </video>
+                  <iframe
+                    className="w-full h-full"
+                    src="https://www.youtube.com/embed/mqSZdw1amg4?autoplay=1&mute=1&loop=1&playlist=mqSZdw1amg4&controls=1&rel=0&modestbranding=1"
+                    title="Tirth Yatra 2026 Day-wise Plan"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
                 </div>
                 <p className="text-white/25 text-[10px] text-center leading-relaxed max-w-[260px]">
-                  Autoplays on scroll · use controls to pause / unmute
+                  Tap to play / pause · full screen available
                 </p>
               </div>
 
