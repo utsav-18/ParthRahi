@@ -1,4 +1,54 @@
+import { useEffect, useRef, useState } from "react";
+
 export default function EventsSection() {
+  const playerRef = useRef(null);
+  const [muted, setMuted] = useState(true);
+
+  useEffect(() => {
+    // Load YouTube IFrame API once
+    if (!window.YT) {
+      const tag = document.createElement("script");
+      tag.src = "https://www.youtube.com/iframe_api";
+      document.body.appendChild(tag);
+    }
+
+    const initPlayer = () => {
+      playerRef.current = new window.YT.Player("yt-player", {
+        videoId: "mqSZdw1amg4",
+        playerVars: {
+          autoplay: 1,
+          mute: 1,
+          loop: 1,
+          playlist: "mqSZdw1amg4",
+          controls: 1,
+          rel: 0,
+          modestbranding: 1,
+          playsinline: 1,
+        },
+        events: {
+          onReady: (e) => e.target.playVideo(),
+        },
+      });
+    };
+
+    if (window.YT && window.YT.Player) {
+      initPlayer();
+    } else {
+      window.onYouTubeIframeAPIReady = initPlayer;
+    }
+
+    return () => {
+      if (playerRef.current?.destroy) playerRef.current.destroy();
+    };
+  }, []);
+
+  const handleUnmute = () => {
+    if (playerRef.current) {
+      playerRef.current.unMute();
+      playerRef.current.setVolume(100);
+      setMuted(false);
+    }
+  };
 
   const days = [
     { day: "Day 1", date: "Mar 29", plan: "Dumraon → Varanasi Darshan" },
@@ -148,17 +198,30 @@ export default function EventsSection() {
                 <p className="text-[11px] font-semibold uppercase tracking-widest text-white/40 self-start md:self-auto">
                   Day-wise Plan Video
                 </p>
-                <div className="w-full max-w-[300px] mx-auto rounded-2xl overflow-hidden border border-white/10 bg-black/50 aspect-[9/16] shadow-xl">
-                  <iframe
-                    className="w-full h-full"
-                    src="https://www.youtube.com/embed/mqSZdw1amg4?autoplay=1&mute=1&loop=1&playlist=mqSZdw1amg4&controls=1&rel=0&modestbranding=1"
-                    title="Tirth Yatra 2026 Day-wise Plan"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
+                <div className="relative w-full max-w-[300px] mx-auto rounded-2xl overflow-hidden border border-white/10 bg-black/50 aspect-[9/16] shadow-xl">
+                  <div id="yt-player" className="w-full h-full" />
+
+                  {/* Unmute overlay — shown until user taps */}
+                  {muted && (
+                    <button
+                      onClick={handleUnmute}
+                      className="absolute inset-0 flex flex-col items-center justify-end pb-10 gap-2 bg-black/30 backdrop-blur-[1px] transition-opacity duration-300 cursor-pointer w-full"
+                    >
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="w-12 h-12 rounded-full bg-white/20 border border-white/40 flex items-center justify-center backdrop-blur-sm">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M3.63 3.63a1 1 0 0 0 0 1.41L7.29 8.7 7 9H4a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h3l3.29 3.29c.63.63 1.71.18 1.71-.71v-4.17l4.18 4.18c-.49.37-1.02.68-1.6.91a1 1 0 1 0 .76 1.85 8.1 8.1 0 0 0 2.45-1.55l1.15 1.15a1 1 0 0 0 1.41-1.41L5.05 3.63a1 1 0 0 0-1.42 0zM19 12c0 .82-.15 1.61-.41 2.34l1.53 1.53A9.9 9.9 0 0 0 21 12c0-4.28-2.68-7.93-6.5-9.36a1 1 0 0 0-.67 1.88C16.72 5.7 19 8.65 19 12zm-9-6.71v1.88l2 2V6a1 1 0 0 0-1.71-.71L10 6.59v-.3z"/>
+                          </svg>
+                        </div>
+                        <span className="text-white text-xs font-semibold bg-black/50 px-3 py-1 rounded-full">
+                          Tap to Unmute
+                        </span>
+                      </div>
+                    </button>
+                  )}
                 </div>
                 <p className="text-white/25 text-[10px] text-center leading-relaxed max-w-[260px]">
-                  Tap to play / pause · full screen available
+                  {muted ? "Playing muted · tap overlay to enable audio" : "🔊 Audio on · use controls to pause"}
                 </p>
               </div>
 
