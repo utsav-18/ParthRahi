@@ -245,7 +245,7 @@ function App() {
                 <div className="absolute -inset-6 rounded-full bg-[radial-gradient(circle_at_center,rgba(80,160,255,0.35),transparent_65%)] blur-2xl"></div>
                 <div className="absolute inset-0 rounded-full border border-white/20"></div>
                 <img
-                  src="/founder.jpeg"
+                  src="/founder.png"
                   alt="Founder - Aashish Kumar"
                   className="relative z-10 w-full h-full object-cover rounded-full border border-sky-400/60 shadow-[0_0_50px_rgba(80,160,255,0.35)]"
                 />
