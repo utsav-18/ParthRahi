@@ -1,11 +1,237 @@
 import { useEffect, useRef, useState } from "react";
 
+// ── Hotel images ───────────────────────────────────────────
+const hotelImages = [
+  { src: "/hot1.jpeg", label: "Deluxe Room" },
+  { src: "/hot2.jpeg", label: "Premium Room" },
+  { src: "/hot3.jpeg", label: "Attached Bathroom" },
+];
+
+// ── Lightbox ───────────────────────────────────────────────
+function Lightbox({ images, index, onClose }) {
+  const [current, setCurrent] = useState(index);
+  const startX = useRef(null);
+
+  useEffect(() => {
+    const handler = (e) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", handler);
+    // Prevent body scroll while open
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", handler);
+      document.body.style.overflow = "";
+    };
+  }, [onClose]);
+
+  const prev = () => setCurrent((c) => (c - 1 + images.length) % images.length);
+  const next = () => setCurrent((c) => (c + 1) % images.length);
+
+  const onTouchStart = (e) => { startX.current = e.touches[0].clientX; };
+  const onTouchEnd   = (e) => {
+    if (startX.current === null) return;
+    const diff = e.changedTouches[0].clientX - startX.current;
+    if (Math.abs(diff) > 50) diff < 0 ? next() : prev();
+    startX.current = null;
+  };
+
+  return (
+    // Backdrop
+    <div
+      className="fixed inset-0 z-[9999] flex items-end md:items-center justify-center"
+      style={{ background: "rgba(0,0,0,0.75)" }}
+      onClick={onClose}
+    >
+      {/* Modal panel — bottom sheet on mobile, centered card on desktop */}
+      <div
+        className="relative w-full md:w-auto md:max-w-lg bg-[#0f1623] border border-white/10 rounded-t-3xl md:rounded-3xl overflow-hidden shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+      >
+        {/* Drag handle (mobile) */}
+        <div className="flex justify-center pt-3 pb-1 md:hidden">
+          <div className="w-10 h-1 rounded-full bg-white/20" />
+        </div>
+
+        {/* Header row */}
+        <div className="flex items-center justify-between px-4 py-2">
+          <span className="text-white/60 text-xs font-medium uppercase tracking-widest">
+            {images[current].label}
+          </span>
+          <button
+            onClick={onClose}
+            className="w-7 h-7 rounded-full bg-white/10 border border-white/15 text-white/70 text-sm flex items-center justify-center hover:bg-white/20 transition"
+          >×</button>
+        </div>
+
+        {/* Image */}
+        <div className="relative mx-4 mb-4 rounded-2xl overflow-hidden bg-black/40"
+          style={{ aspectRatio: "4/3" }}>
+          {images.map((img, i) => (
+            <img
+              key={img.src}
+              src={img.src}
+              alt={img.label}
+              draggable={false}
+              className="absolute inset-0 w-full h-full object-cover select-none"
+              style={{
+                opacity: i === current ? 1 : 0,
+                transition: "opacity 0.3s ease",
+              }}
+            />
+          ))}
+
+          {/* Prev / Next arrows */}
+          <button
+            className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 border border-white/20 text-white flex items-center justify-center hover:bg-black/70 transition"
+            onClick={prev}
+          >‹</button>
+          <button
+            className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 border border-white/20 text-white flex items-center justify-center hover:bg-black/70 transition"
+            onClick={next}
+          >›</button>
+        </div>
+
+        {/* Thumbnail strip */}
+        <div className="flex gap-2 px-4 pb-5">
+          {images.map((img, i) => (
+            <button
+              key={img.src}
+              onClick={() => setCurrent(i)}
+              className="relative flex-1 rounded-xl overflow-hidden border-2 transition-all duration-200"
+              style={{
+                aspectRatio: "4/3",
+                borderColor: i === current ? "rgba(129,140,248,0.9)" : "rgba(255,255,255,0.08)",
+              }}
+            >
+              <img src={img.src} alt={img.label} className="w-full h-full object-cover" draggable={false} />
+              {i !== current && <div className="absolute inset-0 bg-black/40" />}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Hotel Gallery ──────────────────────────────────────────
+function HotelGallery() {
+  const [active, setActive] = useState(0);
+  const [lightboxIndex, setLightboxIndex] = useState(null);
+  const startX = useRef(null);
+
+  const prev = () => setActive((c) => (c - 1 + hotelImages.length) % hotelImages.length);
+  const next = () => setActive((c) => (c + 1) % hotelImages.length);
+
+  const onTouchStart = (e) => { startX.current = e.touches[0].clientX; };
+  const onTouchEnd   = (e) => {
+    if (startX.current === null) return;
+    const diff = e.changedTouches[0].clientX - startX.current;
+    if (Math.abs(diff) > 40) diff < 0 ? next() : prev();
+    startX.current = null;
+  };
+
+  return (
+    <>
+      {lightboxIndex !== null && (
+        <Lightbox
+          images={hotelImages}
+          index={lightboxIndex}
+          onClose={() => setLightboxIndex(null)}
+        />
+      )}
+
+      <div>
+        <p className="text-[11px] font-semibold uppercase tracking-widest text-white/40 mb-3">
+          🏨 Hotel Rooms
+        </p>
+
+        {/* Main image */}
+        <div
+          className="relative w-full rounded-2xl overflow-hidden bg-black/40 border border-white/10 cursor-zoom-in"
+          style={{ aspectRatio: "4/3" }}
+          onClick={() => setLightboxIndex(active)}
+          onTouchStart={onTouchStart}
+          onTouchEnd={onTouchEnd}
+        >
+          {hotelImages.map((img, i) => (
+            <img
+              key={img.src}
+              src={img.src}
+              alt={img.label}
+              draggable={false}
+              className="absolute inset-0 w-full h-full object-cover select-none"
+              style={{
+                opacity: i === active ? 1 : 0,
+                transition: "opacity 0.35s ease",
+                willChange: "opacity",
+              }}
+            />
+          ))}
+
+          {/* Gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
+
+          {/* Label */}
+          <div className="absolute bottom-3 left-4">
+            <span className="text-white text-xs font-semibold bg-black/40 backdrop-blur-sm px-3 py-1 rounded-full border border-white/10">
+              {hotelImages[active].label}
+            </span>
+          </div>
+
+          {/* Tap hint */}
+          <div className="absolute top-3 right-3">
+            <span className="text-white/50 text-[10px] bg-black/30 backdrop-blur-sm px-2 py-0.5 rounded-full border border-white/10">
+              tap to expand
+            </span>
+          </div>
+
+          {/* Nav arrows (desktop only) */}
+          <button
+            className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 border border-white/20 text-white text-lg hidden md:flex items-center justify-center hover:bg-black/60 transition"
+            onClick={(e) => { e.stopPropagation(); prev(); }}
+          >‹</button>
+          <button
+            className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 border border-white/20 text-white text-lg hidden md:flex items-center justify-center hover:bg-black/60 transition"
+            onClick={(e) => { e.stopPropagation(); next(); }}
+          >›</button>
+        </div>
+
+        {/* Thumbnails */}
+        <div className="flex gap-2 mt-2">
+          {hotelImages.map((img, i) => (
+            <button
+              key={img.src}
+              onClick={() => setActive(i)}
+              className="relative flex-1 rounded-xl overflow-hidden border-2 transition-all duration-200"
+              style={{
+                aspectRatio: "4/3",
+                borderColor: i === active ? "rgba(129,140,248,0.8)" : "rgba(255,255,255,0.08)",
+              }}
+            >
+              <img
+                src={img.src}
+                alt={img.label}
+                className="w-full h-full object-cover"
+                draggable={false}
+              />
+              {i !== active && (
+                <div className="absolute inset-0 bg-black/40" />
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}
+
+// ── Main Section ───────────────────────────────────────────
 export default function EventsSection() {
   const playerRef = useRef(null);
   const [muted, setMuted] = useState(true);
 
   useEffect(() => {
-    // Load YouTube IFrame API once
     if (!window.YT) {
       const tag = document.createElement("script");
       tag.src = "https://www.youtube.com/iframe_api";
@@ -59,7 +285,7 @@ export default function EventsSection() {
   ];
 
   const inclusions = [
-    ["🚌", "AC Bus Service"],
+    ["🚌", "Comfortable Bus Service"],
     ["🍳", "Morning Breakfast"],
     ["🍽️", "Dinner Included"],
     ["🏨", "Hotel Stay"],
@@ -98,7 +324,6 @@ export default function EventsSection() {
 
           {/* ── Card Header ── */}
           <div className="relative px-6 sm:px-8 py-6 border-b border-white/10 overflow-hidden">
-            {/* Decorative glow */}
             <div className="absolute inset-0 bg-gradient-to-r from-blue-900/40 via-indigo-900/30 to-purple-900/40 pointer-events-none" />
             <div className="absolute -top-10 -right-10 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
 
@@ -201,7 +426,6 @@ export default function EventsSection() {
                 <div className="relative w-full max-w-[300px] mx-auto rounded-2xl overflow-hidden border border-white/10 bg-black/50 aspect-[9/16] shadow-xl">
                   <div id="yt-player" className="w-full h-full" />
 
-                  {/* Unmute overlay — shown until user taps */}
                   {muted && (
                     <button
                       onClick={handleUnmute}
@@ -267,6 +491,11 @@ export default function EventsSection() {
                 </div>
               </div>
 
+            </div>
+
+            {/* ── HOTEL GALLERY — full width below pricing ── */}
+            <div className="border-t border-white/[0.06] pt-7">
+              <HotelGallery />
             </div>
 
           </div>
