@@ -1,6 +1,6 @@
+import EventsSection from "./EventsSection";
 import BookRideSection from "./BookRideSection";
 import { useState, useEffect } from "react";
-import Prism from "./Prism";
 import Silk from "./Silk";
 
 function App() {
@@ -21,6 +21,7 @@ function App() {
 
   const navItems = [
     { label: "Home",     id: "home"     },
+    { label: "Latest Event",     id: "events"     },
     { label: "Book",     id: "book"     },
     { label: "About",    id: "about"    },
     { label: "Features", id: "features" },
@@ -36,32 +37,14 @@ function App() {
   return (
     <div className="relative w-screen min-h-screen bg-black text-white overflow-x-hidden">
 
-      {/* GLOBAL MOBILE SILK BACKGROUND */}
-      {isMobile && (
-        <div className="fixed inset-0 z-0 pointer-events-none">
-          <Silk speed={10} scale={1.3} color="#1f45ac" noiseIntensity={1} rotation={0} />
-          <div className="absolute inset-0 bg-black/65" />
-        </div>
-      )}
+      {/* ✅ SINGLE GLOBAL SILK BACKGROUND — loaded once, fixed behind everything */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <Silk speed={10} scale={1.3} color="#1f45ac" noiseIntensity={1} rotation={0} />
+        <div className="absolute inset-0 bg-black/65" />
+      </div>
 
       {/* 🔮 HERO */}
       <div id="home" className="relative min-h-screen w-screen overflow-hidden">
-
-        {!isMobile && (
-          <div className="absolute inset-0 pointer-events-none">
-            <Prism
-              animationType="rotate"
-              timeScale={0.7}
-              height={3.5}
-              baseWidth={5.5}
-              scale={3.6}
-              noise={0}
-              glow={1.2}
-              suspendWhenOffscreen={true}
-            />
-            <div className="absolute inset-0 bg-black/60" />
-          </div>
-        )}
 
         {/* Navbar */}
         <nav className="fixed top-0 left-0 z-50 w-full px-6 md:px-14 py-5 flex items-center justify-between bg-black/10 backdrop-blur-md border-b border-white/10">
@@ -165,6 +148,9 @@ function App() {
       {/* Divider */}
       <div className="relative z-10 w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
 
+    <EventsSection />
+
+
       {/* 🚗 BOOK A RIDE */}
       <BookRideSection isMobile={isMobile} />
 
@@ -173,13 +159,6 @@ function App() {
 
       {/* 🟣 ABOUT */}
       <section id="about" className="relative py-28 px-6 md:px-16 overflow-hidden">
-
-        {!isMobile && (
-          <div className="absolute inset-0 pointer-events-none">
-            <Silk speed={10} scale={1.3} color="#1f45ac" noiseIntensity={1} rotation={0} />
-            <div className="absolute inset-0 bg-black/70" />
-          </div>
-        )}
 
         <div className="relative z-10 max-w-7xl mx-auto">
 
@@ -241,22 +220,16 @@ function App() {
 
           <div className="text-center mt-20">
             <p className="text-white/60 text-sm mb-2">Customer Support</p>
-            <p className="text-lg  text-white">8252224027 • 9296218764</p>
+            <p className="text-lg text-white">8252224027 • 9296218764</p>
             <p className="text-2xl font-semibold text-white mt-2">parthrahiofficial@gmail.com</p>
           </div>
 
         </div>
       </section>
 
+
       {/* 👤 FOUNDER */}
       <section className="relative py-24 px-6 md:px-16 overflow-hidden border-t border-white/10">
-
-        {!isMobile && (
-          <div className="absolute inset-0 pointer-events-none">
-            <Silk speed={10} scale={1.3} color="#1f45ac" noiseIntensity={1} rotation={0} />
-            <div className="absolute inset-0 bg-black/70" />
-          </div>
-        )}
 
         <div className="relative z-10 max-w-7xl mx-auto">
 
@@ -308,13 +281,6 @@ function App() {
       {/* ⭐ FEATURES */}
       <section id="features" className="relative min-h-[80vh] py-24 px-6 md:px-16 flex items-center overflow-hidden border-t border-white/10">
 
-        {!isMobile && (
-          <div className="absolute inset-0 pointer-events-none">
-            <Silk speed={10} scale={1.3} color="#1f45ac" noiseIntensity={1} rotation={0} />
-            <div className="absolute inset-0 bg-black/70" />
-          </div>
-        )}
-
         <div className="relative z-10 max-w-6xl mx-auto w-full">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-6 text-white">
             Why Choose ParthRahi
@@ -343,13 +309,6 @@ function App() {
 
       {/* FOOTER / CONTACT */}
       <footer id="contact" className="relative overflow-hidden border-t border-white/10">
-
-        {!isMobile && (
-          <div className="absolute inset-0 pointer-events-none">
-            <Silk speed={10} scale={1.3} color="#1f45ac" noiseIntensity={1} rotation={0} />
-            <div className="absolute inset-0 bg-black/80" />
-          </div>
-        )}
 
         <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-16 py-20 grid gap-12 md:grid-cols-4">
 
