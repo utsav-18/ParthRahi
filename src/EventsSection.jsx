@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 
 // ── Hotel images ───────────────────────────────────────────
 const hotelImages = [
@@ -15,7 +15,6 @@ function Lightbox({ images, index, onClose }) {
   useEffect(() => {
     const handler = (e) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", handler);
-    // Prevent body scroll while open
     document.body.style.overflow = "hidden";
     return () => {
       window.removeEventListener("keydown", handler);
@@ -23,50 +22,59 @@ function Lightbox({ images, index, onClose }) {
     };
   }, [onClose]);
 
-  const prev = () => setCurrent((c) => (c - 1 + images.length) % images.length);
-  const next = () => setCurrent((c) => (c + 1) % images.length);
+  const prev = useCallback(() => setCurrent((c) => (c - 1 + images.length) % images.length), [images.length]);
+  const next = useCallback(() => setCurrent((c) => (c + 1) % images.length), [images.length]);
 
-  const onTouchStart = (e) => { startX.current = e.touches[0].clientX; };
-  const onTouchEnd   = (e) => {
-    if (startX.current === null) return;
-    const diff = e.changedTouches[0].clientX - startX.current;
-    if (Math.abs(diff) > 50) diff < 0 ? next() : prev();
-    startX.current = null;
-  };
+  // Passive touch for lightbox swipe
+  const startXRef = useRef(null);
+  const containerRef = useRef(null);
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const onStart = (e) => { startXRef.current = e.touches[0].clientX; };
+    const onEnd = (e) => {
+      if (startXRef.current === null) return;
+      const diff = e.changedTouches[0].clientX - startXRef.current;
+      if (Math.abs(diff) > 50) diff < 0 ? next() : prev();
+      startXRef.current = null;
+    };
+    el.addEventListener("touchstart", onStart, { passive: true });
+    el.addEventListener("touchend", onEnd, { passive: true });
+    return () => {
+      el.removeEventListener("touchstart", onStart);
+      el.removeEventListener("touchend", onEnd);
+    };
+  }, [next, prev]);
 
   return (
-    // Backdrop
     <div
       className="fixed inset-0 z-[9999] flex items-end md:items-center justify-center"
       style={{ background: "rgba(0,0,0,0.75)" }}
       onClick={onClose}
     >
-      {/* Modal panel — bottom sheet on mobile, centered card on desktop */}
       <div
+        ref={containerRef}
         className="relative w-full md:w-auto md:max-w-lg bg-[#0f1623] border border-white/10 rounded-t-3xl md:rounded-3xl overflow-hidden shadow-2xl"
         onClick={(e) => e.stopPropagation()}
-        onTouchStart={onTouchStart}
-        onTouchEnd={onTouchEnd}
       >
-        {/* Drag handle (mobile) */}
+        {/* Drag handle */}
         <div className="flex justify-center pt-3 pb-1 md:hidden">
           <div className="w-10 h-1 rounded-full bg-white/20" />
         </div>
 
-        {/* Header row */}
+        {/* Header */}
         <div className="flex items-center justify-between px-4 py-2">
           <span className="text-white/60 text-xs font-medium uppercase tracking-widest">
             {images[current].label}
           </span>
           <button
             onClick={onClose}
-            className="w-7 h-7 rounded-full bg-white/10 border border-white/15 text-white/70 text-sm flex items-center justify-center hover:bg-white/20 transition"
+            className="w-7 h-7 rounded-full bg-white/10 border border-white/15 text-white/70 text-sm flex items-center justify-center"
           >×</button>
         </div>
 
         {/* Image */}
-        <div className="relative mx-4 mb-4 rounded-2xl overflow-hidden bg-black/40"
-          style={{ aspectRatio: "4/3" }}>
+        <div className="relative mx-4 mb-4 rounded-2xl overflow-hidden bg-black/40" style={{ aspectRatio: "4/3" }}>
           {images.map((img, i) => (
             <img
               key={img.src}
@@ -74,25 +82,20 @@ function Lightbox({ images, index, onClose }) {
               alt={img.label}
               draggable={false}
               className="absolute inset-0 w-full h-full object-cover select-none"
-              style={{
-                opacity: i === current ? 1 : 0,
-                transition: "opacity 0.3s ease",
-              }}
+              style={{ opacity: i === current ? 1 : 0, transition: "opacity 0.3s ease" }}
             />
           ))}
-
-          {/* Prev / Next arrows */}
           <button
-            className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 border border-white/20 text-white flex items-center justify-center hover:bg-black/70 transition"
+            className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 border border-white/20 text-white flex items-center justify-center"
             onClick={prev}
           >‹</button>
           <button
-            className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 border border-white/20 text-white flex items-center justify-center hover:bg-black/70 transition"
+            className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 border border-white/20 text-white flex items-center justify-center"
             onClick={next}
           >›</button>
         </div>
 
-        {/* Thumbnail strip */}
+        {/* Thumbnails */}
         <div className="flex gap-2 px-4 pb-5">
           {images.map((img, i) => (
             <button
@@ -118,18 +121,30 @@ function Lightbox({ images, index, onClose }) {
 function HotelGallery() {
   const [active, setActive] = useState(0);
   const [lightboxIndex, setLightboxIndex] = useState(null);
-  const startX = useRef(null);
+  const galleryRef = useRef(null);
 
-  const prev = () => setActive((c) => (c - 1 + hotelImages.length) % hotelImages.length);
-  const next = () => setActive((c) => (c + 1) % hotelImages.length);
-
-  const onTouchStart = (e) => { startX.current = e.touches[0].clientX; };
-  const onTouchEnd   = (e) => {
-    if (startX.current === null) return;
-    const diff = e.changedTouches[0].clientX - startX.current;
-    if (Math.abs(diff) > 40) diff < 0 ? next() : prev();
-    startX.current = null;
-  };
+  // Passive touch for swipe
+  useEffect(() => {
+    const el = galleryRef.current;
+    if (!el) return;
+    let startX = null;
+    const onStart = (e) => { startX = e.touches[0].clientX; };
+    const onEnd = (e) => {
+      if (startX === null) return;
+      const diff = e.changedTouches[0].clientX - startX;
+      if (Math.abs(diff) > 40) {
+        if (diff < 0) setActive((c) => (c + 1) % hotelImages.length);
+        else setActive((c) => (c - 1 + hotelImages.length) % hotelImages.length);
+      }
+      startX = null;
+    };
+    el.addEventListener("touchstart", onStart, { passive: true });
+    el.addEventListener("touchend", onEnd, { passive: true });
+    return () => {
+      el.removeEventListener("touchstart", onStart);
+      el.removeEventListener("touchend", onEnd);
+    };
+  }, []);
 
   return (
     <>
@@ -148,11 +163,10 @@ function HotelGallery() {
 
         {/* Main image */}
         <div
+          ref={galleryRef}
           className="relative w-full rounded-2xl overflow-hidden bg-black/40 border border-white/10 cursor-zoom-in"
           style={{ aspectRatio: "4/3" }}
           onClick={() => setLightboxIndex(active)}
-          onTouchStart={onTouchStart}
-          onTouchEnd={onTouchEnd}
         >
           {hotelImages.map((img, i) => (
             <img
@@ -161,39 +175,35 @@ function HotelGallery() {
               alt={img.label}
               draggable={false}
               className="absolute inset-0 w-full h-full object-cover select-none"
-              style={{
-                opacity: i === active ? 1 : 0,
-                transition: "opacity 0.35s ease",
-                willChange: "opacity",
-              }}
+              style={{ opacity: i === active ? 1 : 0, transition: "opacity 0.35s ease" }}
             />
           ))}
 
-          {/* Gradient overlay */}
+          {/* Gradient */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
 
           {/* Label */}
           <div className="absolute bottom-3 left-4">
-            <span className="text-white text-xs font-semibold bg-black/40 backdrop-blur-sm px-3 py-1 rounded-full border border-white/10">
+            <span className="text-white text-xs font-semibold bg-black/50 px-3 py-1 rounded-full border border-white/10">
               {hotelImages[active].label}
             </span>
           </div>
 
-          {/* Tap hint */}
+          {/* Hint */}
           <div className="absolute top-3 right-3">
-            <span className="text-white/50 text-[10px] bg-black/30 backdrop-blur-sm px-2 py-0.5 rounded-full border border-white/10">
+            <span className="text-white/50 text-[10px] bg-black/40 px-2 py-0.5 rounded-full border border-white/10">
               tap to expand
             </span>
           </div>
 
-          {/* Nav arrows (desktop only) */}
+          {/* Desktop arrows only */}
           <button
             className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 border border-white/20 text-white text-lg hidden md:flex items-center justify-center hover:bg-black/60 transition"
-            onClick={(e) => { e.stopPropagation(); prev(); }}
+            onClick={(e) => { e.stopPropagation(); setActive((c) => (c - 1 + hotelImages.length) % hotelImages.length); }}
           >‹</button>
           <button
             className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 border border-white/20 text-white text-lg hidden md:flex items-center justify-center hover:bg-black/60 transition"
-            onClick={(e) => { e.stopPropagation(); next(); }}
+            onClick={(e) => { e.stopPropagation(); setActive((c) => (c + 1) % hotelImages.length); }}
           >›</button>
         </div>
 
@@ -209,15 +219,8 @@ function HotelGallery() {
                 borderColor: i === active ? "rgba(129,140,248,0.8)" : "rgba(255,255,255,0.08)",
               }}
             >
-              <img
-                src={img.src}
-                alt={img.label}
-                className="w-full h-full object-cover"
-                draggable={false}
-              />
-              {i !== active && (
-                <div className="absolute inset-0 bg-black/40" />
-              )}
+              <img src={img.src} alt={img.label} className="w-full h-full object-cover" draggable={false} />
+              {i !== active && <div className="absolute inset-0 bg-black/40" />}
             </button>
           ))}
         </div>
@@ -226,19 +229,35 @@ function HotelGallery() {
   );
 }
 
-// ── Main Section ───────────────────────────────────────────
-export default function EventsSection() {
+// ── YouTube embed — lazy loaded only when visible ──────────
+function YouTubeEmbed({ onUnmute, muted }) {
+  const containerRef = useRef(null);
   const playerRef = useRef(null);
-  const [muted, setMuted] = useState(true);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    if (!window.YT) {
-      const tag = document.createElement("script");
-      tag.src = "https://www.youtube.com/iframe_api";
-      document.body.appendChild(tag);
-    }
+    const el = containerRef.current;
+    if (!el) return;
+
+    // Only initialize YouTube player when section scrolls into view
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !loaded) {
+          setLoaded(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.2 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [loaded]);
+
+  useEffect(() => {
+    if (!loaded) return;
 
     const initPlayer = () => {
+      if (playerRef.current) return; // already init
       playerRef.current = new window.YT.Player("yt-player", {
         videoId: "mqSZdw1amg4",
         playerVars: {
@@ -257,24 +276,69 @@ export default function EventsSection() {
       });
     };
 
-    if (window.YT && window.YT.Player) {
+    if (!window.YT) {
+      const tag = document.createElement("script");
+      tag.src = "https://www.youtube.com/iframe_api";
+      document.body.appendChild(tag);
+      window.onYouTubeIframeAPIReady = initPlayer;
+    } else if (window.YT.Player) {
       initPlayer();
     } else {
       window.onYouTubeIframeAPIReady = initPlayer;
     }
 
     return () => {
-      if (playerRef.current?.destroy) playerRef.current.destroy();
+      if (playerRef.current?.destroy) {
+        playerRef.current.destroy();
+        playerRef.current = null;
+      }
     };
-  }, []);
+  }, [loaded]);
 
   const handleUnmute = () => {
     if (playerRef.current) {
       playerRef.current.unMute();
       playerRef.current.setVolume(100);
-      setMuted(false);
+      onUnmute();
     }
   };
+
+  return (
+    <div ref={containerRef} className="relative w-full max-w-[300px] mx-auto rounded-2xl overflow-hidden border border-white/10 bg-black/50 shadow-xl" style={{ aspectRatio: "9/16" }}>
+      {loaded ? (
+        <>
+          <div id="yt-player" className="w-full h-full" />
+          {muted && (
+            <button
+              onClick={handleUnmute}
+              className="absolute inset-0 flex flex-col items-center justify-end pb-10 gap-2 bg-black/30 cursor-pointer w-full"
+            >
+              <div className="flex flex-col items-center gap-2">
+                <div className="w-12 h-12 rounded-full bg-white/20 border border-white/40 flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M3.63 3.63a1 1 0 0 0 0 1.41L7.29 8.7 7 9H4a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h3l3.29 3.29c.63.63 1.71.18 1.71-.71v-4.17l4.18 4.18c-.49.37-1.02.68-1.6.91a1 1 0 1 0 .76 1.85 8.1 8.1 0 0 0 2.45-1.55l1.15 1.15a1 1 0 0 0 1.41-1.41L5.05 3.63a1 1 0 0 0-1.42 0zM19 12c0 .82-.15 1.61-.41 2.34l1.53 1.53A9.9 9.9 0 0 0 21 12c0-4.28-2.68-7.93-6.5-9.36a1 1 0 0 0-.67 1.88C16.72 5.7 19 8.65 19 12zm-9-6.71v1.88l2 2V6a1 1 0 0 0-1.71-.71L10 6.59v-.3z"/>
+                  </svg>
+                </div>
+                <span className="text-white text-xs font-semibold bg-black/50 px-3 py-1 rounded-full">
+                  Tap to Unmute
+                </span>
+              </div>
+            </button>
+          )}
+        </>
+      ) : (
+        // Placeholder shown before lazy load
+        <div className="w-full h-full flex items-center justify-center bg-black/40">
+          <div className="w-10 h-10 rounded-full border-2 border-white/20 border-t-white/60 animate-spin" />
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Main Section ───────────────────────────────────────────
+export default function EventsSection() {
+  const [muted, setMuted] = useState(true);
 
   const days = [
     { day: "Day 1", date: "Mar 29", plan: "Dumraon → Varanasi Darshan" },
@@ -308,7 +372,7 @@ export default function EventsSection() {
     >
       <div className="relative z-10 max-w-5xl mx-auto">
 
-        {/* ── Section Header ── */}
+        {/* Header */}
         <div className="text-center mb-12">
           <span className="inline-block text-xs uppercase tracking-[0.3em] text-white/50 mb-4 px-4 py-1.5 rounded-full border border-white/10 bg-white/5">
             Latest Events
@@ -319,44 +383,39 @@ export default function EventsSection() {
           <p className="text-white/50 text-sm">by ParthRahi Mobility</p>
         </div>
 
-        {/* ── Main Card ── */}
-        <div className="rounded-3xl overflow-hidden border border-white/10 bg-white/[0.04] backdrop-blur-xl shadow-2xl">
+        {/* Main Card — no backdrop-blur on mobile (major perf cause) */}
+        <div className="rounded-3xl overflow-hidden border border-white/10 shadow-2xl"
+          style={{ background: "rgba(255,255,255,0.04)" }}>
 
-          {/* ── Card Header ── */}
+          {/* Card Header */}
           <div className="relative px-6 sm:px-8 py-6 border-b border-white/10 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-900/40 via-indigo-900/30 to-purple-900/40 pointer-events-none" />
-            <div className="absolute -top-10 -right-10 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute inset-0 pointer-events-none"
+              style={{ background: "linear-gradient(to right, rgba(30,58,138,0.4), rgba(49,46,129,0.3), rgba(88,28,135,0.4))" }} />
 
             <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <p className="text-xs text-white/50 uppercase tracking-widest mb-1">
-                  धार्मिक तीर्थ यात्रा
-                </p>
-                <h3 className="text-2xl md:text-3xl font-bold text-white">
-                  Tirth Yatra 2026
-                </h3>
-                <p className="text-white/60 text-sm mt-1.5 flex items-center gap-2">
+                <p className="text-xs text-white/50 uppercase tracking-widest mb-1">धार्मिक तीर्थ यात्रा</p>
+                <h3 className="text-2xl md:text-3xl font-bold text-white">Tirth Yatra 2026</h3>
+                <p className="text-white/60 text-sm mt-1.5 flex flex-wrap items-center gap-2">
                   <span>📅 29 March – 2 April 2026</span>
                   <span className="text-white/30">·</span>
                   <span>5 Days / 4 Nights</span>
                 </p>
               </div>
               <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-green-500/15 border border-green-400/30 self-start sm:self-auto">
-                <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                <span className="text-green-300 text-xs font-semibold tracking-wide">
-                  Booking Open
-                </span>
+                <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse shrink-0" />
+                <span className="text-green-300 text-xs font-semibold tracking-wide">Booking Open</span>
               </div>
             </div>
           </div>
 
-          {/* ── Card Body ── */}
+          {/* Card Body */}
           <div className="p-5 sm:p-8 flex flex-col gap-8">
 
-            {/* ── TOP ROW: Destinations + Day Plan | Video ── */}
+            {/* TOP ROW */}
             <div className="grid md:grid-cols-[1fr_auto] gap-8 items-start">
 
-              {/* LEFT: Destinations + Day Plan + Starting Point */}
+              {/* Left */}
               <div className="flex flex-col gap-6 min-w-0">
 
                 {/* Destinations */}
@@ -366,10 +425,7 @@ export default function EventsSection() {
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {destinations.map((place) => (
-                      <span
-                        key={place}
-                        className="px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-400/25 text-indigo-200 text-sm font-medium"
-                      >
+                      <span key={place} className="px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-400/25 text-indigo-200 text-sm font-medium">
                         {place}
                       </span>
                     ))}
@@ -383,15 +439,10 @@ export default function EventsSection() {
                   </p>
                   <div className="flex flex-col gap-2">
                     {days.map(({ day, date, plan }, i) => (
-                      <div
-                        key={day}
-                        className="flex items-start gap-3 rounded-xl px-4 py-3 bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.07] transition-colors duration-200"
-                      >
+                      <div key={day} className="flex items-start gap-3 rounded-xl px-4 py-3 bg-white/[0.04] border border-white/[0.06]">
                         <div className="flex flex-col items-center pt-0.5 shrink-0">
                           <div className={`w-2 h-2 rounded-full mt-1 ${i === 0 ? "bg-indigo-400" : "bg-white/30"}`} />
-                          {i < days.length - 1 && (
-                            <div className="w-px flex-1 min-h-[18px] bg-white/10 mt-1" />
-                          )}
+                          {i < days.length - 1 && <div className="w-px flex-1 min-h-[18px] bg-white/10 mt-1" />}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-0.5">
@@ -407,43 +458,21 @@ export default function EventsSection() {
 
                 {/* Starting Point */}
                 <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.06]">
-                  <span className="text-xl">📍</span>
+                  <span className="text-xl shrink-0">📍</span>
                   <div>
-                    <p className="text-[10px] uppercase tracking-widest text-white/40 mb-0.5">
-                      Starting Point
-                    </p>
+                    <p className="text-[10px] uppercase tracking-widest text-white/40 mb-0.5">Starting Point</p>
                     <p className="text-white font-semibold text-sm">Dumraon, Buxar, Bihar</p>
                   </div>
                 </div>
 
               </div>
 
-              {/* RIGHT: Video */}
+              {/* Right: Video — lazy loaded */}
               <div className="flex flex-col items-center gap-3 w-full md:w-[300px] shrink-0">
                 <p className="text-[11px] font-semibold uppercase tracking-widest text-white/40 self-start md:self-auto">
                   Day-wise Plan Video
                 </p>
-                <div className="relative w-full max-w-[300px] mx-auto rounded-2xl overflow-hidden border border-white/10 bg-black/50 aspect-[9/16] shadow-xl">
-                  <div id="yt-player" className="w-full h-full" />
-
-                  {muted && (
-                    <button
-                      onClick={handleUnmute}
-                      className="absolute inset-0 flex flex-col items-center justify-end pb-10 gap-2 bg-black/30 backdrop-blur-[1px] transition-opacity duration-300 cursor-pointer w-full"
-                    >
-                      <div className="flex flex-col items-center gap-2">
-                        <div className="w-12 h-12 rounded-full bg-white/20 border border-white/40 flex items-center justify-center backdrop-blur-sm">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M3.63 3.63a1 1 0 0 0 0 1.41L7.29 8.7 7 9H4a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h3l3.29 3.29c.63.63 1.71.18 1.71-.71v-4.17l4.18 4.18c-.49.37-1.02.68-1.6.91a1 1 0 1 0 .76 1.85 8.1 8.1 0 0 0 2.45-1.55l1.15 1.15a1 1 0 0 0 1.41-1.41L5.05 3.63a1 1 0 0 0-1.42 0zM19 12c0 .82-.15 1.61-.41 2.34l1.53 1.53A9.9 9.9 0 0 0 21 12c0-4.28-2.68-7.93-6.5-9.36a1 1 0 0 0-.67 1.88C16.72 5.7 19 8.65 19 12zm-9-6.71v1.88l2 2V6a1 1 0 0 0-1.71-.71L10 6.59v-.3z"/>
-                          </svg>
-                        </div>
-                        <span className="text-white text-xs font-semibold bg-black/50 px-3 py-1 rounded-full">
-                          Tap to Unmute
-                        </span>
-                      </div>
-                    </button>
-                  )}
-                </div>
+                <YouTubeEmbed muted={muted} onUnmute={() => setMuted(false)} />
                 <p className="text-white/25 text-[10px] text-center leading-relaxed max-w-[260px]">
                   {muted ? "Playing muted · tap overlay to enable audio" : "🔊 Audio on · use controls to pause"}
                 </p>
@@ -451,7 +480,7 @@ export default function EventsSection() {
 
             </div>
 
-            {/* ── BOTTOM ROW: Pricing + Inclusions — full width ── */}
+            {/* BOTTOM ROW: Pricing + Inclusions */}
             <div className="border-t border-white/[0.06] pt-7 grid md:grid-cols-2 gap-8">
 
               {/* Pricing */}
@@ -460,12 +489,14 @@ export default function EventsSection() {
                   मूल्य — Pricing
                 </p>
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="relative rounded-2xl p-5 text-center overflow-hidden border border-blue-400/20 bg-gradient-to-b from-blue-900/30 to-blue-900/10">
+                  <div className="relative rounded-2xl p-5 text-center overflow-hidden border border-blue-400/20"
+                    style={{ background: "linear-gradient(to bottom, rgba(30,64,175,0.3), rgba(30,64,175,0.1))" }}>
                     <p className="text-xs text-blue-300/80 mb-2 font-medium">Non-AC Room</p>
                     <p className="text-3xl font-bold text-white tracking-tight">₹5,500</p>
                     <p className="text-xs text-white/40 mt-1">per person</p>
                   </div>
-                  <div className="relative rounded-2xl p-5 text-center overflow-hidden border border-indigo-400/20 bg-gradient-to-b from-indigo-900/30 to-indigo-900/10">
+                  <div className="relative rounded-2xl p-5 text-center overflow-hidden border border-indigo-400/20"
+                    style={{ background: "linear-gradient(to bottom, rgba(67,56,202,0.3), rgba(67,56,202,0.1))" }}>
                     <div className="absolute top-2 right-2 text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-400/20">
                       Premium
                     </div>
@@ -493,15 +524,16 @@ export default function EventsSection() {
 
             </div>
 
-            {/* ── HOTEL GALLERY — full width below pricing ── */}
+            {/* Hotel Gallery */}
             <div className="border-t border-white/[0.06] pt-7">
               <HotelGallery />
             </div>
 
           </div>
 
-          {/* ── Footer CTA ── */}
-          <div className="border-t border-white/[0.07] px-5 sm:px-8 py-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white/[0.02]">
+          {/* Footer CTA */}
+          <div className="border-t border-white/[0.07] px-5 sm:px-8 py-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+            style={{ background: "rgba(255,255,255,0.02)" }}>
             <div>
               <p className="text-white/40 text-xs mb-1">
                 अधिक जानकारी के लिए संपर्क करें — For more info contact:
@@ -522,7 +554,7 @@ export default function EventsSection() {
 
         </div>
 
-        {/* ── Tagline ── */}
+        {/* Tagline */}
         <p className="text-center text-white/35 text-sm mt-8 italic">
           "सीमित सीटें उपलब्ध हैं — जल्दी बुक करें!" &nbsp;·&nbsp; Limited seats available, book fast!
         </p>
