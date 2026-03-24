@@ -122,8 +122,8 @@ function App() {
                   <button onClick={() => scrollTo("book")} className={btnPrimary}>
                     Book a Ride
                   </button>
-                  <button onClick={() => scrollTo("contact")} className={btnSecondary}>
-                    Become a Driver
+                  <button onClick={() => alert("Coming Soon!!")} className={btnSecondary}>
+                    Download Our App
                   </button>
                 </div>
               </div>
@@ -358,15 +358,28 @@ function App() {
               <button onClick={() => scrollTo("book")} className={btnPrimary}>
                 Book Ride
               </button>
-              <button className={btnSecondary}>Download App</button>
+              <button onClick={() => alert("Coming Soon!!")}  className={btnSecondary}>Download App</button>
             </div>
-            <div className="flex gap-5 pt-2">
-              {["X", "Instagram", "LinkedIn"].map((social) => (
-                <span key={social} className="text-xs text-white/60 hover:text-white hover:scale-110 cursor-pointer transition">
-                  {social}
-                </span>
-              ))}
-            </div>
+
+          <div className="flex gap-5 pt-2">
+            {[
+              { name: "X", url: "https://twitter.com/yourusername" },
+              { name: "Instagram", url: "https://www.instagram.com/parthrahiofficial/" },
+              { name: "YouTube", url: "https://youtube.com/in/yourusername" },
+              { name: "Facebook", url: "https://facebook.com/in/yourusername" }
+            ].map((social) => (
+              <a
+                key={social.name}
+                href={social.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-white/60 hover:text-white hover:scale-110 cursor-pointer transition"
+              >
+                {social.name}
+              </a>
+            ))}
+          </div>
+
           </div>
 
         </div>
