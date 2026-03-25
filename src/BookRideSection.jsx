@@ -141,13 +141,6 @@ ${mapLink}`;
   return (
     <section id="book" className="relative py-24 px-6 md:px-16 overflow-hidden border-t border-white/10">
 
-      {!isMobile && (
-        <div className="absolute inset-0 pointer-events-none">
-          <Silk speed={10} scale={1.3} color="#1f45ac" noiseIntensity={1} rotation={0} />
-          <div className="absolute inset-0 bg-black/70" />
-        </div>
-      )}
-
       <div className="relative z-10 text-center mb-14">
         <p className="text-xs uppercase tracking-[0.3em] text-white/50 mb-3">Ready to go?</p>
         <h2 className="text-3xl md:text-5xl font-bold text-white">Book Your Ride</h2>

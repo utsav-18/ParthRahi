@@ -129,13 +129,13 @@ function App() {
               </div>
 
               <div className="flex justify-center pt-10 pb-16 md:pb-0 md:pt-0">
-                <div className="relative w-[160px] h-[160px] sm:w-[210px] sm:h-[210px] md:w-[280px] md:h-[280px] transition-all duration-500 hover:scale-110">
+                <div className="relative w-[160px] h-[160px] sm:w-[210px] sm:h-[210px] md:w-[300px] md:h-[300px] transition-all duration-500 hover:scale-120">
                   <div className="absolute -inset-6 rounded-full bg-[radial-gradient(circle_at_center,rgba(80,160,255,0.35),transparent_65%)] blur-2xl"></div>
                   <div className="absolute inset-0 rounded-full border border-white/20"></div>
                   <img
                     src="/logo.svg"
                     alt="ParthRahi Logo"
-                    className="relative z-10 w-full h-full object-cover rounded-full border border-sky-400/60 shadow-[0_0_40px_rgba(80,160,255,0.35)] transition-all duration-500 hover:shadow-[0_0_70px_rgba(80,160,255,0.8)]"
+                    className="relative z-10 w-full h-full object-cover rounded-full border border-sky-400/60 shadow-[0_0_40px_rgba(80,160,255,0.5)] transition-all duration-500 hover:shadow-[0_0_70px_rgba(80,160,255,0.8)]"
                   />
                 </div>
               </div>
