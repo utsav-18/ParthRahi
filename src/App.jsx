@@ -224,6 +224,7 @@ function App() {
             <p className="text-2xl font-semibold text-white mt-2">parthrahiofficial@gmail.com</p>
           </div>
 
+
         </div>
       </section>
 
@@ -387,8 +388,8 @@ function App() {
         <div className="relative z-10 border-t border-white/10 py-6 px-6 md:px-16 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-white/60">
           <p>© {new Date().getFullYear()} Parthrahi Smartcab Solutions LLP.</p>
           <div className="flex gap-6">
-            <span className="hover:text-white cursor-pointer">Privacy Policy</span>
-            <span className="hover:text-white cursor-pointer">Terms of Service</span>
+            <span  onClick={() => window.open("https://parthrahi-backend.web.app/privacy", "_blank")} className="hover:text-white cursor-pointer">Privacy Policy</span>
+            <span onClick={() => window.open("https://parthrahi-backend.web.app/privacy", "_blank")} className="hover:text-white cursor-pointer">Terms of Service</span>
           </div>
         </div>
 
