@@ -219,8 +219,10 @@ function App() {
           </div>
 
           <div className="text-center mt-20">
-            <p className="text-white/60 text-sm mb-2">Customer Support</p>
-            <p className="text-lg text-white">8252224027 • 9296218764</p>
+            <p className="text-white/90 text-sm mb-2">Customer Support</p>
+            <p className="text-lg">
+              <b className="hover:text-white cursor-pointer hover:underline" onClick={() => window.location.href = "tel:8252224027"}>8252224027</b> <br />
+              <b className="hover:text-white cursor-pointer hover:underline" onClick={() => window.location.href = "tel:9296218764"}>9296218764</b></p>
             <p className="text-2xl font-semibold text-white mt-2">parthrahiofficial@gmail.com</p>
           </div>
 
