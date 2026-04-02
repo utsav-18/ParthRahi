@@ -378,7 +378,7 @@ export default function EventsSection() {
             Latest Events
           </span>
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-2">
-            Our Tour 🚌
+            Our Tour Services 🚌
           </h2>
           <p className="text-white/50 text-sm">by ParthRahi Mobility</p>
         </div>
