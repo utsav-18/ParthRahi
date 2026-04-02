@@ -319,7 +319,9 @@ function App() {
               Technology-driven ride booking platform providing Car, Bike and Auto rides.
             </p>
             <p className="text-sm text-white/60">
-              Support: 8252224027 <br /> 9296218764
+              Support: <br />
+                        <b className="hover:text-white cursor-pointer" onClick={() => window.location.href = "tel:8252224027"}>8252224027</b> <br />
+                        <b className="hover:text-white cursor-pointer" onClick={() => window.location.href = "tel:9296218764"}>9296218764</b>
             </p>
           </div>
 
