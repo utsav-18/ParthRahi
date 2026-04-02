@@ -364,7 +364,6 @@ function App() {
 
           <div className="flex gap-5 pt-2">
             {[
-              { name: "X", url: "https://twitter.com/yourusername" },
               { name: "Instagram", url: "https://www.instagram.com/parthrahiofficial/" },
               { name: "YouTube", url: "https://youtube.com/in/yourusername" },
               { name: "Facebook", url: "https://facebook.com/in/yourusername" }
