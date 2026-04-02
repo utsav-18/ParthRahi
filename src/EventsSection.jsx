@@ -341,11 +341,11 @@ export default function EventsSection() {
   const [muted, setMuted] = useState(true);
 
   const days = [
-    { day: "Day 1", date: "Mar 29", plan: "Dumraon → Varanasi Darshan" },
-    { day: "Day 2", date: "Mar 30", plan: "Vindhyachal Darshan" },
-    { day: "Day 3", date: "Mar 31", plan: "Ayodhya Darshan" },
-    { day: "Day 4", date: "Apr 1",  plan: "Full Day Mathura & Vrindavan · Departure 8:00 PM → Dumraon" },
-    { day: "Day 5", date: "Apr 2",  plan: "Return to Dumraon, Buxar" },
+    { day: "Day 1", plan: "Dumraon → Varanasi Darshan" },
+    { day: "Day 2", plan: "Vindhyachal Darshan" },
+    { day: "Day 3", plan: "Ayodhya Darshan" },
+    { day: "Day 4", plan: "Full Day Mathura & Vrindavan · Departure 8:00 PM → Dumraon" },
+    { day: "Day 5", plan: "Return to Dumraon, Buxar" },
   ];
 
   const inclusions = [
@@ -397,7 +397,7 @@ export default function EventsSection() {
                 <p className="text-xs text-white/50 uppercase tracking-widest mb-1">धार्मिक तीर्थ यात्रा</p>
                 <h3 className="text-2xl md:text-3xl font-bold text-white">Tirth Yatra 2026</h3>
                 <p className="text-white/60 text-sm mt-1.5 flex flex-wrap items-center gap-2">
-                  <span>📅 29 March – 2 April 2026</span>
+                  {/* <span>📅 29 March – 2 April 2026</span> */}
                   <span className="text-white/30">·</span>
                   <span>5 Days / 4 Nights</span>
                 </p>
