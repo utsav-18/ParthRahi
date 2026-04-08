@@ -14,7 +14,7 @@ function App() {
   const navItems = [
     { label: "Home",     id: "home"     },
     { label: "Events",     id: "events"     },
-    { label: "Book",     id: "book"     },
+    { label: "Book Ride",     id: "book"     },
     { label: "About",    id: "about"    },
     { label: "Features", id: "features" },
     { label: "Contact",  id: "contact"  },
