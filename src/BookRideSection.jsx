@@ -1,3 +1,5 @@
+/* global google */
+
 import { useState, useEffect, useRef } from "react";
 import Silk from "./Silk";
 
@@ -8,14 +10,13 @@ const RIDE_OPTIONS = [
   { value: "car",  label: "Car",  icon: "🚗",  desc: "Comfortable ride"  },
 ];
 
-export default function BookRideSection({ isMobile }) {
+export default function BookRideSection() {
   const [rideType,    setRideType]    = useState("auto");
   const [source,      setSource]      = useState("");
   const [destination, setDestination] = useState("");
   const [userName,    setUserName]    = useState("");
   const [userPhone,   setUserPhone]   = useState("");
   const [distanceKm,  setDistanceKm]  = useState(null);
-  const [fare,        setFare]        = useState(null);
   const [loading,     setLoading]     = useState(false);
   const [locLoading,  setLocLoading]  = useState(false);
   const [mapsReady,   setMapsReady]   = useState(false);
@@ -68,9 +69,7 @@ export default function BookRideSection({ isMobile }) {
     return () => { delete window.__bookRideMapInit; };
   }, []);
 
-  useEffect(() => {
-    if (distanceKm) setFare(Math.round(distanceKm * RATES[rideType]));
-  }, [rideType, distanceKm]);
+  const fare = distanceKm ? Math.round(distanceKm * RATES[rideType]) : null;
 
   const calculateRoute = () => {
     const src = sourceInputRef.current?.value?.trim();
@@ -87,7 +86,7 @@ export default function BookRideSection({ isMobile }) {
         if (status !== "OK") { setErrors({ route: "Could not find route. Try a nearby landmark." }); return; }
         dirRenderer.current.setDirections(result);
         const km = parseFloat((result.routes[0].legs[0].distance.value / 1000).toFixed(2));
-        setDistanceKm(km); setFare(Math.round(km * RATES[rideType]));
+        setDistanceKm(km);
         setSource(src); setDestination(dst); setStep(2);
       }
     );

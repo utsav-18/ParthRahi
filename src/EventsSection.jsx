@@ -10,7 +10,6 @@ const hotelImages = [
 // ── Lightbox ───────────────────────────────────────────────
 function Lightbox({ images, index, onClose }) {
   const [current, setCurrent] = useState(index);
-  const startX = useRef(null);
 
   useEffect(() => {
     const handler = (e) => e.key === "Escape" && onClose();

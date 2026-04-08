@@ -1,18 +1,10 @@
 import EventsSection from "./EventsSection";
 import BookRideSection from "./BookRideSection";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Silk from "./Silk";
 
 function App() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768);
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
-  }, []);
 
   const scrollTo = (id) => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
@@ -152,7 +144,7 @@ function App() {
 
 
       {/* 🚗 BOOK A RIDE */}
-      <BookRideSection isMobile={isMobile} />
+      <BookRideSection />
 
       {/* Divider */}
       <div className="relative z-10 w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
