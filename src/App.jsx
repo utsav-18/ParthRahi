@@ -230,7 +230,7 @@ function App() {
                     </div>
                     <button
                       onClick={() => (window.location.href = `tel:${contact.number}`)}
-                      className="shrink-0 px-4 py-2 rounded-full bg-white text-black text-sm font-semibold cursor-pointer border border-white/60 shadow-[0_4px_16px_rgba(255,255,255,0.12)] hover:bg-gray-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(255,255,255,0.2)] active:translate-y-0 focus:outline-none focus:ring-2 focus:ring-white/60 transition-all duration-200"
+                      className="shrink-0 px-4 py-2 rounded-full bg-white text-black text-sm font-semibold cursor-pointer border border-white/60 shadow-[0_4px_16px_rgba(255,255,255,0.12)] hover:bg-gray-200 hover:-translate-y-0.5 active:translate-y-0 focus:outline-none focus:ring-2 focus:ring-white/60 transition-all duration-200"
                     >
                       Call Now
                     </button>

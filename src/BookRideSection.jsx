@@ -173,7 +173,7 @@ ${mapLink}`;
           <button
             onClick={useCurrentLocation}
             disabled={!mapsReady || locLoading}
-            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-sky-400/30 text-sky-300 text-sm hover:bg-sky-400/10 transition-all duration-200 disabled:opacity-40"
+            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-sky-400/30 text-sky-300 text-sm cursor-pointer hover:bg-sky-400/10 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {locLoading
               ? <><span className="w-3 h-3 border-2 border-sky-400 border-t-transparent rounded-full animate-spin" />Fetching…</>
@@ -193,7 +193,7 @@ ${mapLink}`;
               <button
                 key={value}
                 onClick={() => setRideType(value)}
-                className={`relative flex flex-col items-center gap-1.5 py-4 rounded-xl border transition-all duration-200 text-center
+                className={`relative flex flex-col items-center gap-1.5 py-4 rounded-xl border cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 text-center
                   ${rideType === value
                     ? "border-sky-400/80 bg-sky-400/10 shadow-[0_0_20px_rgba(56,189,248,0.15)]"
                     : "border-white/10 bg-white/5 hover:border-white/20"}`}
@@ -213,7 +213,7 @@ ${mapLink}`;
           <button
             onClick={calculateRoute}
             disabled={!mapsReady || loading}
-            className="w-full py-3.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-semibold text-sm transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="w-full py-3.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-semibold text-sm cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             {loading
               ? <><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Calculating…</>
@@ -271,7 +271,7 @@ ${mapLink}`;
 
               <button
                 onClick={bookRide}
-                className="w-full py-4 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 text-white font-bold text-sm transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 shadow-[0_0_30px_rgba(34,197,94,0.2)] flex items-center justify-center gap-2"
+                className="w-full py-4 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 text-white font-bold text-sm cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 shadow-[0_0_30px_rgba(34,197,94,0.2)] flex items-center justify-center gap-2"
               >
                 📲 Book via WhatsApp
               </button>
@@ -302,7 +302,7 @@ ${mapLink}`;
                 <button
                   key={value}
                   onClick={() => setRideType(value)}
-                  className={`p-3 rounded-xl border text-center transition-all duration-200 ${rideType === value ? "border-sky-400/60 bg-sky-400/10" : "border-white/10 bg-white/5 hover:bg-white/8"}`}
+                  className={`p-3 rounded-xl border text-center cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 ${rideType === value ? "border-sky-400/60 bg-sky-400/10" : "border-white/10 bg-white/5 hover:bg-white/8"}`}
                 >
                   <div className="text-lg">{icon}</div>
                   <div className={`text-xs font-medium ${rideType === value ? "text-sky-300" : "text-white/70"}`}>{label}</div>

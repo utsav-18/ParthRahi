@@ -68,7 +68,7 @@ function Lightbox({ images, index, onClose }) {
           </span>
           <button
             onClick={onClose}
-            className="w-7 h-7 rounded-full bg-white/10 border border-white/15 text-white/70 text-sm flex items-center justify-center"
+            className="w-7 h-7 rounded-full bg-white/10 border border-white/15 text-white/70 text-sm flex items-center justify-center cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
           >×</button>
         </div>
 
@@ -85,11 +85,11 @@ function Lightbox({ images, index, onClose }) {
             />
           ))}
           <button
-            className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 border border-white/20 text-white flex items-center justify-center"
+            className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 border border-white/20 text-white flex items-center justify-center cursor-pointer transition-all duration-200 hover:-translate-y-[55%] active:-translate-y-1/2"
             onClick={prev}
           >‹</button>
           <button
-            className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 border border-white/20 text-white flex items-center justify-center"
+            className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 border border-white/20 text-white flex items-center justify-center cursor-pointer transition-all duration-200 hover:-translate-y-[55%] active:-translate-y-1/2"
             onClick={next}
           >›</button>
         </div>
@@ -100,7 +100,7 @@ function Lightbox({ images, index, onClose }) {
             <button
               key={img.src}
               onClick={() => setCurrent(i)}
-              className="relative flex-1 rounded-xl overflow-hidden border-2 transition-all duration-200"
+              className="relative flex-1 rounded-xl overflow-hidden border-2 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
               style={{
                 aspectRatio: "4/3",
                 borderColor: i === current ? "rgba(129,140,248,0.9)" : "rgba(255,255,255,0.08)",
@@ -197,11 +197,11 @@ function HotelGallery() {
 
           {/* Desktop arrows only */}
           <button
-            className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 border border-white/20 text-white text-lg hidden md:flex items-center justify-center hover:bg-black/60 transition"
+            className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 border border-white/20 text-white text-lg hidden md:flex items-center justify-center cursor-pointer hover:bg-black/60 transition-all duration-200 hover:-translate-y-[55%] active:-translate-y-1/2"
             onClick={(e) => { e.stopPropagation(); setActive((c) => (c - 1 + hotelImages.length) % hotelImages.length); }}
           >‹</button>
           <button
-            className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 border border-white/20 text-white text-lg hidden md:flex items-center justify-center hover:bg-black/60 transition"
+            className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 border border-white/20 text-white text-lg hidden md:flex items-center justify-center cursor-pointer hover:bg-black/60 transition-all duration-200 hover:-translate-y-[55%] active:-translate-y-1/2"
             onClick={(e) => { e.stopPropagation(); setActive((c) => (c + 1) % hotelImages.length); }}
           >›</button>
         </div>
@@ -212,7 +212,7 @@ function HotelGallery() {
             <button
               key={img.src}
               onClick={() => setActive(i)}
-              className="relative flex-1 rounded-xl overflow-hidden border-2 transition-all duration-200"
+              className="relative flex-1 rounded-xl overflow-hidden border-2 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
               style={{
                 aspectRatio: "4/3",
                 borderColor: i === active ? "rgba(129,140,248,0.8)" : "rgba(255,255,255,0.08)",
@@ -310,7 +310,7 @@ function YouTubeEmbed({ onUnmute, muted }) {
           {muted && (
             <button
               onClick={handleUnmute}
-              className="absolute inset-0 flex flex-col items-center justify-end pb-10 gap-2 bg-black/30 cursor-pointer w-full"
+              className="absolute inset-0 flex flex-col items-center justify-end pb-10 gap-2 bg-black/30 cursor-pointer w-full transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
             >
               <div className="flex flex-col items-center gap-2">
                 <div className="w-12 h-12 rounded-full bg-white/20 border border-white/40 flex items-center justify-center">
