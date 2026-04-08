@@ -210,12 +210,38 @@ function App() {
             </div>
           </div>
 
-          <div className="text-center mt-20">
-            <p className="text-white/90 text-sm mb-2">Customer Support</p>
-            <p className="text-lg">
-              <b className="hover:text-white cursor-pointer hover:underline" onClick={() => window.location.href = "tel:8252224027"}>8252224027</b> <br />
-              <b className="hover:text-white cursor-pointer hover:underline" onClick={() => window.location.href = "tel:9296218764"}>9296218764</b></p>
-            <p className="text-2xl font-semibold text-white mt-2">parthrahiofficial@gmail.com</p>
+          <div className="mt-20">
+            <div className="max-w-3xl mx-auto rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md p-6 md:p-8">
+              <p className="text-white/60 text-xs uppercase tracking-[0.25em] text-center mb-2">Customer Support</p>
+              <h3 className="text-xl md:text-2xl font-semibold text-white text-center mb-6">Talk To Our Team</h3>
+
+              <div className="grid sm:grid-cols-2 gap-4">
+                {[
+                  { label: "Primary Support", number: "8252224027" },
+                  { label: "Alternate Support", number: "9296218764" },
+                ].map((contact) => (
+                  <div
+                    key={contact.number}
+                    className="rounded-xl border border-white/10 bg-black/25 p-4 flex items-center justify-between gap-3"
+                  >
+                    <div>
+                      <p className="text-[11px] uppercase tracking-widest text-white/45">{contact.label}</p>
+                      <p className="text-lg font-semibold text-white">{contact.number}</p>
+                    </div>
+                    <button
+                      onClick={() => (window.location.href = `tel:${contact.number}`)}
+                      className="shrink-0 px-4 py-2 rounded-full bg-white text-black text-sm font-semibold hover:bg-gray-200 transition"
+                    >
+                      Call Now
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              <p className="text-center text-white/80 text-sm md:text-base mt-6">
+                Email: <span className="font-semibold text-white">parthrahiofficial@gmail.com</span>
+              </p>
+            </div>
           </div>
 
 
@@ -314,8 +340,8 @@ function App() {
             </p>
             <p className="text-sm text-white/60">
               Support: <br />
-                        <b className="hover:text-white cursor-pointer" onClick={() => window.location.href = "tel:8252224027"}>8252224027</b> <br />
-                        <b className="hover:text-white cursor-pointer" onClick={() => window.location.href = "tel:9296218764"}>9296218764</b>
+                        <a href="tel:8252224027" className="hover:text-white cursor-pointer hover:underline transition">8252224027</a> <br />
+                        <a href="tel:9296218764" className="hover:text-white cursor-pointer hover:underline transition">9296218764</a>
             </p>
           </div>
 
@@ -360,17 +386,18 @@ function App() {
 
           <div className="flex gap-5 pt-2">
             {[
-              { name: "Instagram", url: "https://www.instagram.com/parthrahiofficial/" },
-              { name: "YouTube", url: "https://youtube.com/in/yourusername" },
-              { name: "Facebook", url: "https://facebook.com/in/yourusername" }
+              { name: "Instagram", icon: "📷", url: "https://www.instagram.com/parthrahiofficial/" },
+              { name: "YouTube", icon: "▶", url: "https://youtube.com/in/yourusername" },
+              { name: "Facebook", icon: "f", url: "https://facebook.com/in/yourusername" }
             ].map((social) => (
               <a
                 key={social.name}
                 href={social.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-xs text-white/60 hover:text-white hover:scale-110 cursor-pointer transition"
+                className="text-xs text-white/60 hover:text-white hover:scale-110 cursor-pointer transition inline-flex items-center gap-1"
               >
+                <span aria-hidden="true">{social.icon}</span>
                 {social.name}
               </a>
             ))}
