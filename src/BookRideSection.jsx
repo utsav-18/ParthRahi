@@ -134,8 +134,16 @@ ${mapLink}`;
     window.open(`https://wa.me/918971654394?text=${encodeURIComponent(message)}`, "_blank");
   };
 
+  const ensureFieldVisibility = (event) => {
+    if (window.innerWidth >= 768) return;
+    const field = event.target;
+    window.setTimeout(() => {
+      field.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 120);
+  };
+
   const inputCls = (field) =>
-    `w-full bg-white/5 border ${errors[field] ? "border-red-400/60" : "border-white/10"} rounded-xl px-4 py-3 text-white text-sm placeholder:text-white/30 focus:outline-none focus:border-sky-400/60 transition-all duration-200`;
+    `w-full bg-black/35 border ${errors[field] ? "border-red-400/60" : "border-white/20"} rounded-xl px-4 py-3 text-white text-sm placeholder:text-white/50 focus:outline-none focus:border-sky-300 focus:ring-2 focus:ring-sky-400/25 transition-all duration-200`;
 
   return (
     <section id="book" className="relative py-24 px-6 md:px-16 overflow-hidden border-t border-white/10">
@@ -165,7 +173,7 @@ ${mapLink}`;
           <div className="space-y-1">
             <div className="relative">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm pointer-events-none">📍</span>
-              <input ref={sourceInputRef} placeholder="Pickup location" autoComplete="off" className={`${inputCls("source")} pl-10`} />
+              <input ref={sourceInputRef} placeholder="Pickup location" autoComplete="off" onFocus={ensureFieldVisibility} className={`${inputCls("source")} pl-10`} />
             </div>
             {errors.source && <p className="text-red-400 text-xs pl-1">{errors.source}</p>}
           </div>
@@ -183,7 +191,7 @@ ${mapLink}`;
           <div className="space-y-1">
             <div className="relative">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm pointer-events-none">🏁</span>
-              <input ref={destInputRef} placeholder="Drop location" autoComplete="off" className={`${inputCls("destination")} pl-10`} />
+              <input ref={destInputRef} placeholder="Drop location" autoComplete="off" onFocus={ensureFieldVisibility} className={`${inputCls("destination")} pl-10`} />
             </div>
             {errors.destination && <p className="text-red-400 text-xs pl-1">{errors.destination}</p>}
           </div>
@@ -249,7 +257,7 @@ ${mapLink}`;
               <div className="space-y-1">
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm pointer-events-none">👤</span>
-                  <input value={userName} onChange={(e) => setUserName(e.target.value)} placeholder="Your full name" autoComplete="off" className={`${inputCls("userName")} pl-10`} />
+                  <input value={userName} onChange={(e) => setUserName(e.target.value)} onFocus={ensureFieldVisibility} placeholder="Your full name" autoComplete="off" className={`${inputCls("userName")} pl-10`} />
                 </div>
                 {errors.userName && <p className="text-red-400 text-xs pl-1">{errors.userName}</p>}
               </div>
@@ -260,6 +268,7 @@ ${mapLink}`;
                   <input
                     value={userPhone}
                     onChange={(e) => setUserPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                    onFocus={ensureFieldVisibility}
                     placeholder="10-digit mobile number"
                     inputMode="numeric"
                     autoComplete="off"
