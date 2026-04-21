@@ -1,10 +1,19 @@
 import EventsSection from "./EventsSection";
 import BookRideSection from "./BookRideSection";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Silk from "./Silk";
 
 function App() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [introDone, setIntroDone] = useState(false);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setIntroDone(true);
+    }, 1200);
+
+    return () => window.clearTimeout(timer);
+  }, []);
 
   const scrollTo = (id) => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
@@ -29,11 +38,28 @@ function App() {
   return (
     <div className="relative w-screen min-h-screen bg-black text-white overflow-x-hidden">
 
+      <div
+        className={`fixed inset-0 z-80 pointer-events-none transition-opacity duration-700 ${introDone ? "opacity-0" : "opacity-100"}`}
+        aria-hidden="true"
+      >
+        <div className="absolute inset-0 bg-black" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(37,82,205,0.42),transparent_60%)]" />
+        <div className="relative h-full w-full flex items-center justify-center">
+          <div className={`text-center transition-all duration-700 ${introDone ? "opacity-0 scale-95" : "opacity-100 scale-100"}`}>
+            <p className="text-[11px] tracking-[0.38em] uppercase text-slate-300/90">ParthRahi</p>
+            <h1 className="mt-3 text-3xl md:text-5xl font-semibold text-white">Mobility Platform</h1>
+            <p className="mt-4 text-sm text-slate-200/80">Reliable rides, professionally delivered</p>
+          </div>
+        </div>
+      </div>
+
       {/* ✅ SINGLE GLOBAL SILK BACKGROUND — loaded once, fixed behind everything */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         <Silk speed={10} scale={1.3} color="#2552cd" noiseIntensity={1} rotation={0} />
         <div className="absolute inset-0 bg-black/65" />
       </div>
+
+      <div className={`transition-all duration-900 ease-out ${introDone ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
 
       {/* 🔮 HERO */}
       <div id="home" className="relative min-h-screen w-screen overflow-hidden">
@@ -416,6 +442,8 @@ function App() {
         </div>
 
       </footer>
+
+      </div>
 
     </div>
   );
