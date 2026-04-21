@@ -46,13 +46,6 @@ function App() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(37,82,205,0.42),transparent_60%)]" />
         <div className="relative h-full w-full flex items-center justify-center">
           <div className={`text-center transition-all duration-700 ${introDone ? "opacity-0 scale-95" : "opacity-100 scale-100"}`}>
-            <div className="mx-auto mb-6 w-20 h-20 md:w-24 md:h-24 rounded-2xl border border-cyan-200/40 bg-white/5 backdrop-blur-sm flex items-center justify-center shadow-[0_0_28px_rgba(56,189,248,0.28)] animate-pulse">
-              <img
-                src="/logo.svg"
-                alt="ParthRahi logo"
-                className="w-14 h-14 md:w-16 md:h-16 object-contain"
-              />
-            </div>
             <p className="text-[11px] tracking-[0.38em] uppercase text-slate-300/90">ParthRahi</p>
             <h1 className="mt-3 text-3xl md:text-5xl font-semibold text-white">Mobility Platform</h1>
             <p className="mt-4 text-sm text-slate-200/80">Reliable rides, professionally delivered</p>
