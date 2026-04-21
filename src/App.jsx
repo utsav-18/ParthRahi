@@ -10,7 +10,7 @@ function App() {
   useEffect(() => {
     const timer = window.setTimeout(() => {
       setIntroDone(true);
-    }, 1200);
+    }, 1800);
 
     return () => window.clearTimeout(timer);
   }, []);
