@@ -140,9 +140,9 @@ function App() {
                   <button onClick={() => scrollTo("book")} className={btnPrimary}>
                     Book a Ride
                   </button>
-                  <button onClick={() => alert("Coming Soon!!")} className={btnSecondary}>
+                  <a href="https://play.google.com/store/apps/details?id=com.parthrahi.parthrahi" target="_blank" rel="noopener noreferrer" className={btnSecondary}>
                     Download Our App
-                  </button>
+                  </a>
                 </div>
               </div>
 
@@ -407,7 +407,7 @@ function App() {
               <button onClick={() => scrollTo("book")} className={btnPrimary}>
                 Book Ride
               </button>
-              <button onClick={() => alert("Coming Soon!!")}  className={btnSecondary}>Download App</button>
+              <a href="https://play.google.com/store/apps/details?id=com.parthrahi.parthrahi" target="_blank" rel="noopener noreferrer" className={btnSecondary}>Download App</a>
             </div>
 
           <div className="flex gap-5 pt-2">
