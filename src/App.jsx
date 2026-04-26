@@ -61,56 +61,56 @@ function App() {
 
       <div className={`transition-all duration-900 ease-out ${introDone ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
 
-      {/* 🔮 HERO */}
-      <div id="home" className="relative min-h-screen w-screen overflow-hidden">
-
-        {/* Navbar */}
-        <nav className="fixed top-0 left-0 z-50 w-full px-6 md:px-14 py-5 flex items-center justify-between bg-black/10 backdrop-blur-md border-b border-white/10">
-          <div
-            onClick={() => scrollTo("home")}
-            className="text-lg md:text-xl font-semibold tracking-wide cursor-pointer"
-          >
-            ParthRahi
-          </div>
-
-          <ul className="hidden md:flex gap-10 text-sm">
-            {navItems.map((item) => (
-              <li
-                key={item.id}
-                onClick={() => scrollTo(item.id)}
-                className="relative cursor-pointer opacity-80 hover:opacity-100 transition after:absolute after:left-0 after:-bottom-1 after:h-px after:w-0 after:bg-white after:transition-all after:duration-300 hover:after:w-full"
-              >
-                {item.label}
-              </li>
-            ))}
-          </ul>
-
-          <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="md:hidden flex flex-col gap-1.5 z-40"
-          >
-            <span className={`w-6 h-0.5 bg-white transition ${menuOpen ? "rotate-45 translate-y-2" : ""}`} />
-            <span className={`w-6 h-0.5 bg-white transition ${menuOpen ? "opacity-0" : ""}`} />
-            <span className={`w-6 h-0.5 bg-white transition ${menuOpen ? "-rotate-45 -translate-y-2" : ""}`} />
-          </button>
-        </nav>
-
-        {/* Mobile Menu */}
+      {/* Navbar */}
+      <nav className="sticky top-0 left-0 z-50 w-full px-6 md:px-14 py-5 flex items-center justify-between bg-black/10 backdrop-blur-md border-b border-white/10">
         <div
-          className={`fixed inset-0 bg-black/95 backdrop-blur-lg z-20 flex flex-col items-center justify-center gap-10 text-xl transition-transform duration-500 ${
-            menuOpen ? "translate-x-0" : "translate-x-full"
-          }`}
+          onClick={() => scrollTo("home")}
+          className="text-lg md:text-xl font-semibold tracking-wide cursor-pointer"
         >
+          ParthRahi
+        </div>
+
+        <ul className="hidden md:flex gap-10 text-sm">
           {navItems.map((item) => (
-            <div
+            <li
               key={item.id}
               onClick={() => scrollTo(item.id)}
-              className="cursor-pointer hover:scale-110 transition"
+              className="relative cursor-pointer opacity-80 hover:opacity-100 transition after:absolute after:left-0 after:-bottom-1 after:h-px after:w-0 after:bg-white after:transition-all after:duration-300 hover:after:w-full"
             >
               {item.label}
-            </div>
+            </li>
           ))}
-        </div>
+        </ul>
+
+        <button
+          onClick={() => setMenuOpen(!menuOpen)}
+          className="md:hidden flex flex-col gap-1.5 z-40"
+        >
+          <span className={`w-6 h-0.5 bg-white transition ${menuOpen ? "rotate-45 translate-y-2" : ""}`} />
+          <span className={`w-6 h-0.5 bg-white transition ${menuOpen ? "opacity-0" : ""}`} />
+          <span className={`w-6 h-0.5 bg-white transition ${menuOpen ? "-rotate-45 -translate-y-2" : ""}`} />
+        </button>
+      </nav>
+
+      {/* Mobile Menu */}
+      <div
+        className={`fixed inset-0 bg-black/95 backdrop-blur-lg z-20 flex flex-col items-center justify-center gap-10 text-xl transition-transform duration-500 ${
+          menuOpen ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
+        {navItems.map((item) => (
+          <div
+            key={item.id}
+            onClick={() => scrollTo(item.id)}
+            className="cursor-pointer hover:scale-110 transition"
+          >
+            {item.label}
+          </div>
+        ))}
+      </div>
+
+      {/* 🔮 HERO */}
+      <div id="home" className="relative min-h-screen w-screen overflow-hidden">
 
         {/* Hero Content */}
         <section className="relative z-10 flex items-center min-h-screen px-6 md:px-16 pt-28 md:pt-0">
