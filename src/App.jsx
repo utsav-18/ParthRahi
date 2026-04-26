@@ -15,6 +15,14 @@ function App() {
     return () => window.clearTimeout(timer);
   }, []);
 
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? "hidden" : "";
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [menuOpen]);
+
   const scrollTo = (id) => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
     setMenuOpen(false);
@@ -59,10 +67,10 @@ function App() {
         <div className="absolute inset-0 bg-black/65" />
       </div>
 
-      <div className={`transition-all duration-900 ease-out ${introDone ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
+      <div className={`transition-opacity duration-900 ease-out ${introDone ? "opacity-100" : "opacity-0"}`}>
 
       {/* Navbar */}
-      <nav className="sticky top-0 left-0 z-50 w-full px-6 md:px-14 py-5 flex items-center justify-between bg-black/10 backdrop-blur-md border-b border-white/10">
+      <nav className="fixed top-0 inset-x-0 z-50 w-full px-6 md:px-14 py-5 flex items-center justify-between bg-black/35 backdrop-blur-xl border-b border-white/10 shadow-[0_8px_24px_rgba(0,0,0,0.25)]">
         <div
           onClick={() => scrollTo("home")}
           className="text-lg md:text-xl font-semibold tracking-wide cursor-pointer"
@@ -95,7 +103,7 @@ function App() {
 
       {/* Mobile Menu */}
       <div
-        className={`fixed top-[72px] inset-x-0 bottom-0 bg-black/95 backdrop-blur-lg z-[60] transition-all duration-300 md:hidden ${
+        className={`fixed top-[74px] inset-x-0 bottom-0 bg-black/95 backdrop-blur-lg z-[60] transition-[opacity,transform] duration-400 ease-out will-change-transform md:hidden ${
           menuOpen
             ? "opacity-100 translate-y-0 pointer-events-auto"
             : "opacity-0 -translate-y-2 pointer-events-none"
@@ -116,7 +124,7 @@ function App() {
       </div>
 
       {/* 🔮 HERO */}
-      <div id="home" className="relative min-h-screen w-screen overflow-hidden">
+      <div id="home" className="relative min-h-screen w-screen overflow-hidden pt-[76px] md:pt-[84px]">
 
         {/* Hero Content */}
         <section className="relative z-10 flex items-center min-h-screen px-6 md:px-16 pt-28 md:pt-0">
