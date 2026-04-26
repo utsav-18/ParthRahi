@@ -84,7 +84,8 @@ function App() {
 
         <button
           onClick={() => setMenuOpen(!menuOpen)}
-          className="md:hidden flex flex-col gap-1.5 z-40"
+          aria-label={menuOpen ? "Close menu" : "Open menu"}
+          className="md:hidden flex flex-col gap-1.5 z-[70]"
         >
           <span className={`w-6 h-0.5 bg-white transition ${menuOpen ? "rotate-45 translate-y-2" : ""}`} />
           <span className={`w-6 h-0.5 bg-white transition ${menuOpen ? "opacity-0" : ""}`} />
@@ -94,19 +95,24 @@ function App() {
 
       {/* Mobile Menu */}
       <div
-        className={`fixed inset-0 bg-black/95 backdrop-blur-lg z-20 flex flex-col items-center justify-center gap-10 text-xl transition-transform duration-500 ${
-          menuOpen ? "translate-x-0" : "translate-x-full"
+        className={`fixed top-[72px] inset-x-0 bottom-0 bg-black/95 backdrop-blur-lg z-[60] transition-all duration-300 md:hidden ${
+          menuOpen
+            ? "opacity-100 translate-y-0 pointer-events-auto"
+            : "opacity-0 -translate-y-2 pointer-events-none"
         }`}
       >
-        {navItems.map((item) => (
-          <div
-            key={item.id}
-            onClick={() => scrollTo(item.id)}
-            className="cursor-pointer hover:scale-110 transition"
-          >
-            {item.label}
-          </div>
-        ))}
+        <ul className="h-full overflow-y-auto px-6 py-8 flex flex-col items-center gap-5 text-white text-lg font-medium">
+          {navItems.map((item) => (
+            <li key={item.id} className="w-full max-w-sm">
+              <button
+                onClick={() => scrollTo(item.id)}
+                className="w-full rounded-xl border border-white/15 bg-white/5 py-3.5 text-center hover:bg-white/10 active:scale-[0.99] transition"
+              >
+                {item.label}
+              </button>
+            </li>
+          ))}
+        </ul>
       </div>
 
       {/* 🔮 HERO */}
