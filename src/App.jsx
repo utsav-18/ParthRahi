@@ -285,10 +285,10 @@ function App() {
             <h2 className="text-3xl md:text-5xl font-bold text-white">Meet the Founder</h2>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-16 items-center">
+          <div className="grid md:grid-cols-2 gap-12 md:gap-20 items-center max-w-5xl mx-auto">
 
-            <div className="flex justify-center">
-              <div className="relative w-[200px] h-[200px] md:w-[260px] md:h-[260px] transition-all duration-500 hover:scale-105">
+            <div className="flex justify-center md:justify-end">
+              <div className="relative w-[200px] h-[200px] md:w-[280px] md:h-[280px] transition-all duration-500 hover:scale-105">
                 <div className="absolute -inset-6 rounded-full bg-[radial-gradient(circle_at_center,rgba(80,160,255,0.35),transparent_65%)] blur-2xl"></div>
                 <div className="absolute inset-0 rounded-full border border-white/20"></div>
                 <img
@@ -300,9 +300,9 @@ function App() {
             </div>
 
             <div className="space-y-6 text-center md:text-left">
-              <h3 className="text-2xl md:text-3xl font-semibold text-white">Aashish Kumar</h3>
-              <p className="text-sm text-white/60">Founder, ParthRahi</p>
-              <p className="text-white/70 leading-relaxed max-w-lg">
+              <h3 className="text-3xl md:text-4xl font-semibold text-white">Aashish Kumar</h3>
+              <p className="text-sm text-white/60 uppercase tracking-[0.2em]">Founder, ParthRahi</p>
+              <p className="text-white/70 leading-relaxed">
                 ParthRahi was built with a simple vision — to make everyday
                 transportation reliable, affordable and accessible for everyone.
                 Our goal is to connect passengers with trusted drivers while
