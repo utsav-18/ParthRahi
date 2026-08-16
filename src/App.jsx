@@ -180,7 +180,15 @@ function App() {
       {/* Divider */}
       <div className="relative z-10 w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
 
-    <EventsSection />
+
+
+
+
+    {/*<EventsSection />*/}
+
+
+
+
 
 
       {/* 🚗 BOOK A RIDE */}
