@@ -150,14 +150,29 @@ function App() {
                   Special Offer: Get up to 20% OFF on your rides
                 </p>
 
-                <div className="flex flex-col sm:flex-row gap-3 pt-3 justify-center md:justify-start">
-                  <button onClick={() => scrollTo("book")} className={btnPrimary}>
-                    Book a Ride
-                  </button>
-                  <a href="https://play.google.com/store/apps/details?id=com.parthrahi.parthrahi" target="_blank" rel="noopener noreferrer" className={btnSecondary}>
-                    Download Our App
-                  </a>
-                </div>
+                    <div className="flex flex-col sm:flex-row gap-3 pt-3 justify-center md:justify-start">
+                      <button onClick={() => scrollTo("book")} className={btnPrimary}>
+                        Book a Ride
+                      </button>
+
+                      <a
+                        href="https://play.google.com/store/apps/details?id=com.parthrahi.parthrahi"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={btnSecondary}
+                      >
+                        Download Our App
+                      </a>
+
+                      <a
+                        href="https://play.google.com/store/apps/details?id=com.parthrahi.parth"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={btnSecondary}
+                      >
+                        Drive with ParthRahi
+                      </a>
+                    </div>
               </div>
 
               <div className="flex justify-center pt-10 pb-16 md:pb-0 md:pt-0">
@@ -376,94 +391,221 @@ function App() {
         </div>
       </section>
 
-      {/* FOOTER / CONTACT */}
-      <footer id="contact" className="relative overflow-hidden border-t border-white/10">
+{/* FOOTER / CONTACT */}
+<footer
+  id="contact"
+  className="relative overflow-x-hidden border-t border-white/10"
+>
+  {/* Main Footer */}
+  <div className="relative z-10 max-w-6xl mx-auto px-6 lg:px-10 py-16 md:py-20">
 
-        <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-16 py-20 grid gap-12 md:grid-cols-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-16">
 
-          <div className="space-y-4">
-            <h3 className="text-xl font-semibold tracking-wide text-white">ParthRahi</h3>
-            <p className="text-sm text-white/70">
-              Technology-driven ride booking platform providing Car, Bike and Auto rides.
-            </p>
-            <p className="text-sm text-white/60">
-              Support: <br />
-                        <a href="tel:8252224027" className="hover:text-white cursor-pointer hover:underline transition">8252224027</a> <br />
-                        <a href="tel:9296218764" className="hover:text-white cursor-pointer hover:underline transition">9296218764</a>
-            </p>
-          </div>
+      {/* BRAND */}
+      <div className="min-w-0 space-y-5">
+        <h3 className="text-xl font-semibold tracking-wide text-white">
+          ParthRahi
+        </h3>
 
-          <div>
-            <h4 className="text-sm font-semibold mb-4 uppercase text-white/80">Company</h4>
-            <ul className="space-y-3 text-sm text-white/70">
-              {[
-                { label: "About",    id: "about"    },
-                { label: "Features", id: "features" },
-                { label: "Book",     id: "book"     },
-                { label: "Contact",  id: "contact"  },
-              ].map((item) => (
-                <li
-                  key={item.id}
-                  onClick={() => scrollTo(item.id)}
-                  className="hover:text-white hover:translate-x-1 transition cursor-pointer"
-                >
-                  {item.label}
-                </li>
-              ))}
-            </ul>
-          </div>
+        <p className="text-sm leading-6 text-white/60 max-w-xs">
+          Technology-driven ride booking platform providing Car, Bike and
+          Auto rides.
+        </p>
 
-          <div>
-            <h4 className="text-sm font-semibold mb-4 uppercase text-white/80">Riders</h4>
-            <ul className="space-y-3 text-sm text-white/70">
-              <li onClick={() => scrollTo("book")}     className="hover:text-white hover:translate-x-1 transition cursor-pointer">Book a Ride</li>
-              <li onClick={() => scrollTo("book")}     className="hover:text-white hover:translate-x-1 transition cursor-pointer">Become a Driver</li>
-              <li onClick={() => scrollTo("features")} className="hover:text-white hover:translate-x-1 transition cursor-pointer">Safety Guidelines</li>
-              <li onClick={() => scrollTo("contact")}  className="hover:text-white hover:translate-x-1 transition cursor-pointer">Help & Support</li>
-            </ul>
-          </div>
+        <div className="pt-1">
+          <p className="text-xs uppercase tracking-wider text-white/40 mb-2">
+            Support
+          </p>
 
-          <div className="space-y-5">
-            <h4 className="text-sm font-semibold uppercase text-white/80">Get Started</h4>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <button onClick={() => scrollTo("book")} className={btnPrimary}>
-                Book Ride
-              </button>
-              <a href="https://play.google.com/store/apps/details?id=com.parthrahi.parthrahi" target="_blank" rel="noopener noreferrer" className={btnSecondary}>Download App</a>
-            </div>
+          <div className="space-y-1">
+            <a
+              href="tel:8252224027"
+              className="block text-sm text-white/60 hover:text-white hover:underline transition"
+            >
+              8252224027
+            </a>
 
-          <div className="flex gap-5 pt-2">
-            {[
-              { name: "Instagram", icon: "📷", url: "https://www.instagram.com/parthrahiofficial/" },
-              { name: "YouTube", icon: "▶", url: "https://youtube.com/in/yourusername" },
-              { name: "Facebook", icon: "f", url: "https://facebook.com/in/yourusername" }
-            ].map((social) => (
-              <a
-                key={social.name}
-                href={social.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-white/60 hover:text-white hover:scale-110 cursor-pointer transition inline-flex items-center gap-1"
-              >
-                <span aria-hidden="true">{social.icon}</span>
-                {social.name}
-              </a>
-            ))}
-          </div>
-
-          </div>
-
-        </div>
-
-        <div className="relative z-10 border-t border-white/10 py-6 px-6 md:px-16 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-white/60">
-          <p>© {new Date().getFullYear()} Parthrahi Smartcab Solutions LLP.</p>
-          <div className="flex gap-6">
-            <span  onClick={() => window.open("https://parthrahi-backend.web.app/privacy", "_blank")} className="hover:text-white cursor-pointer">Privacy Policy</span>
-            <span onClick={() => window.open("https://parthrahi-backend.web.app/privacy", "_blank")} className="hover:text-white cursor-pointer">Terms of Service</span>
+            <a
+              href="tel:9296218764"
+              className="block text-sm text-white/60 hover:text-white hover:underline transition"
+            >
+              9296218764
+            </a>
           </div>
         </div>
+      </div>
 
-      </footer>
+      {/* COMPANY */}
+      <div>
+        <h4 className="text-xs font-semibold mb-6 uppercase tracking-wider text-white/50">
+          Company
+        </h4>
+
+        <ul className="space-y-4 text-sm text-white/60">
+          {[
+            { label: "About", id: "about" },
+            { label: "Features", id: "features" },
+            { label: "Book", id: "book" },
+            { label: "Contact", id: "contact" },
+          ].map((item) => (
+            <li
+              key={item.id}
+              onClick={() => scrollTo(item.id)}
+              className="w-fit hover:text-white hover:translate-x-1 transition-all cursor-pointer"
+            >
+              {item.label}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* RIDERS */}
+      <div>
+        <h4 className="text-xs font-semibold mb-6 uppercase tracking-wider text-white/50">
+          Riders
+        </h4>
+
+        <ul className="space-y-4 text-sm text-white/60">
+          <li
+            onClick={() => scrollTo("book")}
+            className="w-fit hover:text-white hover:translate-x-1 transition-all cursor-pointer"
+          >
+            Book a Ride
+          </li>
+
+          <li
+            onClick={() =>
+              window.open(
+                "https://play.google.com/store/apps/details?id=com.parthrahi.parth",
+                "_blank"
+              )
+            }
+            className="w-fit hover:text-white hover:translate-x-1 transition-all cursor-pointer"
+          >
+            Drive with Us
+          </li>
+
+          <li
+            onClick={() => scrollTo("features")}
+            className="w-fit hover:text-white hover:translate-x-1 transition-all cursor-pointer"
+          >
+            Safety Guidelines
+          </li>
+
+          <li
+            onClick={() => scrollTo("contact")}
+            className="w-fit hover:text-white hover:translate-x-1 transition-all cursor-pointer"
+          >
+            Help & Support
+          </li>
+        </ul>
+      </div>
+
+      {/* GET STARTED */}
+      <div className="min-w-0">
+        <h4 className="text-xs font-semibold mb-6 uppercase tracking-wider text-white/50">
+          Get Started
+        </h4>
+
+        <div className="flex flex-col gap-3 w-full max-w-xs">
+
+          <button
+            onClick={() => scrollTo("book")}
+            className={`${btnPrimary} w-full`}
+          >
+            Book Ride
+          </button>
+
+          <a
+            href="https://play.google.com/store/apps/details?id=com.parthrahi.parthrahi"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`${btnSecondary} w-full text-center`}
+          >
+            Download App
+          </a>
+
+          <a
+            href="https://play.google.com/store/apps/details?id=com.parthrahi.parth"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`${btnSecondary} w-full text-center`}
+          >
+            Drive with Us
+          </a>
+        </div>
+
+        {/* SOCIALS */}
+        <div className="flex flex-wrap gap-x-5 gap-y-3 mt-7">
+          {[
+            {
+              name: "Instagram",
+              icon: "📷",
+              url: "https://www.instagram.com/parthrahiofficial/",
+            },
+            {
+              name: "YouTube",
+              icon: "▶",
+              url: "https://youtube.com/in/yourusername",
+            },
+            {
+              name: "Facebook",
+              icon: "f",
+              url: "https://facebook.com/in/yourusername",
+            },
+          ].map((social) => (
+            <a
+              key={social.name}
+              href={social.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-white/50 hover:text-white transition inline-flex items-center gap-1.5"
+            >
+              <span aria-hidden="true">{social.icon}</span>
+              {social.name}
+            </a>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {/* BOTTOM BAR */}
+  <div className="relative z-10 border-t border-white/10">
+    <div className="max-w-6xl mx-auto px-6 lg:px-10 py-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-white/40">
+
+      <p className="text-center sm:text-left">
+        © {new Date().getFullYear()} Parthrahi Smartcab Solutions LLP.
+      </p>
+
+      <div className="flex items-center gap-6">
+        <span
+          onClick={() =>
+            window.open(
+              "https://parthrahi-backend.web.app/privacy",
+              "_blank"
+            )
+          }
+          className="hover:text-white cursor-pointer transition"
+        >
+          Privacy Policy
+        </span>
+
+        <span
+          onClick={() =>
+            window.open(
+              "https://parthrahi-backend.web.app/privacy",
+              "_blank"
+            )
+          }
+          className="hover:text-white cursor-pointer transition"
+        >
+          Terms of Service
+        </span>
+      </div>
+    </div>
+  </div>
+</footer>
 
       </div>
 
