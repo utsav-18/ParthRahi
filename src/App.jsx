@@ -124,7 +124,10 @@ function App() {
       </div>
 
       {/* 🔮 HERO */}
-      <div id="home" className="relative min-h-screen w-screen overflow-hidden pt-[76px] md:pt-[84px]">
+        <div
+          id="home"
+          className="relative min-h-screen w-screen overflow-hidden pt-[46px] md:pt-[54px]"
+        >
 
         {/* Hero Content */}
         <section className="relative z-10 flex items-center min-h-screen px-6 md:px-16 pt-28 md:pt-0">
