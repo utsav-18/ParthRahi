@@ -13,3 +13,77 @@ body {
   background: #000;
   color: #fff;
 }
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 20% 10%, rgba(48, 112, 255, 0.14), transparent 42%);
+  z-index: 0;
+}
+
+.aura-blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(60px);
+  opacity: 0.38;
+  mix-blend-mode: screen;
+}
+
+.aura-blob-one {
+  width: 36rem;
+  height: 36rem;
+  top: -12rem;
+  left: -10rem;
+  background: radial-gradient(circle, rgba(70, 134, 255, 0.42), rgba(70, 134, 255, 0));
+  animation: auraDriftOne 20s ease-in-out infinite alternate;
+}
+
+.aura-blob-two {
+  width: 30rem;
+  height: 30rem;
+  bottom: -8rem;
+  right: -8rem;
+  background: radial-gradient(circle, rgba(49, 101, 230, 0.38), rgba(49, 101, 230, 0));
+  animation: auraDriftTwo 24s ease-in-out infinite alternate;
+}
+
+.aura-blob-three {
+  width: 22rem;
+  height: 22rem;
+  top: 38%;
+  left: 42%;
+  background: radial-gradient(circle, rgba(130, 178, 255, 0.22), rgba(130, 178, 255, 0));
+  animation: auraPulse 8s ease-in-out infinite;
+}
+
+@keyframes auraDriftOne {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  100% {
+    transform: translate3d(6rem, 3rem, 0) scale(1.1);
+  }
+}
+
+@keyframes auraDriftTwo {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  100% {
+    transform: translate3d(-5rem, -3.5rem, 0) scale(1.08);
+  }
+}
+
+@keyframes auraPulse {
+  0%,
+  100% {
+    opacity: 0.2;
+    transform: scale(0.96);
+  }
+  50% {
+    opacity: 0.36;
+    transform: scale(1.08);
+  }
+}

@@ -38,10 +38,10 @@ function App() {
   ];
 
   const btnPrimary =
-    "inline-flex items-center justify-center px-6 md:px-8 py-2.5 md:py-3 rounded-full bg-white text-black font-medium whitespace-nowrap cursor-pointer transition-all duration-200 hover:bg-gray-200 hover:-translate-y-0.5 active:translate-y-0";
+    "inline-flex items-center justify-center px-6 md:px-8 py-2.5 md:py-3 rounded-full bg-white text-black font-medium whitespace-nowrap cursor-pointer border border-white/70 shadow-[0_10px_28px_rgba(255,255,255,0.2)] transition-all duration-300 hover:bg-gray-200 hover:-translate-y-0.5 hover:shadow-[0_14px_34px_rgba(255,255,255,0.28)] active:translate-y-0";
 
   const btnSecondary =
-    "inline-flex items-center justify-center px-6 md:px-8 py-2.5 md:py-3 rounded-full border border-white/40 text-white whitespace-nowrap cursor-pointer transition-all duration-200 hover:bg-white/10 hover:-translate-y-0.5 active:translate-y-0";
+    "inline-flex items-center justify-center px-6 md:px-8 py-2.5 md:py-3 rounded-full border border-white/35 text-white whitespace-nowrap cursor-pointer bg-white/[0.02] shadow-[0_8px_22px_rgba(13,30,82,0.35)] transition-all duration-300 hover:bg-white/12 hover:border-white/55 hover:-translate-y-0.5 hover:shadow-[0_12px_26px_rgba(55,115,255,0.25)] active:translate-y-0";
 
   return (
     <div className="relative w-screen min-h-screen bg-black text-white overflow-x-hidden">
@@ -64,13 +64,20 @@ function App() {
       {/* ✅ SINGLE GLOBAL SILK BACKGROUND — loaded once, fixed behind everything */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         <Silk speed={16} scale={1.3} color="#2552cd" noiseIntensity={1} rotation={0} />
-        <div className="absolute inset-0 bg-black/65" />
+        <div className="absolute inset-0 bg-black/60" />
       </div>
 
-      <div className={`transition-opacity duration-900 ease-out ${introDone ? "opacity-100" : "opacity-0"}`}>
+      <div className="fixed inset-0 z-[1] pointer-events-none overflow-hidden">
+        <div className="aura-blob aura-blob-one" />
+        <div className="aura-blob aura-blob-two" />
+        <div className="aura-blob aura-blob-three" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(8,11,27,0.18),rgba(8,11,27,0.48)_60%,rgba(2,4,10,0.82))]" />
+      </div>
+
+      <div className={`relative z-10 transition-opacity duration-900 ease-out ${introDone ? "opacity-100" : "opacity-0"}`}>
 
       {/* Navbar */}
-      <nav className="fixed top-0 inset-x-0 z-50 w-full px-6 md:px-14 py-5 flex items-center justify-between bg-black/35 backdrop-blur-xl border-b border-white/10 shadow-[0_8px_24px_rgba(0,0,0,0.25)]">
+      <nav className="fixed top-0 inset-x-0 z-50 w-full px-6 md:px-14 py-5 flex items-center justify-between bg-[linear-gradient(to_right,rgba(7,12,32,0.72),rgba(2,6,20,0.52),rgba(7,12,32,0.72))] backdrop-blur-xl border-b border-white/12 shadow-[0_8px_30px_rgba(0,0,0,0.35)]">
         <div
           onClick={() => scrollTo("home")}
           className="text-lg md:text-xl font-semibold tracking-wide cursor-pointer"
@@ -139,7 +146,7 @@ function App() {
                   PARTHRAHI MOBILITY
                 </p>
 
-                <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold leading-tight">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold leading-tight drop-shadow-[0_8px_24px_rgba(43,101,255,0.28)]">
                   Book Your Ride
                   <br /> with ParthRahi
                 </h1>
@@ -217,8 +224,9 @@ function App() {
 
       {/* 🟣 ABOUT */}
       <section id="about" className="relative py-28 px-6 md:px-16 overflow-hidden">
+        <div className="pointer-events-none absolute top-20 left-1/2 -translate-x-1/2 w-[70%] h-44 bg-[radial-gradient(circle_at_center,rgba(55,115,255,0.22),transparent_70%)] blur-2xl" />
 
-        <div className="relative z-10 max-w-7xl mx-auto">
+        <div className="relative z-10 max-w-7xl mx-auto rounded-[2rem] border border-white/10 bg-white/[0.03] backdrop-blur-sm px-6 py-12 md:px-10 md:py-14 shadow-[0_0_90px_rgba(39,92,220,0.12)]">
 
           <div className="text-center mb-20">
             <p className="text-xs uppercase tracking-[0.3em] text-white/60 mb-3">About Us</p>
@@ -238,7 +246,7 @@ function App() {
             ].map(([icon, title, desc]) => (
               <div
                 key={title}
-                className="bg-white/5 border border-white/10 backdrop-blur-md p-6 rounded-xl text-center transition hover:bg-white/10 hover:-translate-y-1"
+                className="bg-white/5 border border-white/10 backdrop-blur-md p-6 rounded-xl text-center transition-all duration-300 hover:bg-white/12 hover:-translate-y-1 hover:shadow-[0_14px_34px_rgba(35,87,210,0.24)]"
               >
                 <div className="text-2xl mb-3">{icon}</div>
                 <h3 className="font-semibold text-white mb-1">{title}</h3>
@@ -260,14 +268,14 @@ function App() {
               </p>
             </div>
             <div className="space-y-6">
-              <div className="bg-white/5 border border-white/10 rounded-xl p-6 backdrop-blur-md hover:bg-white/10 transition">
+              <div className="bg-white/5 border border-white/10 rounded-xl p-6 backdrop-blur-md hover:bg-white/10 hover:border-white/20 hover:shadow-[0_10px_26px_rgba(36,85,201,0.2)] transition-all duration-300">
                 <h4 className="font-semibold text-white mb-2">Our Mission</h4>
                 <p className="text-sm text-white/70">
                   Provide reliable, affordable transportation by connecting
                   riders with verified drivers quickly and safely.
                 </p>
               </div>
-              <div className="bg-white/5 border border-white/10 rounded-xl p-6 backdrop-blur-md hover:bg-white/10 transition">
+              <div className="bg-white/5 border border-white/10 rounded-xl p-6 backdrop-blur-md hover:bg-white/10 hover:border-white/20 hover:shadow-[0_10px_26px_rgba(36,85,201,0.2)] transition-all duration-300">
                 <h4 className="font-semibold text-white mb-2">Our Vision</h4>
                 <p className="text-sm text-white/70">
                   Become a trusted mobility platform that transforms how people travel in cities.
@@ -277,7 +285,7 @@ function App() {
           </div>
 
           <div className="mt-20">
-            <div className="max-w-3xl mx-auto rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md p-6 md:p-8">
+            <div className="max-w-3xl mx-auto rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md p-6 md:p-8 shadow-[0_12px_32px_rgba(17,39,107,0.3)]">
               <p className="text-white/60 text-xs uppercase tracking-[0.25em] text-center mb-2">Customer Support</p>
               <h3 className="text-xl md:text-2xl font-semibold text-white text-center mb-6">Talk To Our Team</h3>
 
@@ -317,8 +325,9 @@ function App() {
 
       {/* 👤 FOUNDER */}
       <section className="relative py-24 px-6 md:px-16 overflow-hidden border-t border-white/10">
+        <div className="pointer-events-none absolute top-16 right-[8%] w-56 h-56 rounded-full bg-[radial-gradient(circle_at_center,rgba(67,124,255,0.28),transparent_72%)] blur-3xl" />
 
-        <div className="relative z-10 max-w-7xl mx-auto">
+        <div className="relative z-10 max-w-7xl mx-auto rounded-[2rem] border border-white/10 bg-white/[0.03] backdrop-blur-sm px-6 py-12 md:px-10 md:py-14 shadow-[0_0_85px_rgba(39,92,220,0.1)]">
 
           <div className="text-center mb-20">
             <p className="text-xs uppercase tracking-[0.25em] text-white/60 mb-3">Founder</p>
@@ -348,7 +357,7 @@ function App() {
                 Our goal is to connect passengers with trusted drivers while
                 creating new opportunities for local communities.
               </p>
-              <div className="bg-white/5 border border-white/10 backdrop-blur-md p-6 rounded-xl">
+              <div className="bg-white/5 border border-white/10 backdrop-blur-md p-6 rounded-xl shadow-[0_10px_24px_rgba(18,42,115,0.24)]">
                 <p className="text-white/80 italic">
                   "Transportation should be simple, transparent and safe for
                   everyone. ParthRahi is built to bring that change."
@@ -367,8 +376,9 @@ function App() {
 
       {/* ⭐ FEATURES */}
       <section id="features" className="relative min-h-[80vh] py-24 px-6 md:px-16 flex items-center overflow-hidden border-t border-white/10">
+        <div className="pointer-events-none absolute top-20 left-[10%] w-64 h-64 rounded-full bg-[radial-gradient(circle_at_center,rgba(67,124,255,0.22),transparent_72%)] blur-3xl" />
 
-        <div className="relative z-10 max-w-6xl mx-auto w-full">
+        <div className="relative z-10 max-w-6xl mx-auto w-full rounded-[2rem] border border-white/10 bg-white/[0.03] backdrop-blur-sm px-6 py-12 md:px-10 md:py-14 shadow-[0_0_85px_rgba(39,92,220,0.12)]">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-6 text-white">
             Why Choose ParthRahi
           </h2>
@@ -384,7 +394,7 @@ function App() {
             ].map(([title, desc]) => (
               <div
                 key={title}
-                className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-8 transition-all duration-300 hover:-translate-y-2 hover:bg-white/10 hover:shadow-xl"
+                className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-8 transition-all duration-300 hover:-translate-y-2 hover:bg-white/12 hover:border-white/20 hover:shadow-[0_16px_36px_rgba(33,80,196,0.3)]"
               >
                 <h3 className="text-lg font-semibold mb-3 text-white">{title}</h3>
                 <p className="text-sm text-white/70">{desc}</p>
@@ -399,8 +409,9 @@ function App() {
   id="contact"
   className="relative overflow-x-hidden border-t border-white/10"
 >
+  <div className="pointer-events-none absolute top-14 left-1/2 -translate-x-1/2 w-[72%] h-48 bg-[radial-gradient(circle_at_center,rgba(62,120,255,0.2),transparent_72%)] blur-3xl" />
   {/* Main Footer */}
-  <div className="relative z-10 max-w-6xl mx-auto px-6 lg:px-10 py-16 md:py-20">
+  <div className="relative z-10 max-w-6xl mx-auto px-6 lg:px-10 py-16 md:py-20 rounded-t-[2rem] border-x border-t border-white/10 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.04),rgba(255,255,255,0.015))] backdrop-blur-sm shadow-[0_-22px_70px_rgba(25,60,160,0.16)]">
 
     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-[1.15fr_0.85fr_0.85fr_1.15fr] gap-12 xl:gap-10">
 
@@ -573,7 +584,7 @@ function App() {
             href={social.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="group w-full rounded-xl border border-white/12 bg-white/[0.03] px-4 py-3.5 flex items-center justify-between gap-3 transition-all duration-300 hover:bg-white/[0.08] hover:border-white/30 hover:-translate-y-0.5"
+            className="group w-full rounded-xl border border-white/12 bg-white/[0.03] px-4 py-3.5 flex items-center justify-between gap-3 transition-all duration-300 hover:bg-white/[0.08] hover:border-white/30 hover:-translate-y-0.5 hover:shadow-[0_12px_28px_rgba(31,74,190,0.24)]"
             aria-label={`Open ${social.name}`}
           >
             <span className="min-w-0 flex items-center gap-3">
