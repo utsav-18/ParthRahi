@@ -554,7 +554,7 @@ function App() {
             {
               name: "Facebook",
               icon: "f",
-              url: "https://facebook.com/in/yourusername",
+              url: "https://www.facebook.com/profile.php?id=61579536731846",
             },
           ].map((social) => (
             <a
