@@ -402,7 +402,7 @@ function App() {
   {/* Main Footer */}
   <div className="relative z-10 max-w-6xl mx-auto px-6 lg:px-10 py-16 md:py-20">
 
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-16">
+    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-[1.15fr_0.85fr_0.85fr_1.15fr] gap-12 xl:gap-10">
 
       {/* BRAND */}
       <div className="min-w-0 space-y-5">
@@ -439,7 +439,7 @@ function App() {
       </div>
 
       {/* COMPANY */}
-      <div>
+      <div className="min-w-0">
         <h4 className="text-xs font-semibold mb-6 uppercase tracking-wider text-white/50">
           Company
         </h4>
@@ -463,7 +463,7 @@ function App() {
       </div>
 
       {/* RIDERS */}
-      <div>
+      <div className="min-w-0">
         <h4 className="text-xs font-semibold mb-6 uppercase tracking-wider text-white/50">
           Riders
         </h4>
@@ -538,37 +538,65 @@ function App() {
           </a>
         </div>
 
-        {/* SOCIALS */}
-        <div className="flex flex-wrap gap-x-5 gap-y-3 mt-7">
-          {[
-            {
-              name: "Instagram",
-              icon: "📷",
-              url: "https://www.instagram.com/parthrahiofficial/",
-            },
-            {
-              name: "YouTube",
-              icon: "▶",
-              url: "https://youtube.com/in/yourusername",
-            },
-            {
-              name: "Facebook",
-              icon: "f",
-              url: "https://www.facebook.com/profile.php?id=61579536731846",
-            },
-          ].map((social) => (
-            <a
-              key={social.name}
-              href={social.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs text-white/50 hover:text-white transition inline-flex items-center gap-1.5"
-            >
-              <span aria-hidden="true">{social.icon}</span>
-              {social.name}
-            </a>
-          ))}
-        </div>
+      </div>
+    </div>
+
+    {/* SOCIALS */}
+    <div className="mt-12 pt-8 border-t border-white/10">
+      <p className="text-[11px] uppercase tracking-[0.22em] text-white/45 text-center mb-4">
+        Follow Us
+      </p>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-w-3xl mx-auto">
+        {[
+          {
+            name: "Instagram",
+            detail: "Official profile",
+            short: "IG",
+            url: "https://www.instagram.com/parthrahiofficial/",
+          },
+          {
+            name: "YouTube",
+            detail: "Latest videos",
+            short: "YT",
+            url: "https://youtube.com/in/yourusername",
+          },
+          {
+            name: "Facebook",
+            detail: "Community updates",
+            short: "FB",
+            url: "https://www.facebook.com/profile.php?id=61579536731846",
+          },
+        ].map((social) => (
+          <a
+            key={social.name}
+            href={social.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group w-full rounded-xl border border-white/12 bg-white/[0.03] px-4 py-3.5 flex items-center justify-between gap-3 transition-all duration-300 hover:bg-white/[0.08] hover:border-white/30 hover:-translate-y-0.5"
+            aria-label={`Open ${social.name}`}
+          >
+            <span className="min-w-0 flex items-center gap-3">
+              <span
+                aria-hidden="true"
+                className="w-9 h-9 rounded-full border border-white/20 bg-black/30 flex items-center justify-center text-[11px] font-semibold text-white/85 group-hover:border-white/40 group-hover:text-white"
+              >
+                {social.short}
+              </span>
+
+              <span className="min-w-0">
+                <span className="block text-sm font-medium text-white group-hover:text-white">
+                  {social.name}
+                </span>
+                <span className="block text-[11px] text-white/50 truncate group-hover:text-white/70">
+                  {social.detail}
+                </span>
+              </span>
+            </span>
+
+            <span className="text-[11px] text-white/45 group-hover:text-white/80 transition">Open</span>
+          </a>
+        ))}
       </div>
     </div>
   </div>
