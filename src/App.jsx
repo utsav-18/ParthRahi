@@ -63,7 +63,7 @@ function App() {
 
       {/* ✅ SINGLE GLOBAL SILK BACKGROUND — loaded once, fixed behind everything */}
       <div className="fixed inset-0 z-0 pointer-events-none">
-        <Silk speed={16} scale={1.3} color="#2552cd" noiseIntensity={1} rotation={0} />
+        <Silk speed={12} scale={1.3} color="#2552cd" noiseIntensity={1} rotation={0} />
         <div className="absolute inset-0 bg-black/60" />
       </div>
 
