@@ -570,7 +570,7 @@ function App() {
             name: "YouTube",
             detail: "Latest videos",
             short: "YT",
-            url: "https://youtube.com/in/yourusername",
+            url: "https://www.youtube.com/@parthrahimobility",
           },
           {
             name: "Facebook",
