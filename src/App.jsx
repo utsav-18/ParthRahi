@@ -412,7 +412,7 @@ function App() {
 
         <p className="text-sm leading-6 text-white/60 max-w-xs">
           Technology-driven ride booking platform providing Car, Bike and
-          Auto rides.
+          Auto rides and E-rickshaw.
         </p>
 
         <div className="pt-1">
