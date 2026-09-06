@@ -48,55 +48,20 @@ const RIDE_OPTIONS = [
 // Distinct, filled-style silhouettes so vehicles read clearly even at small sizes,
 // instead of similar-looking outline glyphs.
 function VehicleSymbol({ type, className = "w-6 h-6" }) {
-  if (type === "bike") {
-    return (
-      <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
-        <circle cx="5.5" cy="17.5" r="3.1" fill="none" stroke="currentColor" strokeWidth="1.7" />
-        <circle cx="18.5" cy="17.5" r="3.1" fill="none" stroke="currentColor" strokeWidth="1.7" />
-        <path d="M5.5 17.5 9 10h3.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M9 17.5h6.5l-2.6-6.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M12.7 10h3" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
-        <circle cx="12.7" cy="8.3" r="1.2" fill="currentColor" />
-      </svg>
-    );
-  }
+  const logos = {
+    auto: "/auto-logo.png",
+    bike: "/bike-logo.png",
+    cab: "/cab-logo.png",
+    erickshaw: "/e-riksha-logo.png",
+  };
 
-  if (type === "cab") {
-    return (
-      <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
-        <path d="M4 16.5V13l1.8-4.2A2 2 0 0 1 7.6 7.6h8.8a2 2 0 0 1 1.8 1.2L20 13v3.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M4 13h16" stroke="currentColor" strokeWidth="1.7" />
-        <path d="M6.5 9.8h11" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
-        <circle cx="7.3" cy="16.7" r="1.7" fill="none" stroke="currentColor" strokeWidth="1.7" />
-        <circle cx="16.7" cy="16.7" r="1.7" fill="none" stroke="currentColor" strokeWidth="1.7" />
-      </svg>
-    );
-  }
-
-  if (type === "erickshaw") {
-    return (
-      <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
-        <path d="M3.5 15.5h14.2l-1.4-6a1.6 1.6 0 0 0-1.56-1.2H8.2" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M8.2 8.3 5.4 11.4v4.1" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M18.5 9.3v6.2" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
-        <path d="M18.5 9.3h1.8" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
-        <circle cx="7" cy="18" r="1.8" fill="none" stroke="currentColor" strokeWidth="1.7" />
-        <circle cx="15" cy="18" r="1.8" fill="none" stroke="currentColor" strokeWidth="1.7" />
-        <path d="M12.2 4.3 10.9 6.6h2.5l-1.3 2.3" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    );
-  }
-
-  // auto rickshaw (default)
   return (
-    <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
-      <path d="M4 15.5h13.2l-1.5-5.6A1.8 1.8 0 0 0 14 8.6H8.6" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M8.6 8.6 5.6 11.8v3.7" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M17.2 9.6v5.9" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
-      <path d="M17.2 9.6h1.7" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
-      <circle cx="7.4" cy="18" r="1.8" fill="none" stroke="currentColor" strokeWidth="1.7" />
-      <circle cx="15" cy="18" r="1.8" fill="none" stroke="currentColor" strokeWidth="1.7" />
-    </svg>
+    <img
+      src={logos[type]}
+      alt={type}
+      className={`object-contain drop-shadow-md ${className}`}
+      aria-hidden="true"
+    />
   );
 }
 
@@ -309,8 +274,8 @@ ${mapLink}`;
                     className={`relative flex items-center gap-2.5 sm:gap-3 p-3 sm:p-3.5 rounded-xl border cursor-pointer text-left transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/50
                       ${selected ? `${accent.ring} ${accent.bg} ${accent.glow}` : "border-slate-100/15 bg-slate-900/70 hover:border-slate-100/40"}`}
                   >
-                    <span className={`shrink-0 w-9 h-9 sm:w-11 sm:h-11 rounded-lg border flex items-center justify-center ${selected ? accent.iconBox : "border-slate-100/20 text-slate-100/90"} ${selected ? accent.icon : ""}`}>
-                      <VehicleSymbol type={value} className="w-5 h-5 sm:w-6 sm:h-6" />
+                    <span className={`shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-lg border flex items-center justify-center overflow-hidden bg-white ${selected ? "border-[3px] " + accent.ring : "border-transparent"} transition-all duration-200`}>
+                      <VehicleSymbol type={value} className="w-full h-full p-1" />
                     </span>
                     <span className="min-w-0">
                       <span className={`block text-[13px] sm:text-sm font-semibold truncate ${selected ? "text-white" : "text-slate-50"}`}>{label}</span>
@@ -356,8 +321,8 @@ ${mapLink}`;
             <div className="bg-linear-to-r from-cyan-300/20 to-slate-300/10 border border-cyan-100/35 rounded-lg px-4 sm:px-5 py-4 space-y-3">
               <div className="flex items-center justify-between gap-3 sm:gap-4">
                 <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-                  <span className="shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-md border border-cyan-300/40 bg-cyan-300/10 flex items-center justify-center text-cyan-200">
-                    <VehicleSymbol type={rideType} className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
+                  <span className="shrink-0 w-11 h-11 sm:w-12 sm:h-12 rounded-lg border-2 border-cyan-300/40 bg-white flex items-center justify-center overflow-hidden">
+                    <VehicleSymbol type={rideType} className="w-full h-full p-1" />
                   </span>
                   <div className="min-w-0">
                     <p className="text-slate-100/80 text-[11px] sm:text-xs uppercase tracking-wide">Distance</p>

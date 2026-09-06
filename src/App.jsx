@@ -563,19 +563,19 @@ function App() {
           {
             name: "Instagram",
             detail: "Official profile",
-            short: "IG",
+            logo: "/Insta-logo.png",
             url: "https://www.instagram.com/parthrahiofficial/",
           },
           {
             name: "YouTube",
             detail: "Latest videos",
-            short: "YT",
+            logo: "/youtube-logo.webp",
             url: "https://www.youtube.com/@parthrahimobility",
           },
           {
             name: "Facebook",
             detail: "Community updates",
-            short: "FB",
+            logo: "/facebook-logo.png",
             url: "https://www.facebook.com/profile.php?id=61579536731846",
           },
         ].map((social) => (
@@ -590,9 +590,9 @@ function App() {
             <span className="min-w-0 flex items-center gap-3">
               <span
                 aria-hidden="true"
-                className="w-9 h-9 rounded-full border border-white/20 bg-black/30 flex items-center justify-center text-[11px] font-semibold text-white/85 group-hover:border-white/40 group-hover:text-white"
+                className="w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden flex items-center justify-center transition-transform group-hover:scale-110"
               >
-                {social.short}
+                <img src={social.logo} alt={social.name} className="w-[120%] h-[120%] object-contain drop-shadow-md" />
               </span>
 
               <span className="min-w-0">
