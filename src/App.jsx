@@ -41,7 +41,7 @@ function App() {
     "inline-flex items-center justify-center px-6 md:px-8 py-2.5 md:py-3 rounded-full bg-white text-black font-medium whitespace-nowrap cursor-pointer border border-white/70 shadow-lg shadow-white/10 transition-all duration-300 hover:bg-gray-200 hover:-translate-y-0.5 hover:shadow-xl shadow-white/20 active:translate-y-0";
 
   const btnSecondary =
-    "inline-flex items-center justify-center px-6 md:px-8 py-2.5 md:py-3 rounded-full border border-white/35 text-white whitespace-nowrap cursor-pointer bg-white/[0.02] shadow-md shadow-blue-900/30 transition-all duration-300 hover:bg-white/12 hover:border-white/55 hover:-translate-y-0.5 hover:shadow-lg shadow-blue-500/20 active:translate-y-0";
+    "inline-flex items-center justify-center px-6 md:px-8 py-2.5 md:py-3 rounded-full border border-slate-500 text-white whitespace-nowrap cursor-pointer bg-slate-900/40 shadow-md shadow-blue-900/30 transition-all duration-300 hover:bg-slate-700/60 hover:border-white/55 hover:-translate-y-0.5 hover:shadow-lg shadow-blue-500/20 active:translate-y-0";
 
   return (
     <div className="relative w-full min-h-screen bg-black text-white overflow-x-hidden">
@@ -56,7 +56,7 @@ function App() {
           <div className={`text-center transition-all duration-700 ${introDone ? "opacity-0 scale-95" : "opacity-100 scale-100"}`}>
             <p className="text-[11px] tracking-[0.38em] uppercase text-slate-300/90">ParthRahi</p>
             <h1 className="mt-3 text-3xl md:text-5xl font-semibold text-white">Mobility Platform</h1>
-            <p className="mt-4 text-sm text-slate-200/80">Reliable rides, professionally delivered</p>
+            <p className="mt-4 text-sm text-slate-200">Reliable rides, professionally delivered</p>
           </div>
         </div>
       </div>
@@ -77,7 +77,7 @@ function App() {
       <div className={`relative z-10 transition-opacity duration-900 ease-out ${introDone ? "opacity-100" : "opacity-0"}`}>
 
       {/* Navbar */}
-      <nav className="fixed top-0 inset-x-0 z-50 w-full px-6 md:px-14 py-5 flex items-center justify-between bg-[linear-gradient(to_right,rgba(7,12,32,0.72),rgba(2,6,20,0.52),rgba(7,12,32,0.72))] backdrop-blur-xl border-b border-white/12 shadow-[0_8px_30px_rgba(0,0,0,0.35)]">
+      <nav className="fixed top-0 inset-x-0 z-50 w-full px-6 md:px-14 py-5 flex items-center justify-between bg-slate-950/80 backdrop-blur-xl border-b border-slate-700/60 shadow-[0_8px_30px_rgba(0,0,0,0.35)]">
         <div
           onClick={() => scrollTo("home")}
           className="text-lg md:text-xl font-semibold tracking-wide cursor-pointer"
@@ -119,7 +119,7 @@ function App() {
 
       {/* Mobile Menu Drawer */}
       <div
-        className={`fixed top-0 right-0 bottom-0 w-[75vw] max-w-[320px] bg-slate-900/95 border-l border-white/10 shadow-2xl z-[45] flex flex-col pt-[84px] px-6 md:hidden transition-transform duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform ${
+        className={`fixed top-0 right-0 bottom-0 w-[75vw] max-w-[320px] bg-slate-900/95 border-l border-slate-700/50 shadow-2xl z-[45] flex flex-col pt-[84px] px-6 md:hidden transition-transform duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform ${
           menuOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
@@ -132,7 +132,7 @@ function App() {
             >
               <button
                 onClick={() => scrollTo(item.id)}
-                className="w-full text-left py-4 text-[17px] font-medium text-white/90 border-b border-white/5 hover:text-cyan-300 hover:border-white/20 active:scale-[0.98] transition-all"
+                className="w-full text-left py-4 text-[17px] font-medium text-white border-b border-white/5 hover:text-cyan-300 hover:border-slate-600 active:scale-[0.98] transition-all"
               >
                 {item.label}
               </button>
@@ -142,7 +142,7 @@ function App() {
 
         {/* Premium Bottom Action */}
         <div className="mt-auto mb-10 space-y-4">
-          <p className="text-[10px] uppercase tracking-widest text-white/40 mb-3 text-center">Ready to travel?</p>
+          <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-3 text-center">Ready to travel?</p>
           <button 
             onClick={() => scrollTo("book")} 
             className="w-full py-3.5 rounded-xl bg-cyan-300 text-slate-950 font-semibold text-sm shadow-lg shadow-cyan-300/20 active:scale-[0.98] transition-all"
@@ -164,7 +164,7 @@ function App() {
             <div className="grid md:grid-cols-2 gap-14 md:gap-16 items-center">
 
               <div className="text-white text-center md:text-left space-y-5">
-                <p className="text-xs uppercase tracking-[0.25em] text-white/60">
+                <p className="text-xs uppercase tracking-[0.25em] text-slate-300">
                   PARTHRAHI MOBILITY
                 </p>
 
@@ -173,7 +173,7 @@ function App() {
                   <br /> with ParthRahi
                 </h1>
 
-                <p className="text-sm sm:text-base text-white/80 max-w-md mx-auto md:mx-0">
+                <p className="text-sm sm:text-base text-slate-100 max-w-md mx-auto md:mx-0">
                   Fast, affordable, and reliable rides for your everyday travel.
                   Book Car, Bike, or Auto rides in seconds and reach your destination safely.
                 </p>
@@ -210,7 +210,7 @@ function App() {
               <div className="flex justify-center pt-10 pb-16 md:pb-0 md:pt-0">
                 <div className="relative w-[160px] h-[160px] sm:w-[210px] sm:h-[210px] md:w-[300px] md:h-[300px] transition-all duration-500 hover:scale-120">
                   <div className="absolute -inset-6 rounded-full bg-[radial-gradient(circle_at_center,rgba(80,160,255,0.35),transparent_65%)] blur-2xl"></div>
-                  <div className="absolute inset-0 rounded-full border border-white/20"></div>
+                  <div className="absolute inset-0 rounded-full border border-slate-600"></div>
                   <img
                     src="/logo.svg"
                     alt="ParthRahi Logo"
@@ -248,12 +248,12 @@ function App() {
       <section id="about" className="relative py-28 px-6 md:px-16 overflow-hidden">
         <div className="pointer-events-none absolute top-20 left-1/2 -translate-x-1/2 w-[70%] h-44 bg-[radial-gradient(circle_at_center,rgba(55,115,255,0.22),transparent_70%)] blur-2xl" />
 
-        <div className="relative z-10 max-w-7xl mx-auto rounded-[2rem] border border-white/10 bg-white/[0.03] backdrop-blur-sm px-6 py-12 md:px-10 md:py-14 shadow-2xl shadow-blue-500/10">
+        <div className="relative z-10 max-w-7xl mx-auto rounded-[2rem] border border-slate-700/50 bg-slate-900/60 backdrop-blur-sm px-6 py-12 md:px-10 md:py-14 shadow-2xl shadow-blue-500/10">
 
           <div className="text-center mb-20">
-            <p className="text-xs uppercase tracking-[0.3em] text-white/60 mb-3">About Us</p>
+            <p className="text-xs uppercase tracking-[0.3em] text-slate-300 mb-3">About Us</p>
             <h2 className="text-3xl md:text-5xl font-bold text-white">A Trusted Mobility Platform</h2>
-            <p className="text-white/70 mt-6 max-w-xl mx-auto">
+            <p className="text-slate-200 mt-6 max-w-xl mx-auto">
               ParthRahi connects riders with verified local drivers to deliver
               safe, affordable and reliable rides for everyday travel.
             </p>
@@ -268,11 +268,11 @@ function App() {
             ].map(([icon, title, desc]) => (
               <div
                 key={title}
-                className="bg-white/5 border border-white/10 p-6 rounded-xl text-center transition-all duration-300 hover:bg-white/12 hover:-translate-y-1 hover:shadow-xl shadow-blue-500/20"
+                className="bg-slate-800/50 border border-slate-700/50 p-6 rounded-xl text-center transition-all duration-300 hover:bg-slate-700/60 hover:-translate-y-1 hover:shadow-xl shadow-blue-500/20"
               >
                 <div className="text-2xl mb-3">{icon}</div>
                 <h3 className="font-semibold text-white mb-1">{title}</h3>
-                <p className="text-xs text-white/60">{desc}</p>
+                <p className="text-xs text-slate-300">{desc}</p>
               </div>
             ))}
           </div>
@@ -280,26 +280,26 @@ function App() {
           <div className="grid md:grid-cols-2 gap-14 items-center">
             <div>
               <h3 className="text-2xl font-semibold mb-4 text-white">Why We Built ParthRahi</h3>
-              <p className="text-white/70 mb-6 leading-relaxed">
+              <p className="text-slate-200 mb-6 leading-relaxed">
                 ParthRahi was created to simplify everyday transportation by
                 connecting passengers with trusted drivers through a technology-powered platform.
               </p>
-              <p className="text-white/70 leading-relaxed">
+              <p className="text-slate-200 leading-relaxed">
                 Founded by <strong>Aashish Kumar</strong>, the goal is to build
                 a modern transportation ecosystem that benefits both riders and drivers.
               </p>
             </div>
             <div className="space-y-6">
-              <div className="bg-white/5 border border-white/10 rounded-xl p-6 hover:bg-white/10 hover:border-white/20 hover:shadow-lg shadow-blue-500/15 transition-all duration-300">
+              <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6 hover:bg-slate-800/80 hover:border-slate-600 hover:shadow-lg shadow-blue-500/15 transition-all duration-300">
                 <h4 className="font-semibold text-white mb-2">Our Mission</h4>
-                <p className="text-sm text-white/70">
+                <p className="text-sm text-slate-200">
                   Provide reliable, affordable transportation by connecting
                   riders with verified drivers quickly and safely.
                 </p>
               </div>
-              <div className="bg-white/5 border border-white/10 rounded-xl p-6 hover:bg-white/10 hover:border-white/20 hover:shadow-lg shadow-blue-500/15 transition-all duration-300">
+              <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6 hover:bg-slate-800/80 hover:border-slate-600 hover:shadow-lg shadow-blue-500/15 transition-all duration-300">
                 <h4 className="font-semibold text-white mb-2">Our Vision</h4>
-                <p className="text-sm text-white/70">
+                <p className="text-sm text-slate-200">
                   Become a trusted mobility platform that transforms how people travel in cities.
                 </p>
               </div>
@@ -307,8 +307,8 @@ function App() {
           </div>
 
           <div className="mt-20">
-            <div className="max-w-3xl mx-auto rounded-2xl bg-white/5 border border-white/10 p-6 md:p-8 shadow-xl shadow-blue-500/20">
-              <p className="text-white/60 text-xs uppercase tracking-[0.25em] text-center mb-2">Customer Support</p>
+            <div className="max-w-3xl mx-auto rounded-2xl bg-slate-800/50 border border-slate-700/50 p-6 md:p-8 shadow-xl shadow-blue-500/20">
+              <p className="text-slate-300 text-xs uppercase tracking-[0.25em] text-center mb-2">Customer Support</p>
               <h3 className="text-xl md:text-2xl font-semibold text-white text-center mb-6">Talk To Our Team</h3>
 
               <div className="grid sm:grid-cols-2 gap-4">
@@ -318,10 +318,10 @@ function App() {
                 ].map((contact) => (
                   <div
                     key={contact.number}
-                    className="rounded-xl border border-white/10 bg-black/25 p-4 flex items-center justify-between gap-3"
+                    className="rounded-xl border border-slate-700/50 bg-black/25 p-4 flex items-center justify-between gap-3"
                   >
                     <div>
-                      <p className="text-[11px] uppercase tracking-widest text-white/45">{contact.label}</p>
+                      <p className="text-[11px] uppercase tracking-widest text-slate-400">{contact.label}</p>
                       <p className="text-lg font-semibold text-white">{contact.number}</p>
                     </div>
                     <button
@@ -334,7 +334,7 @@ function App() {
                 ))}
               </div>
 
-              <p className="text-center text-white/80 text-sm md:text-base mt-6">
+              <p className="text-center text-slate-100 text-sm md:text-base mt-6">
                 Email: <span className="font-semibold text-white">parthrahiofficial@gmail.com</span>
               </p>
             </div>
@@ -346,13 +346,13 @@ function App() {
 
 
       {/* 👤 FOUNDER */}
-      <section className="relative py-24 px-6 md:px-16 overflow-hidden border-t border-white/10">
+      <section className="relative py-24 px-6 md:px-16 overflow-hidden border-t border-slate-700/50">
         <div className="pointer-events-none absolute top-16 right-[8%] w-56 h-56 rounded-full bg-[radial-gradient(circle_at_center,rgba(67,124,255,0.28),transparent_72%)] blur-3xl" />
 
-        <div className="relative z-10 max-w-7xl mx-auto rounded-[2rem] border border-white/10 bg-white/[0.03] backdrop-blur-sm px-6 py-12 md:px-10 md:py-14 shadow-2xl shadow-blue-500/10">
+        <div className="relative z-10 max-w-7xl mx-auto rounded-[2rem] border border-slate-700/50 bg-slate-900/60 backdrop-blur-sm px-6 py-12 md:px-10 md:py-14 shadow-2xl shadow-blue-500/10">
 
           <div className="text-center mb-20">
-            <p className="text-xs uppercase tracking-[0.25em] text-white/60 mb-3">Founder</p>
+            <p className="text-xs uppercase tracking-[0.25em] text-slate-300 mb-3">Founder</p>
             <h2 className="text-3xl md:text-5xl font-bold text-white">Meet the Founder</h2>
           </div>
 
@@ -361,7 +361,7 @@ function App() {
             <div className="flex justify-center md:justify-end">
               <div className="relative w-[200px] h-[200px] md:w-[280px] md:h-[280px] transition-all duration-500 hover:scale-105">
                 <div className="absolute -inset-6 rounded-full bg-[radial-gradient(circle_at_center,rgba(80,160,255,0.35),transparent_65%)] blur-2xl"></div>
-                <div className="absolute inset-0 rounded-full border border-white/20"></div>
+                <div className="absolute inset-0 rounded-full border border-slate-600"></div>
                 <img
                   src="/founder.png"
                   alt="Founder - Aashish Kumar"
@@ -372,23 +372,23 @@ function App() {
 
             <div className="space-y-6 text-center md:text-left">
               <h3 className="text-3xl md:text-4xl font-semibold text-white">Aashish Kumar</h3>
-              <p className="text-sm text-white/60 uppercase tracking-[0.2em]">Founder, ParthRahi</p>
-              <p className="text-white/70 leading-relaxed">
+              <p className="text-sm text-slate-300 uppercase tracking-[0.2em]">Founder, ParthRahi</p>
+              <p className="text-slate-200 leading-relaxed">
                 ParthRahi was built with a simple vision — to make everyday
                 transportation reliable, affordable and accessible for everyone.
                 Our goal is to connect passengers with trusted drivers while
                 creating new opportunities for local communities.
               </p>
-              <div className="bg-white/5 border border-white/10 p-6 rounded-xl shadow-lg shadow-blue-500/15">
-                <p className="text-white/80 italic">
+              <div className="bg-slate-800/50 border border-slate-700/50 p-6 rounded-xl shadow-lg shadow-blue-500/15">
+                <p className="text-slate-100 italic">
                   "Transportation should be simple, transparent and safe for
                   everyone. ParthRahi is built to bring that change."
                 </p>
               </div>
               <div className="flex flex-wrap gap-3 justify-center md:justify-start">
-                <span className="text-xs px-3 py-1 rounded-full bg-white/10 border border-white/20">LLP Registered</span>
-                <span className="text-xs px-3 py-1 rounded-full bg-white/10 border border-white/20">Startup India</span>
-                <span className="text-xs px-3 py-1 rounded-full bg-white/10 border border-white/20">Verified Drivers</span>
+                <span className="text-xs px-3 py-1 rounded-full bg-slate-800/80 border border-slate-600">LLP Registered</span>
+                <span className="text-xs px-3 py-1 rounded-full bg-slate-800/80 border border-slate-600">Startup India</span>
+                <span className="text-xs px-3 py-1 rounded-full bg-slate-800/80 border border-slate-600">Verified Drivers</span>
               </div>
             </div>
 
@@ -397,14 +397,14 @@ function App() {
       </section>
 
       {/* ⭐ FEATURES */}
-      <section id="features" className="relative min-h-[80vh] py-24 px-6 md:px-16 flex items-center overflow-hidden border-t border-white/10">
+      <section id="features" className="relative min-h-[80vh] py-24 px-6 md:px-16 flex items-center overflow-hidden border-t border-slate-700/50">
         <div className="pointer-events-none absolute top-20 left-[10%] w-64 h-64 rounded-full bg-[radial-gradient(circle_at_center,rgba(67,124,255,0.22),transparent_72%)] blur-3xl" />
 
-        <div className="relative z-10 max-w-6xl mx-auto w-full rounded-[2rem] border border-white/10 bg-white/[0.03] backdrop-blur-sm px-6 py-12 md:px-10 md:py-14 shadow-2xl shadow-blue-500/10">
+        <div className="relative z-10 max-w-6xl mx-auto w-full rounded-[2rem] border border-slate-700/50 bg-slate-900/60 backdrop-blur-sm px-6 py-12 md:px-10 md:py-14 shadow-2xl shadow-blue-500/10">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-6 text-white">
             Why Choose ParthRahi
           </h2>
-          <p className="text-center text-white/70 max-w-2xl mx-auto mb-16">
+          <p className="text-center text-slate-200 max-w-2xl mx-auto mb-16">
             A technology-driven mobility platform designed to make everyday travel simple, affordable, and reliable.
           </p>
           <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-4">
@@ -416,10 +416,10 @@ function App() {
             ].map(([title, desc]) => (
               <div
                 key={title}
-                className="bg-white/5 border border-white/10 rounded-xl p-8 transition-all duration-300 hover:-translate-y-2 hover:bg-white/12 hover:border-white/20 hover:shadow-xl shadow-blue-500/20"
+                className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-8 transition-all duration-300 hover:-translate-y-2 hover:bg-slate-700/60 hover:border-slate-600 hover:shadow-xl shadow-blue-500/20"
               >
                 <h3 className="text-lg font-semibold mb-3 text-white">{title}</h3>
-                <p className="text-sm text-white/70">{desc}</p>
+                <p className="text-sm text-slate-200">{desc}</p>
               </div>
             ))}
           </div>
@@ -429,11 +429,11 @@ function App() {
 {/* FOOTER / CONTACT */}
 <footer
   id="contact"
-  className="relative overflow-x-hidden border-t border-white/10"
+  className="relative overflow-x-hidden border-t border-slate-700/50"
 >
   <div className="pointer-events-none absolute top-14 left-1/2 -translate-x-1/2 w-[72%] h-48 bg-[radial-gradient(circle_at_center,rgba(62,120,255,0.2),transparent_72%)] blur-3xl" />
   {/* Main Footer */}
-  <div className="relative z-10 max-w-6xl mx-auto px-6 lg:px-10 py-16 md:py-20 rounded-t-[2rem] border-x border-t border-white/10 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.04),rgba(255,255,255,0.015))] backdrop-blur-sm shadow-[0_-22px_70px_rgba(25,60,160,0.16)]">
+  <div className="relative z-10 max-w-6xl mx-auto px-6 lg:px-10 py-16 md:py-20 rounded-t-[2rem] border-x border-t border-slate-700/50 bg-[linear-gradient(to_bottom,rgba(15,23,42,0.6),rgba(15,23,42,0.9))] backdrop-blur-sm shadow-[0_-22px_70px_rgba(25,60,160,0.16)]">
 
     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-[1.15fr_0.85fr_0.85fr_1.15fr] gap-12 xl:gap-10">
 
@@ -443,27 +443,27 @@ function App() {
           ParthRahi
         </h3>
 
-        <p className="text-sm leading-6 text-white/60 max-w-xs">
+        <p className="text-sm leading-6 text-slate-300 max-w-xs">
           Technology-driven ride booking platform providing Car, Bike and
           Auto rides and E-rickshaw.
         </p>
 
         <div className="pt-1">
-          <p className="text-xs uppercase tracking-wider text-white/40 mb-2">
+          <p className="text-xs uppercase tracking-wider text-slate-400 mb-2">
             Support
           </p>
 
           <div className="space-y-1">
             <a
               href="tel:8252224027"
-              className="block text-sm text-white/60 hover:text-white hover:underline transition"
+              className="block text-sm text-slate-300 hover:text-white hover:underline transition"
             >
               8252224027
             </a>
 
             <a
               href="tel:9296218764"
-              className="block text-sm text-white/60 hover:text-white hover:underline transition"
+              className="block text-sm text-slate-300 hover:text-white hover:underline transition"
             >
               9296218764
             </a>
@@ -473,11 +473,11 @@ function App() {
 
       {/* COMPANY */}
       <div className="min-w-0">
-        <h4 className="text-xs font-semibold mb-6 uppercase tracking-wider text-white/50">
+        <h4 className="text-xs font-semibold mb-6 uppercase tracking-wider text-slate-400">
           Company
         </h4>
 
-        <ul className="space-y-4 text-sm text-white/60">
+        <ul className="space-y-4 text-sm text-slate-300">
           {[
             { label: "About", id: "about" },
             { label: "Features", id: "features" },
@@ -497,11 +497,11 @@ function App() {
 
       {/* RIDERS */}
       <div className="min-w-0">
-        <h4 className="text-xs font-semibold mb-6 uppercase tracking-wider text-white/50">
+        <h4 className="text-xs font-semibold mb-6 uppercase tracking-wider text-slate-400">
           Riders
         </h4>
 
-        <ul className="space-y-4 text-sm text-white/60">
+        <ul className="space-y-4 text-sm text-slate-300">
           <li
             onClick={() => scrollTo("book")}
             className="w-fit hover:text-white hover:translate-x-1 transition-all cursor-pointer"
@@ -539,7 +539,7 @@ function App() {
 
       {/* GET STARTED */}
       <div className="min-w-0">
-        <h4 className="text-xs font-semibold mb-6 uppercase tracking-wider text-white/50">
+        <h4 className="text-xs font-semibold mb-6 uppercase tracking-wider text-slate-400">
           Get Started
         </h4>
 
@@ -575,8 +575,8 @@ function App() {
     </div>
 
     {/* SOCIALS */}
-    <div className="mt-12 pt-8 border-t border-white/10">
-      <p className="text-[11px] uppercase tracking-[0.22em] text-white/45 text-center mb-4">
+    <div className="mt-12 pt-8 border-t border-slate-700/50">
+      <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400 text-center mb-4">
         Follow Us
       </p>
 
@@ -606,7 +606,7 @@ function App() {
             href={social.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="group w-full rounded-xl border border-white/12 bg-white/[0.03] px-4 py-3.5 flex items-center justify-between gap-3 transition-all duration-300 hover:bg-white/[0.08] hover:border-white/30 hover:-translate-y-0.5 hover:shadow-[0_12px_28px_rgba(31,74,190,0.24)]"
+            className="group w-full rounded-xl border border-slate-700/60 bg-slate-900/60 px-4 py-3.5 flex items-center justify-between gap-3 transition-all duration-300 hover:bg-white/[0.08] hover:border-slate-500 hover:-translate-y-0.5 hover:shadow-[0_12px_28px_rgba(31,74,190,0.24)]"
             aria-label={`Open ${social.name}`}
           >
             <span className="min-w-0 flex items-center gap-3">
@@ -621,13 +621,13 @@ function App() {
                 <span className="block text-sm font-medium text-white group-hover:text-white">
                   {social.name}
                 </span>
-                <span className="block text-[11px] text-white/50 truncate group-hover:text-white/70">
+                <span className="block text-[11px] text-slate-400 truncate group-hover:text-slate-200">
                   {social.detail}
                 </span>
               </span>
             </span>
 
-            <span className="text-[11px] text-white/45 group-hover:text-white/80 transition">Open</span>
+            <span className="text-[11px] text-slate-400 group-hover:text-slate-100 transition">Open</span>
           </a>
         ))}
       </div>
@@ -635,8 +635,8 @@ function App() {
   </div>
 
   {/* BOTTOM BAR */}
-  <div className="relative z-10 border-t border-white/10">
-    <div className="max-w-6xl mx-auto px-6 lg:px-10 py-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-white/40">
+  <div className="relative z-10 border-t border-slate-700/50">
+    <div className="max-w-6xl mx-auto px-6 lg:px-10 py-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
 
       <p className="text-center sm:text-left">
         © {new Date().getFullYear()} Parthrahi Smartcab Solutions LLP.

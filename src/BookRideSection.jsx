@@ -199,7 +199,7 @@ ${mapLink}`;
   };
 
   const inputCls = (field) =>
-    `w-full bg-slate-900/85 border ${errors[field] ? "border-red-300/80" : "border-slate-200/20"} rounded-lg px-4 py-3 text-white text-sm placeholder:text-slate-200/70 focus:outline-none focus:border-cyan-200 focus:ring-2 focus:ring-cyan-300/25 transition-all duration-200`;
+    `w-full bg-slate-900/85 border ${errors[field] ? "border-red-300/80" : "border-slate-200/20"} rounded-lg px-4 py-3 text-white text-sm placeholder:text-slate-300 focus:outline-none focus:border-cyan-200 focus:ring-2 focus:ring-cyan-300/25 transition-all duration-200`;
 
   const stepLabel = step === 1 ? "Trip Setup" : "Rider Profile";
 
@@ -207,9 +207,9 @@ ${mapLink}`;
     <section id="book" className="relative py-16 sm:py-20 md:py-24 px-4 sm:px-6 md:px-16 overflow-hidden border-t border-slate-100/20">
 
       <div className="relative z-10 text-center mb-10 sm:mb-14">
-        <p className="text-[11px] sm:text-xs uppercase tracking-[0.28em] text-slate-100/85 mb-3">ParthRahi Mobility</p>
+        <p className="text-[11px] sm:text-xs uppercase tracking-[0.28em] text-slate-200 mb-3">ParthRahi Mobility</p>
         <h2 className="text-2xl sm:text-3xl md:text-5xl font-semibold text-white">Advance Booking</h2>
-        <p className="text-slate-100/85 mt-3 sm:mt-4 max-w-2xl mx-auto text-sm md:text-base px-2">
+        <p className="text-slate-200 mt-3 sm:mt-4 max-w-2xl mx-auto text-sm md:text-base px-2">
           Plan a route, compare vehicle options, and place your booking with transparent pricing and verified trip details.
         </p>
       </div>
@@ -222,12 +222,12 @@ ${mapLink}`;
             <div className="flex items-center gap-1.5 sm:gap-2">
               {[1, 2].map((s) => (
                 <div key={s} className="flex items-center gap-1.5 sm:gap-2 flex-1 last:flex-initial">
-                  <div className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold transition-all duration-300 ${step >= s ? "bg-cyan-300 text-slate-950" : "bg-slate-100/20 text-slate-200/70"}`}>{s}</div>
+                  <div className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold transition-all duration-300 ${step >= s ? "bg-cyan-300 text-slate-950" : "bg-slate-100/20 text-slate-300"}`}>{s}</div>
                   {s < 2 && <div className={`h-px flex-1 sm:w-8 sm:flex-initial ${step > s ? "bg-cyan-200" : "bg-slate-100/25"}`} />}
                 </div>
               ))}
             </div>
-            <p className="text-xs uppercase tracking-wide text-slate-100/75">
+            <p className="text-xs uppercase tracking-wide text-slate-300">
               Step {step} of 2 · <span className="text-slate-50">{stepLabel}</span>
             </p>
           </div>
@@ -235,7 +235,7 @@ ${mapLink}`;
           <div className="space-y-3">
             <div className="space-y-1">
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[10px] tracking-wider text-slate-100/75 pointer-events-none">FROM</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[10px] tracking-wider text-slate-300 pointer-events-none">FROM</span>
                 <input ref={sourceInputRef} placeholder="Enter pickup location" autoComplete="off" onFocus={ensureFieldVisibility} className={`${inputCls("source")} pl-16`} />
               </div>
               {errors.source && <p className="text-red-400 text-xs pl-1">{errors.source}</p>}
@@ -253,7 +253,7 @@ ${mapLink}`;
 
             <div className="space-y-1">
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[10px] tracking-wider text-slate-100/75 pointer-events-none">TO</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[10px] tracking-wider text-slate-300 pointer-events-none">TO</span>
                 <input ref={destInputRef} placeholder="Enter destination" autoComplete="off" onFocus={ensureFieldVisibility} className={`${inputCls("destination")} pl-16`} />
               </div>
               {errors.destination && <p className="text-red-400 text-xs pl-1">{errors.destination}</p>}
@@ -261,7 +261,7 @@ ${mapLink}`;
           </div>
 
           <div className="space-y-2.5">
-            <p className="text-slate-100/85 text-xs uppercase tracking-[0.18em]">Choose a vehicle</p>
+            <p className="text-slate-200 text-xs uppercase tracking-[0.18em]">Choose a vehicle</p>
             <div className="grid grid-cols-2 gap-2 sm:gap-3">
               {RIDE_OPTIONS.map(({ value, label, desc, accent }) => {
                 const selected = rideType === value;
@@ -279,8 +279,8 @@ ${mapLink}`;
                     </span>
                     <span className="min-w-0">
                       <span className={`block text-[13px] sm:text-sm font-semibold truncate ${selected ? "text-white" : "text-slate-50"}`}>{label}</span>
-                      <span className="block text-[10px] sm:text-[11px] text-slate-100/70 leading-tight truncate">{desc}</span>
-                      <span className={`block text-[11px] sm:text-xs font-semibold mt-0.5 ${selected ? "text-cyan-100" : "text-slate-100/80"}`}>
+                      <span className="block text-[10px] sm:text-[11px] text-slate-300 leading-tight truncate">{desc}</span>
+                      <span className={`block text-[11px] sm:text-xs font-semibold mt-0.5 ${selected ? "text-cyan-100" : "text-slate-200"}`}>
                         {price ? `₹${price}` : `From ₹${RATES[value].baseFare}`}
                       </span>
                     </span>
@@ -312,7 +312,7 @@ ${mapLink}`;
           </button>
 
           {!mapsReady && (
-            <p className="text-center text-slate-100/70 text-xs">
+            <p className="text-center text-slate-300 text-xs">
               {import.meta.env.VITE_GOOGLE_MAPS_API_KEY ? "Loading Google Maps…" : "⚠ Add VITE_GOOGLE_MAPS_API_KEY to .env"}
             </p>
           )}
@@ -325,16 +325,16 @@ ${mapLink}`;
                     <VehicleSymbol type={rideType} className="w-full h-full p-1" />
                   </span>
                   <div className="min-w-0">
-                    <p className="text-slate-100/80 text-[11px] sm:text-xs uppercase tracking-wide">Distance</p>
+                    <p className="text-slate-200 text-[11px] sm:text-xs uppercase tracking-wide">Distance</p>
                     <p className="text-white font-semibold text-sm sm:text-base">{distanceKm} km</p>
                   </div>
                 </div>
                 <div className="text-right shrink-0">
-                  <p className="text-slate-100/80 text-[11px] sm:text-xs uppercase tracking-wide">Estimated fare</p>
+                  <p className="text-slate-200 text-[11px] sm:text-xs uppercase tracking-wide">Estimated fare</p>
                   <p className="text-xl sm:text-2xl font-bold text-cyan-100">₹{fare}</p>
                 </div>
               </div>
-              <p className="text-[10px] sm:text-[11px] text-slate-100/70 border-t border-cyan-100/20 pt-2.5">
+              <p className="text-[10px] sm:text-[11px] text-slate-300 border-t border-cyan-100/20 pt-2.5">
                 Base ₹{activeRate.baseFare} + ₹{activeRate.costPerKm}/km · Minimum fare ₹{activeRate.minimumFare}
               </p>
             </div>
@@ -342,11 +342,11 @@ ${mapLink}`;
 
           {step >= 2 && (
             <div className="space-y-4 pt-2 border-t border-slate-200/10">
-              <p className="text-slate-100/85 text-xs uppercase tracking-[0.18em] pt-1">Rider Details</p>
+              <p className="text-slate-200 text-xs uppercase tracking-[0.18em] pt-1">Rider Details</p>
 
               <div className="space-y-1">
                 <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[10px] tracking-wider text-slate-100/75 pointer-events-none">NAME</span>
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[10px] tracking-wider text-slate-300 pointer-events-none">NAME</span>
                   <input value={userName} onChange={(e) => setUserName(e.target.value)} onFocus={ensureFieldVisibility} placeholder="Enter full name" autoComplete="off" className={`${inputCls("userName")} pl-16`} />
                 </div>
                 {errors.userName && <p className="text-red-400 text-xs pl-1">{errors.userName}</p>}
@@ -354,7 +354,7 @@ ${mapLink}`;
 
               <div className="space-y-1">
                 <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[10px] tracking-wider text-slate-100/75 pointer-events-none">PHONE</span>
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[10px] tracking-wider text-slate-300 pointer-events-none">PHONE</span>
                   <input
                     value={userPhone}
                     onChange={(e) => setUserPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
@@ -375,7 +375,7 @@ ${mapLink}`;
                 Confirm Booking on WhatsApp
               </button>
 
-              <p className="text-center text-slate-100/70 text-[11px]">
+              <p className="text-center text-slate-300 text-[11px]">
                 You will be redirected to WhatsApp to complete confirmation.
               </p>
             </div>
@@ -389,7 +389,7 @@ ${mapLink}`;
               <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
                 <div className="text-center space-y-3">
                   <div className="w-8 h-8 border-2 border-cyan-300 border-t-transparent rounded-full animate-spin mx-auto" />
-                  <p className="text-slate-100/80 text-sm">Loading map…</p>
+                  <p className="text-slate-200 text-sm">Loading map…</p>
                 </div>
               </div>
             )}
