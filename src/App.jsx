@@ -108,26 +108,48 @@ function App() {
         </button>
       </nav>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu Overlay */}
       <div
-        className={`fixed top-[74px] inset-x-0 bottom-0 bg-black/95 backdrop-blur-lg z-[60] transition-[opacity,transform] duration-400 ease-out will-change-transform md:hidden ${
-          menuOpen
-            ? "opacity-100 translate-y-0 pointer-events-auto"
-            : "opacity-0 -translate-y-2 pointer-events-none"
+        className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-[40] md:hidden transition-opacity duration-300 ease-out will-change-opacity ${
+          menuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        }`}
+        onClick={() => setMenuOpen(false)}
+        aria-hidden="true"
+      />
+
+      {/* Mobile Menu Drawer */}
+      <div
+        className={`fixed top-0 right-0 bottom-0 w-[75vw] max-w-[320px] bg-slate-900/95 border-l border-white/10 shadow-2xl z-[45] flex flex-col pt-[84px] px-6 md:hidden transition-transform duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform ${
+          menuOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        <ul className="h-full overflow-y-auto px-6 py-8 flex flex-col items-center gap-5 text-white text-lg font-medium">
-          {navItems.map((item) => (
-            <li key={item.id} className="w-full max-w-sm">
+        <ul className="flex flex-col gap-2">
+          {navItems.map((item, i) => (
+            <li 
+              key={item.id} 
+              style={{ transitionDelay: menuOpen ? `${100 + i * 50}ms` : '0ms' }} 
+              className={`transition-all duration-400 ease-out will-change-transform ${menuOpen ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4'}`}
+            >
               <button
                 onClick={() => scrollTo(item.id)}
-                className="w-full rounded-xl border border-white/15 bg-white/5 py-3.5 text-center hover:bg-white/10 active:scale-[0.99] transition"
+                className="w-full text-left py-4 text-[17px] font-medium text-white/90 border-b border-white/5 hover:text-cyan-300 hover:border-white/20 active:scale-[0.98] transition-all"
               >
                 {item.label}
               </button>
             </li>
           ))}
         </ul>
+
+        {/* Premium Bottom Action */}
+        <div className="mt-auto mb-10 space-y-4">
+          <p className="text-[10px] uppercase tracking-widest text-white/40 mb-3 text-center">Ready to travel?</p>
+          <button 
+            onClick={() => scrollTo("book")} 
+            className="w-full py-3.5 rounded-xl bg-cyan-300 text-slate-950 font-semibold text-sm shadow-lg shadow-cyan-300/20 active:scale-[0.98] transition-all"
+          >
+            Book a Ride
+          </button>
+        </div>
       </div>
 
       {/* 🔮 HERO */}
