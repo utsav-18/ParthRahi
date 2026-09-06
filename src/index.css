@@ -26,9 +26,10 @@ body::before {
 .aura-blob {
   position: absolute;
   border-radius: 9999px;
-  filter: blur(60px);
   opacity: 0.38;
   mix-blend-mode: screen;
+  will-change: transform;
+  pointer-events: none;
 }
 
 .aura-blob-one {
@@ -36,7 +37,7 @@ body::before {
   height: 36rem;
   top: -12rem;
   left: -10rem;
-  background: radial-gradient(circle, rgba(70, 134, 255, 0.42), rgba(70, 134, 255, 0));
+  background: radial-gradient(circle at center, rgba(70, 134, 255, 0.42) 0%, rgba(70, 134, 255, 0) 70%);
   animation: auraDriftOne 20s ease-in-out infinite alternate;
 }
 
@@ -45,7 +46,7 @@ body::before {
   height: 30rem;
   bottom: -8rem;
   right: -8rem;
-  background: radial-gradient(circle, rgba(49, 101, 230, 0.38), rgba(49, 101, 230, 0));
+  background: radial-gradient(circle at center, rgba(49, 101, 230, 0.38) 0%, rgba(49, 101, 230, 0) 70%);
   animation: auraDriftTwo 24s ease-in-out infinite alternate;
 }
 
@@ -54,7 +55,7 @@ body::before {
   height: 22rem;
   top: 38%;
   left: 42%;
-  background: radial-gradient(circle, rgba(130, 178, 255, 0.22), rgba(130, 178, 255, 0));
+  background: radial-gradient(circle at center, rgba(130, 178, 255, 0.22) 0%, rgba(130, 178, 255, 0) 70%);
   animation: auraPulse 8s ease-in-out infinite;
 }
 

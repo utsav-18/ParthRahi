@@ -234,7 +234,7 @@ ${mapLink}`;
   };
 
   const inputCls = (field) =>
-    `w-full bg-slate-900/85 border ${errors[field] ? "border-red-300/80" : "border-slate-200/35"} rounded-lg px-4 py-3 text-white text-sm placeholder:text-slate-200/70 focus:outline-none focus:border-cyan-200 focus:ring-2 focus:ring-cyan-300/25 transition-all duration-200`;
+    `w-full bg-slate-900/85 border ${errors[field] ? "border-red-300/80" : "border-slate-200/20"} rounded-lg px-4 py-3 text-white text-sm placeholder:text-slate-200/70 focus:outline-none focus:border-cyan-200 focus:ring-2 focus:ring-cyan-300/25 transition-all duration-200`;
 
   const stepLabel = step === 1 ? "Trip Setup" : "Rider Profile";
 
@@ -251,7 +251,7 @@ ${mapLink}`;
 
       <div className="relative z-10 max-w-6xl mx-auto grid lg:grid-cols-2 gap-6 md:gap-8 items-start">
 
-        <div className="bg-slate-900/80 border border-slate-100/25 backdrop-blur-xl rounded-2xl p-4 sm:p-6 md:p-8 space-y-5 sm:space-y-6 shadow-2xl">
+        <div className="bg-slate-900/95 md:bg-slate-900/85 border border-slate-100/20 backdrop-blur-none md:backdrop-blur-md rounded-2xl p-4 sm:p-6 md:p-8 space-y-5 sm:space-y-6 shadow-2xl">
 
           <div className="space-y-2">
             <div className="flex items-center gap-1.5 sm:gap-2">
@@ -307,9 +307,9 @@ ${mapLink}`;
                     onClick={() => setRideType(value)}
                     aria-pressed={selected}
                     className={`relative flex items-center gap-2.5 sm:gap-3 p-3 sm:p-3.5 rounded-xl border cursor-pointer text-left transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/50
-                      ${selected ? `${accent.ring} ${accent.bg} ${accent.glow}` : "border-slate-100/25 bg-slate-900/70 hover:border-slate-100/40"}`}
+                      ${selected ? `${accent.ring} ${accent.bg} ${accent.glow}` : "border-slate-100/15 bg-slate-900/70 hover:border-slate-100/40"}`}
                   >
-                    <span className={`shrink-0 w-9 h-9 sm:w-11 sm:h-11 rounded-lg border flex items-center justify-center ${selected ? accent.iconBox : "border-slate-100/35 text-slate-100/90"} ${selected ? accent.icon : ""}`}>
+                    <span className={`shrink-0 w-9 h-9 sm:w-11 sm:h-11 rounded-lg border flex items-center justify-center ${selected ? accent.iconBox : "border-slate-100/20 text-slate-100/90"} ${selected ? accent.icon : ""}`}>
                       <VehicleSymbol type={value} className="w-5 h-5 sm:w-6 sm:h-6" />
                     </span>
                     <span className="min-w-0">
@@ -405,7 +405,7 @@ ${mapLink}`;
 
               <button
                 onClick={bookRide}
-                className="w-full py-4 rounded-lg bg-linear-to-r from-emerald-500 to-emerald-400 hover:from-emerald-400 hover:to-emerald-300 text-slate-950 font-bold text-sm cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 shadow-[0_0_26px_rgba(16,185,129,0.22)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/60"
+                className="w-full py-4 rounded-lg bg-linear-to-r from-emerald-500 to-emerald-400 hover:from-emerald-400 hover:to-emerald-300 text-slate-950 font-bold text-sm cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 shadow-xl shadow-emerald-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/60"
               >
                 Confirm Booking on WhatsApp
               </button>
@@ -418,7 +418,7 @@ ${mapLink}`;
         </div>
 
         <div className="lg:sticky lg:top-24 space-y-4">
-          <div className="rounded-2xl overflow-hidden border border-slate-100/25 shadow-2xl relative h-64 sm:h-80 md:h-96 lg:h-[520px]">
+          <div className="rounded-2xl overflow-hidden border border-slate-100/15 shadow-2xl relative h-64 sm:h-80 md:h-96 lg:h-[520px]">
             <div ref={mapRef} className="w-full h-full" />
             {!mapsReady && (
               <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
