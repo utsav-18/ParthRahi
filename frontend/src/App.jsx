@@ -106,8 +106,29 @@ function App() {
           {!loading && (
             user ? (
               <div className="flex items-center gap-3">
-                {user.profilePicture && <img src={user.profilePicture} alt="Profile" className="w-8 h-8 rounded-full border border-slate-600" referrerPolicy="no-referrer" />}
-                <button onClick={() => setIsLogoutOpen(true)} className="cursor-pointer text-sm text-slate-300 hover:text-white transition">Logout</button>
+                {user.profilePicture ? (
+                  <img
+                    src={user.profilePicture}
+                    alt={user.name || "Profile"}
+                    className="w-9 h-9 rounded-full border border-cyan-400/40 object-cover shadow-sm"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 border border-cyan-300/40 text-white font-semibold text-sm flex items-center justify-center shadow-sm">
+                    {user.name ? user.name.charAt(0).toUpperCase() : (user.email ? user.email.charAt(0).toUpperCase() : "U")}
+                  </div>
+                )}
+                <div className="flex flex-col text-left">
+                  <span className="text-sm font-medium text-white max-w-[140px] truncate">
+                    {user.name || user.email?.split('@')[0]}
+                  </span>
+                </div>
+                <button
+                  onClick={() => setIsLogoutOpen(true)}
+                  className="cursor-pointer ml-1 text-xs text-slate-400 hover:text-red-400 border border-slate-700 hover:border-red-500/50 rounded-lg px-2.5 py-1.5 transition-all"
+                >
+                  Logout
+                </button>
               </div>
             ) : (
               <button 
@@ -169,9 +190,15 @@ function App() {
             user ? (
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  {user.profilePicture && <img src={user.profilePicture} alt="Profile" className="w-10 h-10 rounded-full border border-slate-600" referrerPolicy="no-referrer" />}
+                  {user.profilePicture ? (
+                    <img src={user.profilePicture} alt="Profile" className="w-10 h-10 rounded-full border border-cyan-400/40 object-cover" referrerPolicy="no-referrer" />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 border border-cyan-300/40 text-white font-semibold text-sm flex items-center justify-center shadow-sm">
+                      {user.name ? user.name.charAt(0).toUpperCase() : (user.email ? user.email.charAt(0).toUpperCase() : "U")}
+                    </div>
+                  )}
                   <div className="flex flex-col">
-                    <span className="text-sm font-medium text-white">{user.name}</span>
+                    <span className="text-sm font-medium text-white">{user.name || user.email?.split('@')[0]}</span>
                     <span className="text-xs text-slate-400 truncate max-w-[150px]">{user.email}</span>
                   </div>
                 </div>
@@ -279,7 +306,7 @@ function App() {
 
 
 
-    <EventsSection />
+    {/* <EventsSection /> */}
 
 
 
