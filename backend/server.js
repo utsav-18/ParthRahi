@@ -145,9 +145,20 @@ app.post('/api/auth/google', async (req, res) => {
 });
 
 app.post('/api/auth/signup', async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, phone, password } = req.body;
   if (!name || !email || !password || password.length < 8) {
     return res.status(400).json({ error: 'Valid name, email, and password (min 8 chars) are required' });
+  }
+
+  if (!phone || typeof phone !== 'string' || !phone.trim()) {
+    return res.status(400).json({ error: 'Mobile number is required' });
+  }
+
+  const trimmedPhone = phone.trim();
+  // Validates standard 10-digit Indian numbers, optional +91 or +country code prefix (up to 15 digits as per E.164)
+  const phoneRegex = /^(\+?[1-9]\d{0,3})?[\s-]?\d{10}$/;
+  if (!phoneRegex.test(trimmedPhone.replace(/[\s-]/g, '')) || trimmedPhone.length > 18) {
+    return res.status(400).json({ error: 'Please enter a valid mobile number (e.g. +91 9876543210 or 10-digit mobile number)' });
   }
 
   const normalizedEmail = email.toLowerCase().trim();
@@ -164,8 +175,9 @@ app.post('/api/auth/signup', async (req, res) => {
     const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
     user = new User({
-      name,
+      name: name.trim(),
       email: normalizedEmail,
+      phone: trimmedPhone,
       passwordHash,
       emailVerified: false,
       otpHash,
@@ -234,6 +246,7 @@ app.post('/api/auth/verify-otp', async (req, res) => {
       });
       const safeUser = user.toObject();
       delete safeUser.passwordHash;
+      delete safeUser.otpHash;
       return res.json({ message: 'Verification successful', user: safeUser });
     }
     
@@ -322,9 +335,9 @@ app.post('/api/auth/forgot-password', async (req, res) => {
 
   try {
     const user = await User.findOne({ email: normalizedEmail });
-    const genericMessage = 'If your email is registered with a password, a reset OTP has been sent.';
+    const genericMessage = 'If your email is registered, a reset OTP has been sent.';
 
-    if (!user || !user.passwordHash) {
+    if (!user) {
       return res.json({ message: genericMessage });
     }
 
@@ -403,9 +416,61 @@ app.get('/api/auth/me', async (req, res) => {
       return res.status(401).json({ error: 'User not found' });
     }
 
-    res.json({ user });
+    const safeUser = user.toObject();
+    delete safeUser.passwordHash;
+    delete safeUser.otpHash;
+    delete safeUser.otpAttempts;
+    delete safeUser.otpExpiresAt;
+    delete safeUser.otpPurpose;
+    delete safeUser.otpLastSentAt;
+
+    res.json({ user: safeUser });
   } catch (error) {
     res.status(401).json({ error: 'Invalid session' });
+  }
+});
+
+app.put('/api/auth/phone', async (req, res) => {
+  const token = req.cookies.token;
+  if (!token) {
+    return res.status(401).json({ error: 'Not authenticated' });
+  }
+
+  const { phone } = req.body;
+  if (!phone || typeof phone !== 'string' || !phone.trim()) {
+    return res.status(400).json({ error: 'Mobile number is required' });
+  }
+
+  const trimmedPhone = phone.trim();
+  const phoneRegex = /^(\+?[1-9]\d{0,3})?[\s-]?\d{10}$/;
+  if (!phoneRegex.test(trimmedPhone.replace(/[\s-]/g, '')) || trimmedPhone.length > 18) {
+    return res.status(400).json({ error: 'Please enter a valid mobile number (e.g. +91 9876543210 or 10-digit mobile number)' });
+  }
+
+  try {
+    const jwtSecret = process.env.JWT_SECRET;
+    const decoded = jwt.verify(token, jwtSecret);
+    const user = await User.findById(decoded.userId);
+
+    if (!user) {
+      return res.status(401).json({ error: 'User not found' });
+    }
+
+    user.phone = trimmedPhone;
+    await user.save();
+
+    const safeUser = user.toObject();
+    delete safeUser.passwordHash;
+    delete safeUser.otpHash;
+    delete safeUser.otpAttempts;
+    delete safeUser.otpExpiresAt;
+    delete safeUser.otpPurpose;
+    delete safeUser.otpLastSentAt;
+
+    res.json({ message: 'Mobile number updated successfully', user: safeUser });
+  } catch (error) {
+    console.error('Update phone error:', error.message);
+    res.status(500).json({ error: 'Server error updating mobile number' });
   }
 });
 
