@@ -5,12 +5,14 @@ import Silk from "./Silk";
 import { useAuth } from "./AuthContext";
 import LoginModal from "./LoginModal";
 import ConfirmLogoutModal from "./ConfirmLogoutModal";
+import ProfileModal from "./ProfileModal";
 
 function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [introDone, setIntroDone] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isLogoutOpen, setIsLogoutOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const { user, loading, logout } = useAuth();
 
   useEffect(() => {
@@ -106,23 +108,36 @@ function App() {
           {!loading && (
             user ? (
               <div className="flex items-center gap-3">
-                {user.profilePicture ? (
-                  <img
-                    src={user.profilePicture}
-                    alt={user.name || "Profile"}
-                    className="w-9 h-9 rounded-full border border-cyan-400/40 object-cover shadow-sm"
-                    referrerPolicy="no-referrer"
-                  />
-                ) : (
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 border border-cyan-300/40 text-white font-semibold text-sm flex items-center justify-center shadow-sm">
-                    {user.name ? user.name.charAt(0).toUpperCase() : (user.email ? user.email.charAt(0).toUpperCase() : "U")}
+                {/* Clickable Profile Card with subtle tooltip */}
+                <div
+                  onClick={() => setIsProfileOpen(true)}
+                  className="group relative flex items-center gap-3 py-1 px-2 -ml-2 rounded-full hover:bg-slate-800/60 border border-transparent hover:border-slate-700/60 transition-all duration-200 cursor-pointer"
+                  title="View Profile"
+                >
+                  {user.profilePicture ? (
+                    <img
+                      src={user.profilePicture}
+                      alt={user.name || "Profile"}
+                      className="w-9 h-9 rounded-full border border-cyan-400/40 group-hover:border-cyan-400 object-cover shadow-sm transition-colors"
+                      referrerPolicy="no-referrer"
+                    />
+                  ) : (
+                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 border border-cyan-300/40 group-hover:border-cyan-300 text-white font-semibold text-sm flex items-center justify-center shadow-sm transition-colors">
+                      {user.name ? user.name.charAt(0).toUpperCase() : (user.email ? user.email.charAt(0).toUpperCase() : "U")}
+                    </div>
+                  )}
+                  <div className="flex flex-col text-left">
+                    <span className="text-sm font-medium text-white max-w-[130px] truncate group-hover:text-cyan-300 transition-colors">
+                      {user.name || user.email?.split('@')[0]}
+                    </span>
                   </div>
-                )}
-                <div className="flex flex-col text-left">
-                  <span className="text-sm font-medium text-white max-w-[140px] truncate">
-                    {user.name || user.email?.split('@')[0]}
-                  </span>
+
+                  {/* Subtle hover tooltip */}
+                  <div className="pointer-events-none absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-md bg-slate-900 border border-slate-700/80 text-[11px] text-cyan-300 font-medium whitespace-nowrap shadow-lg opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200">
+                    View Profile
+                  </div>
                 </div>
+
                 <button
                   onClick={() => setIsLogoutOpen(true)}
                   className="cursor-pointer ml-1 text-xs text-slate-400 hover:text-red-400 border border-slate-700 hover:border-red-500/50 rounded-lg px-2.5 py-1.5 transition-all"
@@ -189,7 +204,11 @@ function App() {
           {!loading && (
             user ? (
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
+                <div
+                  onClick={() => { setIsProfileOpen(true); setMenuOpen(false); }}
+                  className="flex items-center gap-3 cursor-pointer py-1.5 px-2 -ml-2 rounded-xl hover:bg-slate-800/60 active:scale-[0.98] transition-all"
+                  title="View Profile"
+                >
                   {user.profilePicture ? (
                     <img src={user.profilePicture} alt="Profile" className="w-10 h-10 rounded-full border border-cyan-400/40 object-cover" referrerPolicy="no-referrer" />
                   ) : (
@@ -198,8 +217,8 @@ function App() {
                     </div>
                   )}
                   <div className="flex flex-col">
-                    <span className="text-sm font-medium text-white">{user.name || user.email?.split('@')[0]}</span>
-                    <span className="text-xs text-slate-400 truncate max-w-[150px]">{user.email}</span>
+                    <span className="text-sm font-medium text-white hover:text-cyan-300 transition-colors">{user.name || user.email?.split('@')[0]}</span>
+                    <span className="text-xs text-slate-400 truncate max-w-[140px]">{user.email}</span>
                   </div>
                 </div>
                 <button onClick={() => { setIsLogoutOpen(true); setMenuOpen(false); }} className="cursor-pointer text-xs font-semibold text-slate-400 hover:text-white uppercase tracking-wider">Logout</button>
@@ -750,6 +769,7 @@ function App() {
 
       <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
       <ConfirmLogoutModal isOpen={isLogoutOpen} onClose={() => setIsLogoutOpen(false)} onConfirm={logout} />
+      <ProfileModal isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} user={user} />
     </div>
   );
 }

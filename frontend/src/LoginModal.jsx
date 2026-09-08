@@ -15,6 +15,7 @@ const LoginModal = ({ isOpen, onClose }) => {
   
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [otp, setOtp] = useState('');
@@ -36,6 +37,7 @@ const LoginModal = ({ isOpen, onClose }) => {
       setView('login');
       setName('');
       setEmail('');
+      setPhone('');
       setPassword('');
       setConfirmPassword('');
       setOtp('');
@@ -74,12 +76,18 @@ const LoginModal = ({ isOpen, onClose }) => {
   const handleSignup = async (e) => {
     e.preventDefault();
     setError('');
+    if (!phone.trim()) return setError('Mobile number is required');
+    const cleanedPhone = phone.replace(/[\s-]/g, '');
+    const phoneRegex = /^(\+?[1-9]\d{0,3})?\d{10}$/;
+    if (!phoneRegex.test(cleanedPhone) || phone.trim().length > 18) {
+      return setError('Please enter a valid mobile number (e.g. +91 9876543210 or 10-digit number)');
+    }
     if (password.length < 8) return setError('Password must be at least 8 characters');
     if (password !== confirmPassword) return setError('Passwords do not match');
     
     setLoading(true);
     try {
-      await axios.post(`${API_BASE_URL}/api/auth/signup`, { name, email, password }, { withCredentials: true });
+      await axios.post(`${API_BASE_URL}/api/auth/signup`, { name, email, phone: phone.trim(), password }, { withCredentials: true });
       switchView('verify-otp');
       setResendTimer(60);
     } catch (err) {
@@ -259,6 +267,9 @@ const LoginModal = ({ isOpen, onClose }) => {
               </div>
               <div>
                 <input type="email" placeholder="Email address" required value={email} onChange={e => setEmail(e.target.value)} className={inputClass} />
+              </div>
+              <div>
+                <input type="tel" placeholder="Mobile Number (e.g. +91 9876543210)" required value={phone} onChange={e => setPhone(e.target.value)} className={inputClass} />
               </div>
               <div className="relative">
                 <input type={showPassword ? "text" : "password"} placeholder="Password (min 8 chars)" required value={password} onChange={e => setPassword(e.target.value)} className={inputClass} />
