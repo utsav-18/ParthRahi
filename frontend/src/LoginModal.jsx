@@ -54,7 +54,7 @@ const LoginModal = ({ isOpen, onClose }) => {
     if (result.success) {
       onClose();
     } else {
-      setError('Google Login failed. Please try again.');
+      setError(result.error || 'Google Login failed. Please try again.');
     }
   };
 

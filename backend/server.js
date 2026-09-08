@@ -76,19 +76,49 @@ app.post('/api/auth/google', async (req, res) => {
       return res.status(401).json({ error: 'Invalid Google credential' });
     }
 
-    const { sub: googleId, name, email, picture: profilePicture } = payload;
+    const { sub: googleId, name, email, picture: profilePicture, email_verified } = payload;
 
-    // Find or create user
-    let user = await User.findOne({ email });
+    if (!email_verified) {
+      return res.status(401).json({ error: 'Google email is not verified. Please verify your email with Google first.' });
+    }
+
+    const normalizedEmail = email.toLowerCase().trim();
+
+    // 1. Check if the incoming googleId already belongs to a user
+    const existingGoogleUser = await User.findOne({ googleId });
+    if (existingGoogleUser && existingGoogleUser.email !== normalizedEmail) {
+      return res.status(409).json({ error: 'This Google account is already linked to another email address.' });
+    }
+
+    // 2. Find user by normalized email
+    let user = await User.findOne({ email: normalizedEmail });
+
     if (user) {
-      if (!user.googleId) {
-        return res.status(409).json({ error: 'Email already registered. Please log in with your email and password.' });
+      // If user has a different googleId already, do not overwrite it
+      if (user.googleId && user.googleId !== googleId) {
+        return res.status(409).json({ error: 'This email is already linked to a different Google account.' });
       }
-      user.name = name || user.name;
-      user.profilePicture = profilePicture || user.profilePicture;
+
+      // Link googleId if missing
+      if (!user.googleId) {
+        user.googleId = googleId;
+      }
+
+      // Preserve existing name and profilePicture unless missing
+      user.name = user.name || name;
+      user.profilePicture = user.profilePicture || profilePicture;
+      user.emailVerified = true;
+
       await user.save();
     } else {
-      user = new User({ googleId, name, email, profilePicture, emailVerified: true });
+      // New user registration via Google
+      user = new User({
+        googleId,
+        name,
+        email: normalizedEmail,
+        profilePicture,
+        emailVerified: true
+      });
       await user.save();
     }
 
@@ -103,9 +133,13 @@ app.post('/api/auth/google', async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
 
-    res.json({ message: 'Authentication successful', user });
+    const safeUser = user.toObject();
+    delete safeUser.passwordHash;
+    delete safeUser.otpHash;
+
+    res.json({ message: 'Authentication successful', user: safeUser });
   } catch (error) {
-    console.error('Google verification error:', error);
+    console.error('Google verification error:', error.message || error);
     res.status(401).json({ error: 'Google verification failed' });
   }
 });
