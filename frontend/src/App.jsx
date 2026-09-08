@@ -2,10 +2,16 @@ import EventsSection from "./EventsSection";
 import BookRideSection from "./BookRideSection";
 import { useEffect, useState } from "react";
 import Silk from "./Silk";
+import { useAuth } from "./AuthContext";
+import LoginModal from "./LoginModal";
+import ConfirmLogoutModal from "./ConfirmLogoutModal";
 
 function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [introDone, setIntroDone] = useState(false);
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isLogoutOpen, setIsLogoutOpen] = useState(false);
+  const { user, loading, logout } = useAuth();
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -85,7 +91,7 @@ function App() {
           ParthRahi
         </div>
 
-        <ul className="hidden md:flex gap-10 text-sm">
+        <ul className="hidden md:flex gap-10 text-base">
           {navItems.map((item) => (
             <li
               key={item.id}
@@ -96,6 +102,23 @@ function App() {
             </li>
           ))}
         </ul>
+        <div className="hidden md:flex items-center gap-4">
+          {!loading && (
+            user ? (
+              <div className="flex items-center gap-3">
+                {user.profilePicture && <img src={user.profilePicture} alt="Profile" className="w-8 h-8 rounded-full border border-slate-600" referrerPolicy="no-referrer" />}
+                <button onClick={() => setIsLogoutOpen(true)} className="cursor-pointer text-sm text-slate-300 hover:text-white transition">Logout</button>
+              </div>
+            ) : (
+              <button 
+                onClick={() => setIsLoginOpen(true)}
+                className={btnSecondary}
+              >
+                Login / SignUp
+              </button>
+            )
+          )}
+        </div>
 
         <button
           onClick={() => setMenuOpen(!menuOpen)}
@@ -139,6 +162,31 @@ function App() {
             </li>
           ))}
         </ul>
+
+        {/* Mobile Auth */}
+        <div className="mt-8 border-t border-white/10 pt-6">
+          {!loading && (
+            user ? (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {user.profilePicture && <img src={user.profilePicture} alt="Profile" className="w-10 h-10 rounded-full border border-slate-600" referrerPolicy="no-referrer" />}
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium text-white">{user.name}</span>
+                    <span className="text-xs text-slate-400 truncate max-w-[150px]">{user.email}</span>
+                  </div>
+                </div>
+                <button onClick={() => { setIsLogoutOpen(true); setMenuOpen(false); }} className="cursor-pointer text-xs font-semibold text-slate-400 hover:text-white uppercase tracking-wider">Logout</button>
+              </div>
+            ) : (
+              <button 
+                onClick={() => { setMenuOpen(false); setIsLoginOpen(true); }}
+                className=" cursor-pointer w-full py-3 rounded-xl border border-white/20 text-white font-medium text-sm hover:bg-white/5 active:scale-[0.98] transition-all"
+              >
+                Login / SignUp
+              </button>
+            )
+          )}
+        </div>
 
         {/* Premium Bottom Action */}
         <div className="mt-auto mb-10 space-y-4">
@@ -202,7 +250,7 @@ function App() {
                         rel="noopener noreferrer"
                         className={btnSecondary}
                       >
-                        Drive with ParthRahi
+                        Become a Driver 
                       </a>
                     </div>
               </div>
@@ -231,7 +279,7 @@ function App() {
 
 
 
-    {/*<EventsSection />*/}
+    <EventsSection />
 
 
 
@@ -673,6 +721,8 @@ function App() {
 
       </div>
 
+      <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
+      <ConfirmLogoutModal isOpen={isLogoutOpen} onClose={() => setIsLogoutOpen(false)} onConfirm={logout} />
     </div>
   );
 }
