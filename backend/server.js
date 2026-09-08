@@ -18,6 +18,7 @@ if (!process.env.JWT_SECRET) {
 const User = require('./models/User');
 
 const app = express();
+app.set('trust proxy', 1);
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // Middleware
