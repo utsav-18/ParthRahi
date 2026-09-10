@@ -16,6 +16,20 @@ if (!process.env.JWT_SECRET) {
 }
 
 const User = require('./models/User');
+const yatraRoutes = require('./routes/yatraRoutes');
+const enquiryRoutes = require('./routes/enquiryRoutes');
+const bookingRoutes = require('./routes/bookingRoutes');
+const adminRoutes = require('./routes/adminRoutes');
+const { isAdminEmail } = require('./middleware/auth');
+
+// Keep a user's role in sync with the ADMIN_EMAILS allow-list.
+const syncAdminRole = async (user) => {
+  const shouldBeAdmin = isAdminEmail(user.email);
+  if (shouldBeAdmin && user.role !== 'admin') {
+    user.role = 'admin';
+    await user.save();
+  }
+};
 
 const app = express();
 app.set('trust proxy', 1);
@@ -57,6 +71,12 @@ app.use('/api/auth/', authLimiter);
 app.get('/', (req, res) => {
   res.json({ message: 'ParthRahi backend is running' });
 });
+
+// Yatra / Events module
+app.use('/api/yatras', yatraRoutes);
+app.use('/api/enquiries', enquiryRoutes);
+app.use('/api/bookings', bookingRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Auth Routes
 app.post('/api/auth/google', async (req, res) => {
@@ -123,6 +143,7 @@ app.post('/api/auth/google', async (req, res) => {
     }
 
     // Create session
+    await syncAdminRole(user);
     const jwtSecret = process.env.JWT_SECRET;
     const token = jwt.sign({ userId: user._id }, jwtSecret, { expiresIn: '7d' });
 
@@ -236,6 +257,7 @@ app.post('/api/auth/verify-otp', async (req, res) => {
     await user.save();
 
     if (purpose === 'signup') {
+      await syncAdminRole(user);
       const jwtSecret = process.env.JWT_SECRET;
       const token = jwt.sign({ userId: user._id }, jwtSecret, { expiresIn: '7d' });
       res.cookie('token', token, {
@@ -310,6 +332,7 @@ app.post('/api/auth/login', async (req, res) => {
 
     if (!user.emailVerified) return res.status(403).json({ error: 'Email verification required', unverified: true });
 
+    await syncAdminRole(user);
     const jwtSecret = process.env.JWT_SECRET;
     const token = jwt.sign({ userId: user._id }, jwtSecret, { expiresIn: '7d' });
     res.cookie('token', token, {
@@ -415,6 +438,8 @@ app.get('/api/auth/me', async (req, res) => {
     if (!user) {
       return res.status(401).json({ error: 'User not found' });
     }
+
+    await syncAdminRole(user);
 
     const safeUser = user.toObject();
     delete safeUser.passwordHash;
