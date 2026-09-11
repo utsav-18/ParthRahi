@@ -6,6 +6,7 @@ import { useLanguage } from "../lib/i18n/LanguageContext";
 import LoginModal from "../LoginModal";
 import ConfirmLogoutModal from "../ConfirmLogoutModal";
 import ProfileModal from "../ProfileModal";
+import AdminLoginModal from "./AdminLoginModal";
 import WhatsAppFab from "./WhatsAppFab";
 import AnnouncementBar from "./AnnouncementBar";
 import LanguageSwitcher from "./LanguageSwitcher";
@@ -21,6 +22,7 @@ export default function Layout() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [introDone, setIntroDone] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isAdminLoginOpen, setIsAdminLoginOpen] = useState(false);
   const [isLogoutOpen, setIsLogoutOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [announceOpen, setAnnounceOpen] = useState(false);
@@ -171,6 +173,13 @@ export default function Layout() {
                   {t("nav.login")}
                 </button>
               ))}
+            <button
+              onClick={() => setIsAdminLoginOpen(true)}
+              className="cursor-pointer text-xs text-slate-500 hover:text-cyan-300 border border-slate-700/60 hover:border-cyan-500/40 rounded-lg px-2.5 py-1.5 transition-all"
+              title={t("adminLogin.title")}
+            >
+              {t("nav.admin")}
+            </button>
           </div>
 
           <div className="md:hidden flex items-center gap-3">
@@ -259,6 +268,15 @@ export default function Layout() {
                   {t("nav.login")}
                 </button>
               ))}
+            <button
+              onClick={() => {
+                setMenuOpen(false);
+                setIsAdminLoginOpen(true);
+              }}
+              className="cursor-pointer w-full mt-3 py-2.5 rounded-xl border border-slate-700/60 text-slate-500 hover:text-cyan-300 hover:border-cyan-500/40 font-medium text-xs uppercase tracking-wider active:scale-[0.98] transition-all"
+            >
+              {t("nav.admin")}
+            </button>
           </div>
 
           <div className="mt-auto mb-10 space-y-4">
@@ -379,6 +397,7 @@ export default function Layout() {
       {onEvents && <WhatsAppFab />}
 
       <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
+      <AdminLoginModal isOpen={isAdminLoginOpen} onClose={() => setIsAdminLoginOpen(false)} />
       <ConfirmLogoutModal isOpen={isLogoutOpen} onClose={() => setIsLogoutOpen(false)} onConfirm={logout} />
       <ProfileModal isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} user={user} />
     </div>

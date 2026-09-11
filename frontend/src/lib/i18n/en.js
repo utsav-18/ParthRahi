@@ -479,6 +479,14 @@ export default {
   bookingStepper: {
     stepOf: "Step {{n}} of {{total}} ·",
   },
+  adminLogin: {
+    title: "Admin Login",
+    emailPlaceholder: "Admin email",
+    passwordPlaceholder: "Password",
+    loginBtn: "Login",
+    loggingIn: "Logging in…",
+    notAdmin: "This account does not have admin access.",
+  },
   common: {
     loading: "Loading…",
   },

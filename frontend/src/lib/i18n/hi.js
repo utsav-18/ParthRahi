@@ -479,6 +479,14 @@ export default {
   bookingStepper: {
     stepOf: "चरण {{n}} / {{total}} ·",
   },
+  adminLogin: {
+    title: "एडमिन लॉगिन",
+    emailPlaceholder: "एडमिन ईमेल",
+    passwordPlaceholder: "पासवर्ड",
+    loginBtn: "लॉगिन",
+    loggingIn: "लॉगिन हो रहा है…",
+    notAdmin: "इस खाते के पास एडमिन एक्सेस नहीं है।",
+  },
   common: {
     loading: "लोड हो रहा है…",
   },
