@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import api from "../../lib/api";
 import useDocumentMeta from "../../lib/useDocumentMeta";
 import AdminShell, { adminBtnPrimary, adminBtnGhost, adminInput } from "./AdminShell";
+import { ADMIN_BASE } from "../../lib/adminPath";
 
 const EMPTY = {
   title: "", slug: "", tagline: "", category: "bus",
@@ -124,10 +125,10 @@ export default function AdminYatraEditPage() {
     try {
       if (isNew) {
         const res = await api.post("/api/admin/yatras", payload);
-        navigate(`/admin/events/${res.data.yatra._id}`);
+        navigate(`${ADMIN_BASE}/events/${res.data.yatra._id}`);
       } else {
         await api.put(`/api/admin/yatras/${id}`, payload);
-        navigate("/admin/events");
+        navigate(`${ADMIN_BASE}/events`);
       }
     } catch (err) {
       setError(err.message);
@@ -142,7 +143,7 @@ export default function AdminYatraEditPage() {
   return (
     <AdminShell
       title={isNew ? "New Yatra" : `Edit — ${form.title}`}
-      back={{ to: "/admin/events", label: "Yatras" }}
+      back={{ to: `${ADMIN_BASE}/events`, label: "Yatras" }}
       actions={<button type="submit" form="yatra-form" disabled={saving} className={adminBtnPrimary}>{saving ? "Saving…" : "Save"}</button>}
     >
       {error && <p className="text-red-400 mb-4 text-sm">{error}</p>}
@@ -276,7 +277,7 @@ export default function AdminYatraEditPage() {
 
         <div className="flex gap-3">
           <button type="submit" disabled={saving} className={adminBtnPrimary}>{saving ? "Saving…" : "Save Yatra"}</button>
-          <button type="button" onClick={() => navigate("/admin/events")} className={adminBtnGhost}>Cancel</button>
+          <button type="button" onClick={() => navigate(`${ADMIN_BASE}/events`)} className={adminBtnGhost}>Cancel</button>
         </div>
       </form>
     </AdminShell>

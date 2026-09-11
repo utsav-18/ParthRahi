@@ -4,6 +4,7 @@ import api from "../../lib/api";
 import useDocumentMeta from "../../lib/useDocumentMeta";
 import { formatDate } from "../../lib/format";
 import AdminShell, { adminInput } from "./AdminShell";
+import { ADMIN_BASE } from "../../lib/adminPath";
 
 const STATUS = ["new", "contacted", "converted", "closed"];
 
@@ -37,7 +38,7 @@ export default function AdminEnquiriesPage() {
   };
 
   return (
-    <AdminShell title="Enquiries" back={{ to: "/admin/events", label: "Yatras" }}>
+    <AdminShell title="Enquiries" back={{ to: `${ADMIN_BASE}/events`, label: "Yatras" }}>
       {loading ? (
         <p className="text-white/50 py-10">Loading…</p>
       ) : error ? (

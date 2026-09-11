@@ -1,11 +1,12 @@
 import { Link } from "react-router-dom";
+import { ADMIN_BASE } from "../../lib/adminPath";
 
 export default function AdminShell({ title, actions, children, back }) {
   return (
     <div className="relative z-10 pt-24 md:pt-28 pb-20 px-4 sm:px-6 md:px-12">
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center gap-2 text-xs text-white/40 mb-3">
-          <Link to="/admin/events" className="hover:text-white/70">Admin</Link>
+          <Link to={`${ADMIN_BASE}/events`} className="hover:text-white/70">Admin</Link>
           {back && (
             <>
               <span>/</span>

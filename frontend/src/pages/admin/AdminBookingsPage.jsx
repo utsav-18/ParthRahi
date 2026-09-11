@@ -4,6 +4,7 @@ import api from "../../lib/api";
 import useDocumentMeta from "../../lib/useDocumentMeta";
 import { formatCurrency, formatDate } from "../../lib/format";
 import AdminShell, { adminInput } from "./AdminShell";
+import { ADMIN_BASE } from "../../lib/adminPath";
 
 const PAYMENT = ["pending", "partial", "paid"];
 const BOOKING = ["pending", "confirmed", "cancelled"];
@@ -47,7 +48,7 @@ export default function AdminBookingsPage() {
   return (
     <AdminShell
       title={yatra ? `Bookings — ${yatra.title}` : "Bookings"}
-      back={{ to: "/admin/events", label: "Yatras" }}
+      back={{ to: `${ADMIN_BASE}/events`, label: "Yatras" }}
     >
       {yatra && (
         <p className="text-white/50 text-sm mb-4">

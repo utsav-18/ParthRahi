@@ -4,6 +4,7 @@ import api from "../../lib/api";
 import useDocumentMeta from "../../lib/useDocumentMeta";
 import { formatCurrency } from "../../lib/format";
 import AdminShell, { adminBtnPrimary } from "./AdminShell";
+import { ADMIN_BASE } from "../../lib/adminPath";
 
 const statusTone = {
   published: "bg-green-500/15 text-green-300 border-green-400/30",
@@ -45,7 +46,7 @@ export default function AdminYatraListPage() {
   return (
     <AdminShell
       title="Yatras"
-      actions={<Link to="/admin/events/new" className={adminBtnPrimary}>+ New Yatra</Link>}
+      actions={<Link to={`${ADMIN_BASE}/events/new`} className={adminBtnPrimary}>+ New Yatra</Link>}
     >
       {loading ? (
         <p className="text-white/50 py-10">Loading…</p>
@@ -83,9 +84,9 @@ export default function AdminYatraListPage() {
                   <td className="px-4 py-3 text-white/70">{formatCurrency(y.price?.amount, y.price?.currency)}</td>
                   <td className="px-4 py-3">
                     <div className="flex gap-1.5 justify-end flex-wrap">
-                      <button onClick={() => navigate(`/admin/events/${y._id}`)} className="text-xs px-2.5 py-1 rounded-md border border-white/15 text-white/70 hover:bg-white/10 cursor-pointer">Edit</button>
-                      <button onClick={() => navigate(`/admin/events/${y._id}/bookings`)} className="text-xs px-2.5 py-1 rounded-md border border-white/15 text-white/70 hover:bg-white/10 cursor-pointer">Bookings</button>
-                      <button onClick={() => navigate(`/admin/events/${y._id}/enquiries`)} className="text-xs px-2.5 py-1 rounded-md border border-white/15 text-white/70 hover:bg-white/10 cursor-pointer">Enquiries</button>
+                      <button onClick={() => navigate(`${ADMIN_BASE}/events/${y._id}`)} className="text-xs px-2.5 py-1 rounded-md border border-white/15 text-white/70 hover:bg-white/10 cursor-pointer">Edit</button>
+                      <button onClick={() => navigate(`${ADMIN_BASE}/events/${y._id}/bookings`)} className="text-xs px-2.5 py-1 rounded-md border border-white/15 text-white/70 hover:bg-white/10 cursor-pointer">Bookings</button>
+                      <button onClick={() => navigate(`${ADMIN_BASE}/events/${y._id}/enquiries`)} className="text-xs px-2.5 py-1 rounded-md border border-white/15 text-white/70 hover:bg-white/10 cursor-pointer">Enquiries</button>
                       <button onClick={() => remove(y)} className="text-xs px-2.5 py-1 rounded-md border border-red-500/30 text-red-300 hover:bg-red-500/10 cursor-pointer">Delete</button>
                     </div>
                   </td>

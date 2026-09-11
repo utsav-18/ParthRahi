@@ -10,6 +10,7 @@ import AdminYatraListPage from "./pages/admin/AdminYatraListPage";
 import AdminYatraEditPage from "./pages/admin/AdminYatraEditPage";
 import AdminBookingsPage from "./pages/admin/AdminBookingsPage";
 import AdminEnquiriesPage from "./pages/admin/AdminEnquiriesPage";
+import { ADMIN_BASE } from "./lib/adminPath";
 
 function App() {
   return (
@@ -23,8 +24,10 @@ function App() {
           <Route path="/events/:slug" element={<YatraDetailPage />} />
           <Route path="/events/:slug/book" element={<YatraBookingPage />} />
 
+          {/* Admin area lives at a secret, unlinked path (see lib/adminPath.js) —
+              set VITE_ADMIN_PATH in .env to control the real URL. */}
           <Route
-            path="/admin/events"
+            path={`${ADMIN_BASE}/events`}
             element={
               <RequireAdmin>
                 <AdminYatraListPage />
@@ -32,7 +35,7 @@ function App() {
             }
           />
           <Route
-            path="/admin/events/new"
+            path={`${ADMIN_BASE}/events/new`}
             element={
               <RequireAdmin>
                 <AdminYatraEditPage />
@@ -40,7 +43,7 @@ function App() {
             }
           />
           <Route
-            path="/admin/events/:id"
+            path={`${ADMIN_BASE}/events/:id`}
             element={
               <RequireAdmin>
                 <AdminYatraEditPage />
@@ -48,7 +51,7 @@ function App() {
             }
           />
           <Route
-            path="/admin/events/:id/bookings"
+            path={`${ADMIN_BASE}/events/:id/bookings`}
             element={
               <RequireAdmin>
                 <AdminBookingsPage />
@@ -56,7 +59,7 @@ function App() {
             }
           />
           <Route
-            path="/admin/events/:id/enquiries"
+            path={`${ADMIN_BASE}/events/:id/enquiries`}
             element={
               <RequireAdmin>
                 <AdminEnquiriesPage />

@@ -156,20 +156,8 @@ export default function Layout() {
                       <span className="text-sm font-medium text-white max-w-[130px] truncate group-hover:text-cyan-300 transition-colors">
                         {user.name || user.email?.split("@")[0]}
                       </span>
-                      {user.role === "admin" && (
-                        <span className="text-[10px] uppercase tracking-wider text-cyan-400">{t("nav.admin")}</span>
-                      )}
                     </div>
                   </div>
-
-                  {user.role === "admin" && (
-                    <button
-                      onClick={() => navigate("/admin/events")}
-                      className="cursor-pointer text-xs text-slate-300 hover:text-cyan-300 border border-slate-700 hover:border-cyan-500/50 rounded-lg px-2.5 py-1.5 transition-all"
-                    >
-                      {t("nav.admin")}
-                    </button>
-                  )}
 
                   <button
                     onClick={() => setIsLogoutOpen(true)}
@@ -272,15 +260,6 @@ export default function Layout() {
                 </button>
               ))}
           </div>
-
-          {user?.role === "admin" && (
-            <button
-              onClick={() => { setMenuOpen(false); navigate("/admin/events"); }}
-              className="mt-4 w-full py-3 rounded-xl border border-cyan-500/40 text-cyan-200 font-medium text-sm hover:bg-cyan-500/10 active:scale-[0.98] transition-all"
-            >
-              {t("nav.admin")}
-            </button>
-          )}
 
           <div className="mt-auto mb-10 space-y-4">
             <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-3 text-center">{t("nav.readyToTravel")}</p>
