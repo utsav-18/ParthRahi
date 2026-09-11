@@ -1,7 +1,9 @@
 import { useState, useId } from "react";
 import { formatDate } from "../../lib/format";
+import { useLanguage } from "../../lib/i18n/LanguageContext";
 
 function DayCard({ day, index, defaultOpen }) {
+  const { t } = useLanguage();
   const [open, setOpen] = useState(defaultOpen);
   const id = useId();
   const num = day.dayNumber ?? index + 1;
@@ -26,9 +28,9 @@ function DayCard({ day, index, defaultOpen }) {
           >
             <span className="flex-1 min-w-0">
               <span className="block text-[10px] font-semibold uppercase tracking-widest text-amber-300/75">
-                Day {num}{day.date ? ` · ${formatDate(day.date)}` : ""}
+                {t("itinerary.day", { n: num })}{day.date ? ` · ${formatDate(day.date)}` : ""}
               </span>
-              <span className="block text-sm font-semibold text-amber-50 truncate">{day.title || `Day ${num}`}</span>
+              <span className="block text-sm font-semibold text-amber-50 truncate">{day.title || t("itinerary.day", { n: num })}</span>
             </span>
             <svg
               viewBox="0 0 16 16"
@@ -63,11 +65,11 @@ function DayCard({ day, index, defaultOpen }) {
               ))}
             </ul>
           ) : (
-            <p className="text-white/50 text-sm">Details to be announced.</p>
+            <p className="text-white/50 text-sm">{t("itinerary.detailsTba")}</p>
           )}
           {day.stayNight && (
             <p className="text-[12px] text-amber-200/60 border-t border-amber-200/10 pt-2">
-              🛏️ Night: <span className="text-amber-100/80">{day.stayNight}</span>
+              🛏️ {t("itinerary.night")} <span className="text-amber-100/80">{day.stayNight}</span>
             </p>
           )}
         </div>

@@ -1,10 +1,12 @@
 import { AccordionItem } from "./Accordion";
-import { DEFAULT_FAQS } from "../../lib/yatraContent";
+import { getDefaultFaqs } from "../../lib/yatraContent";
+import { useLanguage } from "../../lib/i18n/LanguageContext";
 
 export default function YatraFaq({ faqs }) {
+  const { t } = useLanguage();
   const list = Array.isArray(faqs) && faqs.filter((f) => f?.q && f?.a).length
     ? faqs.filter((f) => f?.q && f?.a)
-    : DEFAULT_FAQS;
+    : getDefaultFaqs(t);
 
   return (
     <div className="flex flex-col gap-2">

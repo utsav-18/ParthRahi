@@ -1,8 +1,10 @@
 import { Link } from "react-router-dom";
 import SeatsLeftBadge from "./SeatsLeftBadge";
 import { formatCurrency, durationLabel, nextDeparture, formatDate } from "../../lib/format";
+import { useLanguage } from "../../lib/i18n/LanguageContext";
 
 export default function YatraCard({ yatra }) {
+  const { t } = useLanguage();
   const cover = yatra.heroImages?.[0];
   const dep = nextDeparture(yatra.departureDates);
   const seatsLeft = yatra.seatsLeft ?? Math.max(0, (yatra.totalSeats || 0) - (yatra.seatsBooked || 0));
@@ -30,7 +32,7 @@ export default function YatraCard({ yatra }) {
 
         <div className="absolute top-3 left-3 flex gap-2">
           <span className="text-[10px] uppercase tracking-widest px-2.5 py-1 rounded-full bg-black/55 border border-amber-200/20 text-amber-50 backdrop-blur-sm">
-            By {yatra.category}
+            {t("yatraCard.by")} {t(`categories.${yatra.category}`)}
           </span>
           {duration && (
             <span className="text-[10px] uppercase tracking-widest px-2.5 py-1 rounded-full bg-black/55 border border-amber-200/20 text-amber-50 backdrop-blur-sm">
@@ -42,7 +44,7 @@ export default function YatraCard({ yatra }) {
         <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between gap-2">
           <SeatsLeftBadge seatsLeft={seatsLeft} totalSeats={yatra.totalSeats} />
           <div className="text-right">
-            <p className="text-[10px] uppercase tracking-wider text-amber-100/70">from</p>
+            <p className="text-[10px] uppercase tracking-wider text-amber-100/70">{t("yatraCard.from")}</p>
             <p className="text-xl font-bold text-white leading-none drop-shadow">{formatCurrency(yatra.price?.amount, yatra.price?.currency)}</p>
           </div>
         </div>
@@ -68,14 +70,14 @@ export default function YatraCard({ yatra }) {
         )}
 
         <div className="mt-auto flex items-center justify-between gap-3 pt-3 border-t border-amber-200/10 text-xs text-amber-100/55">
-          <span>{dep ? `🗓 Next: ${formatDate(dep)}` : "🗓 Dates soon"}</span>
+          <span>{dep ? `🗓 ${t("yatraCard.nextLabel")} ${formatDate(dep)}` : `🗓 ${t("yatraCard.datesSoon")}`}</span>
           {yatra.price?.advanceAmount ? (
-            <span className="text-amber-200/80">₹{yatra.price.advanceAmount.toLocaleString("en-IN")} to reserve</span>
+            <span className="text-amber-200/80">{t("yatraCard.toReserve", { amount: `₹${yatra.price.advanceAmount.toLocaleString("en-IN")}` })}</span>
           ) : null}
         </div>
 
         <span className="text-center text-xs font-semibold text-amber-200 border border-amber-300/30 rounded-lg py-2 transition-colors group-hover:bg-amber-300/10">
-          View details &amp; itinerary →
+          {t("yatraCard.viewDetails")}
         </span>
       </div>
     </Link>

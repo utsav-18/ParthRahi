@@ -3,12 +3,11 @@ import { useParams, Link } from "react-router-dom";
 import api from "../lib/api";
 import { useAuth } from "../AuthContext";
 import useDocumentMeta from "../lib/useDocumentMeta";
+import { useLanguage } from "../lib/i18n/LanguageContext";
 import { btnAccent, btnSecondary, inputCls } from "../lib/theme";
 import { formatCurrency, formatDate, nextDeparture } from "../lib/format";
 import BookingStepper from "../components/yatra/BookingStepper";
 import FareBox from "../components/yatra/FareBox";
-
-const STEPS = ["Traveller details", "Payment", "Confirmed"];
 
 const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER || "918252224027";
 const phoneOk = (p) => /^(\+?[1-9]\d{0,3})?[\s-]?\d{10}$/.test(String(p).trim().replace(/[\s-]/g, ""));
@@ -16,6 +15,9 @@ const phoneOk = (p) => /^(\+?[1-9]\d{0,3})?[\s-]?\d{10}$/.test(String(p).trim().
 export default function YatraBookingPage() {
   const { slug } = useParams();
   const { user } = useAuth();
+  const { t } = useLanguage();
+
+  const STEPS = [t("booking.stepTraveller"), t("booking.stepPayment"), t("booking.stepConfirmed")];
 
   const [yatra, setYatra] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -88,11 +90,11 @@ export default function YatraBookingPage() {
 
   const validateStep1 = () => {
     const errs = {};
-    if (!form.travelerName.trim()) errs.travelerName = "Enter the lead traveller's name";
-    if (!phoneOk(form.phone)) errs.phone = "Enter a valid 10-digit mobile number";
-    if (form.email && !/^\S+@\S+\.\S+$/.test(form.email)) errs.email = "Enter a valid email";
-    if (seats < 1 || seats > 20) errs.numberOfSeats = "Seats must be between 1 and 20";
-    if (seats > seatsLeft) errs.numberOfSeats = `Only ${seatsLeft} seat(s) left`;
+    if (!form.travelerName.trim()) errs.travelerName = t("booking.errTravellerName");
+    if (!phoneOk(form.phone)) errs.phone = t("booking.errPhone");
+    if (form.email && !/^\S+@\S+\.\S+$/.test(form.email)) errs.email = t("booking.errEmail");
+    if (seats < 1 || seats > 20) errs.numberOfSeats = t("booking.errSeatsRange");
+    if (seats > seatsLeft) errs.numberOfSeats = t("booking.errSeatsLeft", { n: seatsLeft });
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -143,8 +145,8 @@ export default function YatraBookingPage() {
   if (loadError || !yatra) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-3 pt-24 px-6 text-center">
-        <p className="text-2xl font-semibold text-amber-50">Unable to load this yatra</p>
-        <Link to="/events" className={btnSecondary}>Back to all yatras</Link>
+        <p className="text-2xl font-semibold text-amber-50">{t("booking.unableToLoad")}</p>
+        <Link to="/events" className={btnSecondary}>{t("booking.backToAll")}</Link>
       </div>
     );
   }
@@ -153,14 +155,14 @@ export default function YatraBookingPage() {
     <div className="relative z-10 pt-24 md:pt-28 pb-20 px-4 sm:px-6 md:px-16">
       <div className="max-w-3xl mx-auto">
         <nav className="text-xs text-amber-200/40 mb-4">
-          <Link to="/events" className="hover:text-amber-200/70">Yatras</Link>
+          <Link to="/events" className="hover:text-amber-200/70">{t("booking.yatras")}</Link>
           <span className="mx-1.5">/</span>
           <Link to={`/events/${yatra.slug}`} className="hover:text-amber-200/70">{yatra.title}</Link>
           <span className="mx-1.5">/</span>
-          <span className="text-amber-100/60">Book</span>
+          <span className="text-amber-100/60">{t("booking.book")}</span>
         </nav>
 
-        <h1 className="text-2xl md:text-3xl font-bold text-amber-50 mb-4">🪔 Reserve your seat</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-amber-50 mb-4">🪔 {t("booking.reserveSeat")}</h1>
 
         {/* Trip summary header */}
         <div className="flex items-center gap-4 rounded-2xl border border-amber-200/12 bg-[#160f06]/70 p-3 sm:p-4 mb-5 overflow-hidden">
@@ -170,10 +172,10 @@ export default function YatraBookingPage() {
           <div className="min-w-0">
             <p className="text-sm sm:text-base font-semibold text-amber-50 leading-tight truncate">{yatra.title}</p>
             <p className="text-xs text-amber-100/50 mt-1">
-              {nextDeparture(yatra.departureDates) ? `🗓 ${formatDate(nextDeparture(yatra.departureDates))}` : "Dates to be announced"}
+              {nextDeparture(yatra.departureDates) ? `🗓 ${formatDate(nextDeparture(yatra.departureDates))}` : t("booking.tbaDates")}
               {yatra.startingPoint ? ` · 📍 ${yatra.startingPoint}` : ""}
             </p>
-            <p className="text-xs text-amber-300/80 mt-0.5">{seatsLeft} seat(s) left</p>
+            <p className="text-xs text-amber-300/80 mt-0.5">{seatsLeft} {t("booking.seatsLeft")}</p>
           </div>
         </div>
 
@@ -183,57 +185,57 @@ export default function YatraBookingPage() {
           {/* STEP 1 */}
           {step === 1 && (
             <div className="space-y-4">
-              <p className="text-amber-200/70 text-xs uppercase tracking-[0.18em]">Traveller Details</p>
+              <p className="text-amber-200/70 text-xs uppercase tracking-[0.18em]">{t("booking.travellerDetailsLabel")}</p>
 
               <div className="grid sm:grid-cols-2 gap-3">
                 <div className="space-y-1 sm:col-span-2">
-                  <input className={inputCls(errors.travelerName)} placeholder="Lead traveller full name *" value={form.travelerName} onChange={set("travelerName")} />
+                  <input className={inputCls(errors.travelerName)} placeholder={t("booking.leadTravellerName")} value={form.travelerName} onChange={set("travelerName")} />
                   {errors.travelerName && <p className="text-red-400 text-xs">{errors.travelerName}</p>}
                 </div>
                 <div className="space-y-1">
-                  <input className={inputCls(errors.phone)} placeholder="Mobile number *" inputMode="tel" value={form.phone} onChange={set("phone")} />
+                  <input className={inputCls(errors.phone)} placeholder={t("booking.mobileNumber")} inputMode="tel" value={form.phone} onChange={set("phone")} />
                   {errors.phone && <p className="text-red-400 text-xs">{errors.phone}</p>}
                 </div>
                 <div className="space-y-1">
-                  <input className={inputCls(errors.email)} placeholder="Email (optional)" type="email" value={form.email} onChange={set("email")} />
+                  <input className={inputCls(errors.email)} placeholder={t("booking.emailOptional")} type="email" value={form.email} onChange={set("email")} />
                   {errors.email && <p className="text-red-400 text-xs">{errors.email}</p>}
                 </div>
-                <input className={inputCls(false)} placeholder="City (optional)" value={form.city} onChange={set("city")} />
-                <input className={inputCls(false)} placeholder="Pickup point" value={form.pickupPoint} onChange={set("pickupPoint")} />
+                <input className={inputCls(false)} placeholder={t("booking.cityOptional")} value={form.city} onChange={set("city")} />
+                <input className={inputCls(false)} placeholder={t("booking.pickupPoint")} value={form.pickupPoint} onChange={set("pickupPoint")} />
               </div>
 
               {yatra.price?.variants?.length > 1 && (
                 <div className="space-y-2">
-                  <p className="text-amber-200/70 text-xs uppercase tracking-[0.18em]">Choose fare</p>
+                  <p className="text-amber-200/70 text-xs uppercase tracking-[0.18em]">{t("booking.chooseFare")}</p>
                   <FareBox price={yatra.price} selectedVariant={form.fareVariant} onSelectVariant={(l) => setForm((f) => ({ ...f, fareVariant: l }))} />
                 </div>
               )}
 
               <div className="space-y-1">
-                <label className="text-amber-200/70 text-xs uppercase tracking-[0.18em]">Number of seats</label>
+                <label className="text-amber-200/70 text-xs uppercase tracking-[0.18em]">{t("booking.numberOfSeats")}</label>
                 <div className="flex items-center gap-3">
                   <button type="button" onClick={() => setForm((f) => ({ ...f, numberOfSeats: Math.max(1, seats - 1) }))} className="w-9 h-9 rounded-lg border border-amber-200/18 text-amber-50 text-lg cursor-pointer hover:bg-amber-400/10">−</button>
                   <span className="text-amber-50 font-semibold w-8 text-center">{seats}</span>
                   <button type="button" onClick={() => setForm((f) => ({ ...f, numberOfSeats: Math.min(20, seats + 1) }))} className="w-9 h-9 rounded-lg border border-amber-200/18 text-amber-50 text-lg cursor-pointer hover:bg-amber-400/10">+</button>
-                  <span className="text-amber-200/40 text-xs ml-2">{seatsLeft} seat(s) left</span>
+                  <span className="text-amber-200/40 text-xs ml-2">{seatsLeft} {t("booking.seatsLeft")}</span>
                 </div>
                 {errors.numberOfSeats && <p className="text-red-400 text-xs">{errors.numberOfSeats}</p>}
               </div>
 
               <div className="rounded-xl bg-amber-400/[0.04] border border-amber-200/12 p-4 text-sm space-y-1.5">
                 <div className="flex items-center justify-between text-amber-100/70">
-                  <span>Total fare ({seats} × {formatCurrency(unitPrice)})</span>
+                  <span>{t("booking.totalFare", { seats, unit: formatCurrency(unitPrice) })}</span>
                   <span className="text-amber-50 font-semibold">{formatCurrency(totalAmount)}</span>
                 </div>
                 <div className="flex items-center justify-between text-amber-100 border-t border-amber-200/12 pt-1.5">
-                  <span>{advanceAmount ? "Pay now to reserve (advance)" : "Pay now to reserve"}</span>
+                  <span>{advanceAmount ? t("booking.payNowReserveAdvance") : t("booking.payNowReserve")}</span>
                   <span className="font-semibold">{formatCurrency(dueNow)}</span>
                 </div>
               </div>
 
-              <button onClick={goToPayment} className={`${btnAccent} w-full`}>Continue to Payment</button>
+              <button onClick={goToPayment} className={`${btnAccent} w-full`}>{t("booking.continueToPayment")}</button>
               <p className="text-center text-amber-200/40 text-[11px]">
-                Next you'll see how to pay. Nothing is charged automatically — you pay us directly over UPI or WhatsApp.
+                {t("booking.nextPaymentNote")}
               </p>
             </div>
           )}
@@ -241,28 +243,28 @@ export default function YatraBookingPage() {
           {/* STEP 2 */}
           {step === 2 && (
             <div className="space-y-4">
-              <p className="text-amber-200/70 text-xs uppercase tracking-[0.18em]">Payment</p>
+              <p className="text-amber-200/70 text-xs uppercase tracking-[0.18em]">{t("booking.paymentLabel")}</p>
 
               <div className="rounded-xl border border-amber-300/20 bg-amber-300/[0.06] px-4 py-2.5 text-sm text-amber-100">
-                Review your booking below. The moment you tap <b>Confirm Reservation</b>, {seats} seat(s) are held in your name — then you pay the advance.
+                {t("booking.reviewConfirmNote", { seats })}
               </div>
 
               <div className="rounded-xl border border-amber-200/12 bg-amber-400/[0.04] p-4 space-y-2 text-sm">
-                <div className="flex justify-between text-amber-100/70"><span>Traveller</span><span className="text-amber-50">{form.travelerName}</span></div>
-                <div className="flex justify-between text-amber-100/70"><span>Seats</span><span className="text-amber-50">{seats}{form.fareVariant ? ` · ${form.fareVariant}` : ""}</span></div>
-                <div className="flex justify-between text-amber-100/70"><span>Total fare</span><span className="text-amber-50">{formatCurrency(totalAmount)}</span></div>
+                <div className="flex justify-between text-amber-100/70"><span>{t("booking.traveller")}</span><span className="text-amber-50">{form.travelerName}</span></div>
+                <div className="flex justify-between text-amber-100/70"><span>{t("booking.seats")}</span><span className="text-amber-50">{seats}{form.fareVariant ? ` · ${form.fareVariant}` : ""}</span></div>
+                <div className="flex justify-between text-amber-100/70"><span>{t("booking.totalFareLabel")}</span><span className="text-amber-50">{formatCurrency(totalAmount)}</span></div>
                 <div className="flex justify-between border-t border-amber-200/12 pt-2 text-amber-100 font-semibold">
-                  <span>{advanceAmount ? "Advance due now" : "Amount due now"}</span>
+                  <span>{advanceAmount ? t("booking.advanceDueNow") : t("booking.amountDueNow")}</span>
                   <span>{formatCurrency(dueNow)}</span>
                 </div>
               </div>
 
               <div className="rounded-xl border border-amber-300/20 bg-amber-300/[0.06] p-4 text-sm text-amber-100/80 space-y-2">
-                <p className="font-medium text-amber-100">How to pay</p>
+                <p className="font-medium text-amber-100">{t("booking.howToPay")}</p>
                 {import.meta.env.VITE_UPI_ID ? (
-                  <p>Pay <b>{formatCurrency(dueNow)}</b> to UPI ID <b className="select-all">{import.meta.env.VITE_UPI_ID}</b>, then confirm below.</p>
+                  <p>{t("booking.payUpi", { amount: formatCurrency(dueNow), upi: import.meta.env.VITE_UPI_ID })}</p>
                 ) : (
-                  <p>Confirm your reservation below, then complete the advance payment over WhatsApp with our team. Your seats are held for you meanwhile.</p>
+                  <p>{t("booking.payViaWhatsapp")}</p>
                 )}
                 <a
                   href={`https://wa.me/${WHATSAPP_NUMBER}?text=${whatsappMessage}`}
@@ -270,20 +272,20 @@ export default function YatraBookingPage() {
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 text-amber-200 font-medium hover:underline"
                 >
-                  💬 Message us on WhatsApp
+                  💬 {t("booking.messageUsWhatsapp")}
                 </a>
               </div>
 
               {serverError && <p className="text-red-400 text-sm">{serverError}</p>}
 
               <div className="flex gap-3">
-                <button onClick={() => setStep(1)} className={`${btnSecondary} flex-1`}>Back</button>
+                <button onClick={() => setStep(1)} className={`${btnSecondary} flex-1`}>{t("booking.back")}</button>
                 <button onClick={reserve} disabled={submitting} className={`${btnAccent} flex-1`}>
-                  {submitting ? "Reserving…" : "Confirm Reservation"}
+                  {submitting ? t("booking.reserving") : t("booking.confirmReservation")}
                 </button>
               </div>
               <p className="text-center text-amber-200/40 text-[11px]">
-                Confirming holds your seats. Booking is finalised once the advance payment is received.
+                {t("booking.confirmingHoldsNote")}
               </p>
             </div>
           )}
@@ -292,29 +294,29 @@ export default function YatraBookingPage() {
           {step === 3 && confirmation && (
             <div className="text-center space-y-4 py-4">
               <p className="text-4xl">🙏</p>
-              <h2 className="text-xl font-bold text-amber-50">Seats reserved!</h2>
-              <p className="text-amber-100/60 text-sm">Keep this reference for all communication with our team.</p>
+              <h2 className="text-xl font-bold text-amber-50">{t("booking.seatsReserved")}</h2>
+              <p className="text-amber-100/60 text-sm">{t("booking.keepReference")}</p>
 
               <div className="inline-block rounded-xl border border-amber-300/25 bg-amber-400/[0.06] px-6 py-3">
-                <p className="text-[10px] uppercase tracking-widest text-amber-200/40">Booking reference</p>
+                <p className="text-[10px] uppercase tracking-widest text-amber-200/40">{t("booking.bookingReference")}</p>
                 <p className="text-2xl font-bold text-amber-200 tracking-wider select-all">{confirmation.bookingReference}</p>
               </div>
 
               <div className="text-sm text-amber-100/70 max-w-sm mx-auto space-y-1 text-left rounded-xl border border-amber-200/12 bg-amber-400/[0.03] p-4">
-                <div className="flex justify-between"><span>Yatra</span><span className="text-amber-50">{confirmation.yatra?.title}</span></div>
-                <div className="flex justify-between"><span>Seats</span><span className="text-amber-50">{confirmation.numberOfSeats}</span></div>
-                <div className="flex justify-between"><span>Total fare</span><span className="text-amber-50">{formatCurrency(confirmation.totalAmount)}</span></div>
-                <div className="flex justify-between"><span>Advance due</span><span className="text-amber-50">{formatCurrency(confirmation.advanceAmount || confirmation.totalAmount)}</span></div>
-                <div className="flex justify-between"><span>Status</span><span className="text-orange-300 capitalize">{confirmation.bookingStatus}</span></div>
+                <div className="flex justify-between"><span>{t("booking.yatra")}</span><span className="text-amber-50">{confirmation.yatra?.title}</span></div>
+                <div className="flex justify-between"><span>{t("booking.seats")}</span><span className="text-amber-50">{confirmation.numberOfSeats}</span></div>
+                <div className="flex justify-between"><span>{t("booking.totalFareLabel")}</span><span className="text-amber-50">{formatCurrency(confirmation.totalAmount)}</span></div>
+                <div className="flex justify-between"><span>{t("booking.advanceDueNow")}</span><span className="text-amber-50">{formatCurrency(confirmation.advanceAmount || confirmation.totalAmount)}</span></div>
+                <div className="flex justify-between"><span>{t("booking.status")}</span><span className="text-orange-300 capitalize">{confirmation.bookingStatus}</span></div>
               </div>
 
               <div className="max-w-sm mx-auto text-left rounded-xl border border-amber-300/20 bg-amber-300/[0.05] p-4">
-                <p className="text-amber-100 font-medium text-sm mb-2">What happens next</p>
+                <p className="text-amber-100 font-medium text-sm mb-2">{t("booking.whatHappensNext")}</p>
                 <ol className="space-y-1.5 text-sm text-amber-100/70">
-                  <li>1. Pay the advance over WhatsApp / UPI using the button below.</li>
-                  <li>2. Our team verifies payment and marks your booking <span className="text-amber-50">confirmed</span>.</li>
-                  <li>3. You get the pickup point, reporting time and packing list on WhatsApp.</li>
-                  <li>4. Pay the balance before departure — the tour manager takes it from there.</li>
+                  <li>{t("booking.step1")}</li>
+                  <li>{t("booking.step2")}</li>
+                  <li>{t("booking.step3")}</li>
+                  <li>{t("booking.step4")}</li>
                 </ol>
               </div>
 
@@ -325,9 +327,9 @@ export default function YatraBookingPage() {
                   rel="noopener noreferrer"
                   className={btnAccent}
                 >
-                  💬 Pay advance on WhatsApp
+                  💬 {t("booking.payAdvanceWhatsapp")}
                 </a>
-                <Link to={`/events/${slug}`} className={btnSecondary}>Back to yatra</Link>
+                <Link to={`/events/${slug}`} className={btnSecondary}>{t("booking.backToYatra")}</Link>
               </div>
             </div>
           )}

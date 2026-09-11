@@ -1,14 +1,17 @@
-const ITEMS = [
-  { icon: "🏢", title: "Registered operator", sub: "Parthrahi Smartcab Solutions LLP · Startup India (DPIIT)" },
-  { icon: "🧭", title: "Tour manager on every yatra", sub: "A ParthRahi manager travels with the group from first day to last" },
-  { icon: "🍛", title: "Sattvic meals & clean stays", sub: "Pure-veg breakfast & dinner, hand-picked hotels near the temples" },
-  { icon: "💬", title: "Real people on WhatsApp", sub: "One number for booking, pickup and on-trip help — someone always answers" },
-];
+import { useLanguage } from "../../lib/i18n/LanguageContext";
 
 export default function TrustBand({ compact = false }) {
+  const { t } = useLanguage();
+  const items = [
+    { icon: "🏢", title: t("trustBand.item1Title"), sub: t("trustBand.item1Sub") },
+    { icon: "🧭", title: t("trustBand.item2Title"), sub: t("trustBand.item2Sub") },
+    { icon: "🍛", title: t("trustBand.item3Title"), sub: t("trustBand.item3Sub") },
+    { icon: "💬", title: t("trustBand.item4Title"), sub: t("trustBand.item4Sub") },
+  ];
+
   return (
     <div className={`grid gap-3 ${compact ? "sm:grid-cols-2 lg:grid-cols-4" : "sm:grid-cols-2 lg:grid-cols-4"}`}>
-      {ITEMS.map((it) => (
+      {items.map((it) => (
         <div
           key={it.title}
           className="rounded-2xl border border-amber-200/12 bg-amber-950/20 p-4 transition-all duration-300 hover:bg-amber-900/25 hover:-translate-y-1"

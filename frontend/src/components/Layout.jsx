@@ -2,20 +2,13 @@ import { useEffect, useState } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import Silk from "../Silk";
 import { useAuth } from "../AuthContext";
+import { useLanguage } from "../lib/i18n/LanguageContext";
 import LoginModal from "../LoginModal";
 import ConfirmLogoutModal from "../ConfirmLogoutModal";
 import ProfileModal from "../ProfileModal";
 import WhatsAppFab from "./WhatsAppFab";
 import AnnouncementBar from "./AnnouncementBar";
-
-const navItems = [
-  { label: "Home", id: "home" },
-  { label: "Book Ride", id: "book" },
-  { label: "Yatra & Tours", id: "events" },
-  { label: "About", id: "about" },
-  { label: "Features", id: "features" },
-  { label: "Contact", id: "contact" },
-];
+import LanguageSwitcher from "./LanguageSwitcher";
 
 const btnSecondary =
   "inline-flex items-center justify-center px-6 md:px-8 py-2.5 md:py-3 rounded-full border border-slate-500 text-white whitespace-nowrap cursor-pointer bg-slate-900/40 shadow-md shadow-blue-900/30 transition-all duration-300 hover:bg-slate-700/60 hover:border-white/55 hover:-translate-y-0.5 hover:shadow-lg shadow-blue-500/20 active:translate-y-0";
@@ -24,6 +17,7 @@ const btnPrimary =
   "inline-flex items-center justify-center px-6 md:px-8 py-2.5 md:py-3 rounded-full bg-white text-black font-medium whitespace-nowrap cursor-pointer border border-white/70 shadow-lg shadow-white/10 transition-all duration-300 hover:bg-gray-200 hover:-translate-y-0.5 hover:shadow-xl shadow-white/20 active:translate-y-0";
 
 export default function Layout() {
+  const { t } = useLanguage();
   const [menuOpen, setMenuOpen] = useState(false);
   const [introDone, setIntroDone] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
@@ -36,6 +30,15 @@ export default function Layout() {
   const location = useLocation();
   const onHome = location.pathname === "/";
   const onEvents = location.pathname.startsWith("/events");
+
+  const navItems = [
+    { label: t("nav.home"), id: "home" },
+    { label: t("nav.bookRide"), id: "book" },
+    { label: t("nav.yatra"), id: "events" },
+    { label: t("nav.about"), id: "about" },
+    { label: t("nav.features"), id: "features" },
+    { label: t("nav.contact"), id: "contact" },
+  ];
 
   useEffect(() => {
     const timer = window.setTimeout(() => setIntroDone(true), 1800);
@@ -128,6 +131,7 @@ export default function Layout() {
           </ul>
 
           <div className="hidden md:flex items-center gap-4">
+            <LanguageSwitcher />
             {!loading &&
               (user ? (
                 <div className="flex items-center gap-3">
@@ -153,7 +157,7 @@ export default function Layout() {
                         {user.name || user.email?.split("@")[0]}
                       </span>
                       {user.role === "admin" && (
-                        <span className="text-[10px] uppercase tracking-wider text-cyan-400">Admin</span>
+                        <span className="text-[10px] uppercase tracking-wider text-cyan-400">{t("nav.admin")}</span>
                       )}
                     </div>
                   </div>
@@ -163,7 +167,7 @@ export default function Layout() {
                       onClick={() => navigate("/admin/events")}
                       className="cursor-pointer text-xs text-slate-300 hover:text-cyan-300 border border-slate-700 hover:border-cyan-500/50 rounded-lg px-2.5 py-1.5 transition-all"
                     >
-                      Admin
+                      {t("nav.admin")}
                     </button>
                   )}
 
@@ -171,25 +175,28 @@ export default function Layout() {
                     onClick={() => setIsLogoutOpen(true)}
                     className="cursor-pointer ml-1 text-xs text-slate-400 hover:text-red-400 border border-slate-700 hover:border-red-500/50 rounded-lg px-2.5 py-1.5 transition-all"
                   >
-                    Logout
+                    {t("nav.logout")}
                   </button>
                 </div>
               ) : (
                 <button onClick={() => setIsLoginOpen(true)} className={btnSecondary}>
-                  Login / SignUp
+                  {t("nav.login")}
                 </button>
               ))}
           </div>
 
-          <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            aria-label={menuOpen ? "Close menu" : "Open menu"}
-            className="md:hidden flex flex-col gap-1.5 z-[70]"
-          >
-            <span className={`w-6 h-0.5 bg-white transition ${menuOpen ? "rotate-45 translate-y-2" : ""}`} />
-            <span className={`w-6 h-0.5 bg-white transition ${menuOpen ? "opacity-0" : ""}`} />
-            <span className={`w-6 h-0.5 bg-white transition ${menuOpen ? "-rotate-45 -translate-y-2" : ""}`} />
-          </button>
+          <div className="md:hidden flex items-center gap-3">
+            <LanguageSwitcher />
+            <button
+              onClick={() => setMenuOpen(!menuOpen)}
+              aria-label={menuOpen ? "Close menu" : "Open menu"}
+              className="flex flex-col gap-1.5 z-[70]"
+            >
+              <span className={`w-6 h-0.5 bg-white transition ${menuOpen ? "rotate-45 translate-y-2" : ""}`} />
+              <span className={`w-6 h-0.5 bg-white transition ${menuOpen ? "opacity-0" : ""}`} />
+              <span className={`w-6 h-0.5 bg-white transition ${menuOpen ? "-rotate-45 -translate-y-2" : ""}`} />
+            </button>
+          </div>
         </nav>
         </div>
 
@@ -250,7 +257,7 @@ export default function Layout() {
                     </div>
                   </div>
                   <button onClick={() => { setIsLogoutOpen(true); setMenuOpen(false); }} className="cursor-pointer text-xs font-semibold text-slate-400 hover:text-white uppercase tracking-wider">
-                    Logout
+                    {t("nav.logout")}
                   </button>
                 </div>
               ) : (
@@ -261,7 +268,7 @@ export default function Layout() {
                   }}
                   className="cursor-pointer w-full py-3 rounded-xl border border-white/20 text-white font-medium text-sm hover:bg-white/5 active:scale-[0.98] transition-all"
                 >
-                  Login / SignUp
+                  {t("nav.login")}
                 </button>
               ))}
           </div>
@@ -271,17 +278,17 @@ export default function Layout() {
               onClick={() => { setMenuOpen(false); navigate("/admin/events"); }}
               className="mt-4 w-full py-3 rounded-xl border border-cyan-500/40 text-cyan-200 font-medium text-sm hover:bg-cyan-500/10 active:scale-[0.98] transition-all"
             >
-              Admin Dashboard
+              {t("nav.admin")}
             </button>
           )}
 
           <div className="mt-auto mb-10 space-y-4">
-            <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-3 text-center">Ready to travel?</p>
+            <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-3 text-center">{t("nav.readyToTravel")}</p>
             <button
               onClick={() => goToSection("book")}
               className="w-full py-3.5 rounded-xl bg-cyan-300 text-slate-950 font-semibold text-sm shadow-lg shadow-cyan-300/20 active:scale-[0.98] transition-all"
             >
-              Book a Ride
+              {t("footer.bookARide")}
             </button>
           </div>
         </div>
@@ -299,10 +306,10 @@ export default function Layout() {
               <div className="min-w-0 space-y-5">
                 <h3 className="text-xl font-semibold tracking-wide text-white">ParthRahi</h3>
                 <p className="text-sm leading-6 text-slate-300 max-w-xs">
-                  Technology-driven ride booking platform providing Car, Bike and Auto rides and E-rickshaw.
+                  {t("footer.description")}
                 </p>
                 <div className="pt-1">
-                  <p className="text-xs uppercase tracking-wider text-slate-400 mb-2">Support</p>
+                  <p className="text-xs uppercase tracking-wider text-slate-400 mb-2">{t("footer.support")}</p>
                   <div className="space-y-1">
                     <a href="tel:8252224027" className="block text-sm text-slate-300 hover:text-white hover:underline transition">8252224027</a>
                     <a href="tel:9296218764" className="block text-sm text-slate-300 hover:text-white hover:underline transition">9296218764</a>
@@ -311,13 +318,13 @@ export default function Layout() {
               </div>
 
               <div className="min-w-0">
-                <h4 className="text-xs font-semibold mb-6 uppercase tracking-wider text-slate-400">Company</h4>
+                <h4 className="text-xs font-semibold mb-6 uppercase tracking-wider text-slate-400">{t("footer.company")}</h4>
                 <ul className="space-y-4 text-sm text-slate-300">
                   {[
-                    { label: "About", id: "about" },
-                    { label: "Yatra & Tours", id: "events" },
-                    { label: "Book", id: "book" },
-                    { label: "Contact", id: "contact" },
+                    { label: t("footer.about"), id: "about" },
+                    { label: t("footer.yatraTours"), id: "events" },
+                    { label: t("footer.book"), id: "book" },
+                    { label: t("footer.contact"), id: "contact" },
                   ].map((item) => (
                     <li key={item.id} onClick={() => goToSection(item.id)} className="w-fit hover:text-white hover:translate-x-1 transition-all cursor-pointer">
                       {item.label}
@@ -327,32 +334,32 @@ export default function Layout() {
               </div>
 
               <div className="min-w-0">
-                <h4 className="text-xs font-semibold mb-6 uppercase tracking-wider text-slate-400">Riders</h4>
+                <h4 className="text-xs font-semibold mb-6 uppercase tracking-wider text-slate-400">{t("footer.riders")}</h4>
                 <ul className="space-y-4 text-sm text-slate-300">
-                  <li onClick={() => goToSection("book")} className="w-fit hover:text-white hover:translate-x-1 transition-all cursor-pointer">Book a Ride</li>
-                  <li onClick={() => goToSection("events")} className="w-fit hover:text-white hover:translate-x-1 transition-all cursor-pointer">Yatra &amp; Tours</li>
-                  <li onClick={() => goToSection("features")} className="w-fit hover:text-white hover:translate-x-1 transition-all cursor-pointer">Safety Guidelines</li>
-                  <li onClick={() => goToSection("contact")} className="w-fit hover:text-white hover:translate-x-1 transition-all cursor-pointer">Help &amp; Support</li>
+                  <li onClick={() => goToSection("book")} className="w-fit hover:text-white hover:translate-x-1 transition-all cursor-pointer">{t("footer.bookARide")}</li>
+                  <li onClick={() => goToSection("events")} className="w-fit hover:text-white hover:translate-x-1 transition-all cursor-pointer">{t("footer.yatraTours")}</li>
+                  <li onClick={() => goToSection("features")} className="w-fit hover:text-white hover:translate-x-1 transition-all cursor-pointer">{t("footer.safetyGuidelines")}</li>
+                  <li onClick={() => goToSection("contact")} className="w-fit hover:text-white hover:translate-x-1 transition-all cursor-pointer">{t("footer.helpSupport")}</li>
                 </ul>
               </div>
 
               <div className="min-w-0">
-                <h4 className="text-xs font-semibold mb-6 uppercase tracking-wider text-slate-400">Get Started</h4>
+                <h4 className="text-xs font-semibold mb-6 uppercase tracking-wider text-slate-400">{t("footer.getStarted")}</h4>
                 <div className="flex flex-col gap-3 w-full max-w-xs">
-                  <button onClick={() => goToSection("book")} className={`${btnPrimary} w-full`}>Book Ride</button>
-                  <a href="https://play.google.com/store/apps/details?id=com.parthrahi.parthrahi" target="_blank" rel="noopener noreferrer" className={`${btnSecondary} w-full text-center`}>Download App</a>
-                  <a href="https://play.google.com/store/apps/details?id=com.parthrahi.parth" target="_blank" rel="noopener noreferrer" className={`${btnSecondary} w-full text-center`}>Drive with Us</a>
+                  <button onClick={() => goToSection("book")} className={`${btnPrimary} w-full`}>{t("footer.bookRide")}</button>
+                  <a href="https://play.google.com/store/apps/details?id=com.parthrahi.parthrahi" target="_blank" rel="noopener noreferrer" className={`${btnSecondary} w-full text-center`}>{t("footer.downloadApp")}</a>
+                  <a href="https://play.google.com/store/apps/details?id=com.parthrahi.parth" target="_blank" rel="noopener noreferrer" className={`${btnSecondary} w-full text-center`}>{t("footer.driveWithUs")}</a>
                 </div>
               </div>
             </div>
 
             <div className="mt-12 pt-8 border-t border-slate-700/50">
-              <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400 text-center mb-4">Follow Us</p>
+              <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400 text-center mb-4">{t("footer.followUs")}</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-w-3xl mx-auto">
                 {[
-                  { name: "Instagram", detail: "Official profile", logo: "/Insta-logo.png", url: "https://www.instagram.com/parthrahiofficial/" },
-                  { name: "YouTube", detail: "Latest videos", logo: "/youtube-logo.webp", url: "https://www.youtube.com/@parthrahimobility" },
-                  { name: "Facebook", detail: "Community updates", logo: "/facebook-logo.png", url: "https://www.facebook.com/profile.php?id=61579536731846" },
+                  { name: t("footer.instagram"), detail: t("footer.instagramDetail"), logo: "/Insta-logo.png", url: "https://www.instagram.com/parthrahiofficial/" },
+                  { name: t("footer.youtube"), detail: t("footer.youtubeDetail"), logo: "/youtube-logo.webp", url: "https://www.youtube.com/@parthrahimobility" },
+                  { name: t("footer.facebook"), detail: t("footer.facebookDetail"), logo: "/facebook-logo.png", url: "https://www.facebook.com/profile.php?id=61579536731846" },
                 ].map((social) => (
                   <a
                     key={social.name}
@@ -360,7 +367,7 @@ export default function Layout() {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="group w-full rounded-xl border border-slate-700/60 bg-slate-900/60 px-4 py-3.5 flex items-center justify-between gap-3 transition-all duration-300 hover:bg-white/[0.08] hover:border-slate-500 hover:-translate-y-0.5 hover:shadow-[0_12px_28px_rgba(31,74,190,0.24)]"
-                    aria-label={`Open ${social.name}`}
+                    aria-label={`${t("footer.open")} ${social.name}`}
                   >
                     <span className="min-w-0 flex items-center gap-3">
                       <span aria-hidden="true" className="w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden flex items-center justify-center transition-transform group-hover:scale-110">
@@ -371,7 +378,7 @@ export default function Layout() {
                         <span className="block text-[11px] text-slate-400 truncate group-hover:text-slate-200">{social.detail}</span>
                       </span>
                     </span>
-                    <span className="text-[11px] text-slate-400 group-hover:text-slate-100 transition">Open</span>
+                    <span className="text-[11px] text-slate-400 group-hover:text-slate-100 transition">{t("footer.open")}</span>
                   </a>
                 ))}
               </div>
@@ -380,10 +387,10 @@ export default function Layout() {
 
           <div className="relative z-10 border-t border-slate-700/50">
             <div className="max-w-6xl mx-auto px-6 lg:px-10 py-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
-              <p className="text-center sm:text-left">© {new Date().getFullYear()} Parthrahi Smartcab Solutions LLP.</p>
+              <p className="text-center sm:text-left">{t("footer.copyright", { year: new Date().getFullYear() })}</p>
               <div className="flex items-center gap-6">
-                <span onClick={() => window.open("https://parthrahi-backend.web.app/privacy", "_blank")} className="hover:text-white cursor-pointer transition">Privacy Policy</span>
-                <span onClick={() => window.open("https://parthrahi-backend.web.app/privacy", "_blank")} className="hover:text-white cursor-pointer transition">Terms of Service</span>
+                <span onClick={() => window.open("https://parthrahi-backend.web.app/privacy", "_blank")} className="hover:text-white cursor-pointer transition">{t("footer.privacyPolicy")}</span>
+                <span onClick={() => window.open("https://parthrahi-backend.web.app/privacy", "_blank")} className="hover:text-white cursor-pointer transition">{t("footer.termsOfService")}</span>
               </div>
             </div>
           </div>

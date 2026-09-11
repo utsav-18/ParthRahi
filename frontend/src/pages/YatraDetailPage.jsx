@@ -4,6 +4,7 @@ import api from "../lib/api";
 import useDocumentMeta from "../lib/useDocumentMeta";
 import useJsonLd from "../lib/useJsonLd";
 import { yatraJsonLd } from "../lib/yatraContent";
+import { useLanguage } from "../lib/i18n/LanguageContext";
 import { btnPrimary, btnSecondary } from "../lib/theme";
 import { formatCurrency } from "../lib/format";
 
@@ -39,6 +40,7 @@ const Section = ({ id, kicker: k, hindi, title, children }) => (
 export default function YatraDetailPage() {
   const { slug } = useParams();
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [yatra, setYatra] = useState(null);
   const [testimonials, setTestimonials] = useState([]);
   const [related, setRelated] = useState([]);
@@ -89,9 +91,9 @@ export default function YatraDetailPage() {
   if (error || !yatra) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-3 pt-24 px-6 text-center">
-        <p className="text-2xl font-semibold text-amber-50">Yatra not found</p>
-        <p className="text-amber-100/50 text-sm">{error || "This journey may have been closed or removed."}</p>
-        <Link to="/events" className={`${btnSecondary} mt-2`}>Back to all yatras</Link>
+        <p className="text-2xl font-semibold text-amber-50">{t("yatraDetail.notFoundTitle")}</p>
+        <p className="text-amber-100/50 text-sm">{error || t("yatraDetail.notFoundDesc")}</p>
+        <Link to="/events" className={`${btnSecondary} mt-2`}>{t("yatraDetail.backToAll")}</Link>
       </div>
     );
   }
@@ -100,8 +102,8 @@ export default function YatraDetailPage() {
   const soldOut = seatsLeft <= 0 || yatra.status !== "published";
   const relatedYatras = related.filter((y) => y.slug !== yatra.slug).slice(0, 6);
   const advanceHint = yatra.price?.advanceAmount
-    ? `For this yatra you reserve now with ${formatCurrency(yatra.price.advanceAmount, yatra.price.currency)} per seat; the balance is due before departure.`
-    : "You reserve now and our team confirms the payment details on WhatsApp.";
+    ? t("yatraDetail.advanceHintWithAmount", { amount: formatCurrency(yatra.price.advanceAmount, yatra.price.currency) })
+    : t("yatraDetail.advanceHintNoAmount");
   const galleryImages = (yatra.heroImages || []).filter(Boolean);
 
   return (
@@ -113,7 +115,7 @@ export default function YatraDetailPage() {
           {/* Main column */}
           <div className="min-w-0 space-y-10">
             {yatra.highlights?.length > 0 && (
-              <Section id="highlights" kicker="Trip highlights" hindi="यात्रा की विशेषताएँ" title="Why this yatra">
+              <Section id="highlights" kicker={t("yatraDetail.highlightsKicker")} hindi="यात्रा की विशेषताएँ" title={t("yatraDetail.highlightsTitle")}>
                 <HighlightsList highlights={yatra.highlights} />
               </Section>
             )}
@@ -121,14 +123,14 @@ export default function YatraDetailPage() {
             <QuickInclusionsStrip items={yatra.quickInclusions} />
 
             {galleryImages.length > 1 && (
-              <Section id="gallery" kicker="A glimpse" hindi="झलक" title="Photo gallery">
+              <Section id="gallery" kicker={t("yatraDetail.galleryKicker")} hindi="झलक" title={t("yatraDetail.galleryTitle")}>
                 <YatraGallery images={galleryImages} title={yatra.title} />
               </Section>
             )}
 
             {yatra.freebies?.length > 0 && (
               <div className="rounded-xl border border-green-400/20 bg-green-500/[0.06] px-4 py-3 text-sm text-green-200">
-                🎁 <span className="font-medium">Included free:</span> {yatra.freebies.join(" · ")}
+                🎁 <span className="font-medium">{t("yatraDetail.includedFree")}</span> {yatra.freebies.join(" · ")}
               </div>
             )}
 
@@ -141,7 +143,7 @@ export default function YatraDetailPage() {
 
             <SacredDivider />
 
-            <Section id="itinerary" kicker="Day by day" hindi="दिन-प्रतिदिन" title="Full itinerary">
+            <Section id="itinerary" kicker={t("yatraDetail.itineraryKicker")} hindi="दिन-प्रतिदिन" title={t("yatraDetail.itineraryTitle")}>
               <ItineraryAccordion itinerary={yatra.itinerary} />
               {yatra.mapImageUrl && (
                 <div className="mt-4 rounded-xl overflow-hidden border border-amber-200/12">
@@ -150,7 +152,7 @@ export default function YatraDetailPage() {
               )}
             </Section>
 
-            <Section id="inclusions" kicker="What you pay for" hindi="शुल्क में क्या है" title="Inclusions & exclusions">
+            <Section id="inclusions" kicker={t("yatraDetail.inclusionsKicker")} hindi="शुल्क में क्या है" title={t("yatraDetail.inclusionsTitle")}>
               <InclusionExclusionList
                 inclusions={yatra.inclusions}
                 exclusions={yatra.exclusions}
@@ -160,25 +162,25 @@ export default function YatraDetailPage() {
 
             <SacredDivider />
 
-            <Section id="fare" kicker="Transparent pricing" hindi="पारदर्शी शुल्क" title="Fares & how to reserve">
+            <Section id="fare" kicker={t("yatraDetail.fareKicker")} hindi="पारदर्शी शुल्क" title={t("yatraDetail.fareTitle")}>
               <FareBox price={yatra.price} />
               <div className="mt-4 rounded-xl border border-amber-200/12 bg-amber-400/[0.04] p-4 text-sm text-amber-100/75">
-                <p className="text-amber-50 font-medium mb-1">Reserving your seat</p>
-                <p>{advanceHint} Once you confirm, seats are held in your name and we send a booking reference on WhatsApp. No account or app needed.</p>
+                <p className="text-amber-50 font-medium mb-1">{t("yatraDetail.reservingTitle")}</p>
+                <p>{advanceHint} {t("yatraDetail.reservingHint")}</p>
               </div>
             </Section>
 
             {(yatra.rulesAndFacilities?.length > 0 || yatra.termsAndConditions?.length > 0) && (
-              <Section id="rules" kicker="The fine print, in plain words" hindi="नियम व सुविधाएँ" title="Rules & facilities">
+              <Section id="rules" kicker={t("yatraDetail.rulesKicker")} hindi="नियम व सुविधाएँ" title={t("yatraDetail.rulesTitle")}>
                 <RulesAccordion rules={yatra.rulesAndFacilities} terms={yatra.termsAndConditions} />
               </Section>
             )}
 
-            <Section id="faq" kicker="Questions travellers ask" hindi="अक्सर पूछे जाने वाले प्रश्न" title="Frequently asked questions">
+            <Section id="faq" kicker={t("yatraDetail.faqKicker")} hindi="अक्सर पूछे जाने वाले प्रश्न" title={t("yatraDetail.faqTitle")}>
               <YatraFaq faqs={yatra.faqs} />
             </Section>
 
-            <Section id="why" kicker="Why travel with us" hindi="हम पर भरोसा क्यों" title="You're in safe hands">
+            <Section id="why" kicker={t("yatraDetail.whyKicker")} hindi="हम पर भरोसा क्यों" title={t("yatraDetail.whyTitle")}>
               <TrustBand compact />
             </Section>
 
@@ -189,13 +191,13 @@ export default function YatraDetailPage() {
             </Section>
 
             {testimonials.length > 0 && (
-              <Section id="testimonials" kicker="Travellers' words" hindi="यात्रियों के अनुभव" title="What people say">
+              <Section id="testimonials" kicker={t("yatraDetail.testimonialsKicker")} hindi="यात्रियों के अनुभव" title={t("yatraDetail.testimonialsTitle")}>
                 <TestimonialCarousel testimonials={testimonials} />
               </Section>
             )}
 
             {relatedYatras.length > 0 && (
-              <Section id="related" kicker="Keep exploring" hindi="और यात्राएँ" title="Other journeys">
+              <Section id="related" kicker={t("yatraDetail.relatedKicker")} hindi="और यात्राएँ" title={t("yatraDetail.relatedTitle")}>
                 <RelatedYatrasCarousel yatras={relatedYatras} />
               </Section>
             )}
@@ -211,14 +213,14 @@ export default function YatraDetailPage() {
       {/* Mobile sticky bottom CTA */}
       <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-[#140c03]/92 backdrop-blur-md border-t border-amber-200/15 px-4 py-3 flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-[10px] uppercase tracking-wider text-amber-200/40">from</p>
+          <p className="text-[10px] uppercase tracking-wider text-amber-200/40">{t("yatraDetail.from")}</p>
           <p className="text-lg font-bold text-amber-50 leading-none">{formatCurrency(yatra.price?.amount, yatra.price?.currency)}</p>
         </div>
         {soldOut ? (
-          <span className={`${btnPrimary} opacity-50`}>Sold out</span>
+          <span className={`${btnPrimary} opacity-50`}>{t("yatraDetail.soldOut")}</span>
         ) : (
           <button onClick={() => navigate(`/events/${yatra.slug}/book`)} className={btnPrimary}>
-            Reserve Your Seat
+            {t("yatraDetail.reserveSeat")}
           </button>
         )}
       </div>

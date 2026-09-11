@@ -1,27 +1,11 @@
 // Fallback copy used when a yatra has no page-specific version in the database.
-
-export const DEFAULT_FAQS = [
-  {
-    q: "How do I reserve a seat?",
-    a: "Open a yatra, tap “Reserve Your Seat”, fill the lead traveller's details and number of seats, then pay the advance. You get a booking reference immediately and our team confirms on WhatsApp.",
-  },
-  {
-    q: "How much advance do I pay, and when is the balance due?",
-    a: "The advance is shown on each yatra (for example ₹1,000–₹3,000 per seat). The balance is payable before departure — usually 15–20 days prior. There are no booking fees or hidden charges.",
-  },
-  {
-    q: "What is included in the price?",
-    a: "Travel for the whole route, hotel stay on twin/triple sharing, daily sattvic breakfast and dinner, permits where needed, and a ParthRahi tour manager with the group. Each yatra page lists inclusions and exclusions in full.",
-  },
-  {
-    q: "Can I cancel or change my booking?",
-    a: "Yes. Every yatra page has a clear cancellation & refund policy under “Rules & Facilities”. In short: cancel early and the advance is adjustable; closer to departure a slab-based charge applies.",
-  },
-  {
-    q: "I'm booking for my parents / a group. Can you help?",
-    a: "That's most of what we do. Message us on WhatsApp with the yatra name and number of travellers and we'll hold seats, arrange the nearest pickup point and handle the paperwork.",
-  },
-];
+// Built from the active-language dictionary, so it switches with the site language.
+export function getDefaultFaqs(t) {
+  return [1, 2, 3, 4, 5].map((n) => ({
+    q: t(`yatraFaq.q${n}`),
+    a: t(`yatraFaq.a${n}`),
+  }));
+}
 
 // JSON-LD structured data so search engines and link previews understand the trip.
 export function yatraJsonLd(yatra, url) {

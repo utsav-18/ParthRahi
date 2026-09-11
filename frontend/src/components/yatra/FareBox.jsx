@@ -1,9 +1,11 @@
 import { formatCurrency } from "../../lib/format";
+import { useLanguage } from "../../lib/i18n/LanguageContext";
 
 export default function FareBox({ price = {}, selectedVariant, onSelectVariant }) {
+  const { t } = useLanguage();
   const variants = Array.isArray(price.variants) && price.variants.length
     ? price.variants
-    : [{ label: price.unit || "Per person", amount: price.amount }];
+    : [{ label: price.unit || t("fareBox.perPerson"), amount: price.amount }];
 
   const advance = price.advanceAmount;
   const selectable = Boolean(onSelectVariant);
@@ -31,14 +33,14 @@ export default function FareBox({ price = {}, selectedVariant, onSelectVariant }
             >
               {isValue && (
                 <span className="absolute top-0 right-0 text-[9px] font-bold uppercase tracking-wider bg-green-400/20 text-green-200 px-2 py-0.5 rounded-bl-lg">
-                  Best value
+                  {t("fareBox.bestValue")}
                 </span>
               )}
               <p className="text-xs text-amber-100/60 mb-1.5 font-medium pr-16">{v.label}</p>
               <p className="text-2xl font-bold text-amber-50 tracking-tight">
                 {formatCurrency(v.amount, price.currency)}
               </p>
-              <p className="text-[11px] text-amber-200/40 mt-0.5">{price.unit || "per person"}</p>
+              <p className="text-[11px] text-amber-200/40 mt-0.5">{price.unit || t("fareBox.perPerson")}</p>
               {active && selectable && (
                 <span className="absolute bottom-2 right-2 w-5 h-5 rounded-full bg-amber-300 text-[#3a1c02] text-xs flex items-center justify-center">✓</span>
               )}
@@ -49,8 +51,8 @@ export default function FareBox({ price = {}, selectedVariant, onSelectVariant }
 
       {advance ? (
         <div className="rounded-xl border border-amber-300/25 bg-amber-300/[0.08] px-4 py-3 text-sm text-amber-100">
-          <span className="font-semibold">Reserve with {formatCurrency(advance, price.currency)} per seat.</span>{" "}
-          The remaining balance is payable before departure. No booking fee, no card charges.
+          <span className="font-semibold">{t("fareBox.reserveWithPerSeat", { amount: formatCurrency(advance, price.currency) })}</span>{" "}
+          {t("fareBox.balanceNote")}
         </div>
       ) : null}
     </div>

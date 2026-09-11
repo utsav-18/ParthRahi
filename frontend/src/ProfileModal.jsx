@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from './AuthContext';
+import { useLanguage } from './lib/i18n/LanguageContext';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
 const ProfileModal = ({ isOpen, onClose, user }) => {
   const { setUser } = useAuth();
+  const { t } = useLanguage();
 
   const [isEditingPhone, setIsEditingPhone] = useState(false);
   const [phoneInput, setPhoneInput] = useState('');
@@ -58,14 +60,14 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
 
     const trimmed = phoneInput.trim();
     if (!trimmed) {
-      setPhoneError('Mobile number is required');
+      setPhoneError(t('profile.errPhoneRequired'));
       return;
     }
 
     const cleanedPhone = trimmed.replace(/[\s-]/g, '');
     const phoneRegex = /^(\+?[1-9]\d{0,3})?\d{10}$/;
     if (!phoneRegex.test(cleanedPhone) || trimmed.length > 18) {
-      setPhoneError('Please enter a valid mobile number (e.g. +91 9876543210 or 10-digit number)');
+      setPhoneError(t('profile.errPhoneInvalid'));
       return;
     }
 
@@ -83,7 +85,7 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
       setIsEditingPhone(false);
     } catch (err) {
       console.error('Failed to update phone:', err);
-      setPhoneError(err.response?.data?.error || 'Failed to update mobile number. Please try again.');
+      setPhoneError(err.response?.data?.error || t('profile.errUpdateFailed'));
     } finally {
       setIsSaving(false);
     }
@@ -109,8 +111,8 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
 
         {/* Header Tag */}
         <div className="mb-6">
-          <p className="text-[11px] tracking-[0.38em] uppercase text-cyan-400/90 font-medium">ParthRahi</p>
-          <h2 className="text-xl font-semibold text-white mt-1">User Profile</h2>
+          <p className="text-[11px] tracking-[0.38em] uppercase text-cyan-400/90 font-medium">{t('auth.appName')}</p>
+          <h2 className="text-xl font-semibold text-white mt-1">{t('profile.title')}</h2>
         </div>
 
         {/* Profile Picture / Initials Avatar */}
@@ -131,7 +133,7 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
 
         {/* Name */}
         <h3 className="text-xl font-semibold text-white tracking-wide">
-          {user.name || 'ParthRahi Traveler'}
+          {user.name || t('profile.defaultTraveler')}
         </h3>
 
         {/* Details Card */}
@@ -140,7 +142,7 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
           <div className="bg-slate-800/60 border border-slate-700/60 rounded-xl px-4 py-3">
             <div className="flex items-center justify-between mb-1">
               <p className="text-[11px] uppercase tracking-wider text-slate-400 font-medium">
-                Mobile Number
+                {t('profile.mobileNumber')}
               </p>
               {!isEditingPhone && (
                 <button
@@ -148,7 +150,7 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
                   onClick={handleStartEdit}
                   className="text-xs font-semibold text-cyan-400 hover:text-cyan-300 transition-colors cursor-pointer"
                 >
-                  Edit
+                  {t('profile.edit')}
                 </button>
               )}
             </div>
@@ -158,7 +160,7 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
                 <input
                   type="tel"
                   autoFocus
-                  placeholder="Enter mobile number"
+                  placeholder={t('profile.mobilePlaceholder')}
                   value={phoneInput}
                   onChange={(e) => {
                     setPhoneInput(e.target.value);
@@ -178,14 +180,14 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
                     onClick={handleCancelEdit}
                     className="px-3 py-1.5 rounded-lg border border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white text-xs font-medium transition-colors cursor-pointer disabled:opacity-50"
                   >
-                    Cancel
+                    {t('profile.cancel')}
                   </button>
                   <button
                     type="submit"
                     disabled={isSaving}
                     className="px-3.5 py-1.5 rounded-lg bg-cyan-300 text-slate-950 hover:bg-cyan-200 text-xs font-semibold transition-all shadow-sm cursor-pointer disabled:opacity-50"
                   >
-                    {isSaving ? 'Saving...' : 'Save'}
+                    {isSaving ? t('profile.saving') : t('profile.save')}
                   </button>
                 </div>
               </form>
@@ -194,7 +196,7 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
                 {user.phone ? (
                   user.phone
                 ) : (
-                  <span className="text-slate-400 font-normal italic">Mobile number not added</span>
+                  <span className="text-slate-400 font-normal italic">{t('profile.mobileNotAdded')}</span>
                 )}
               </p>
             )}
@@ -203,10 +205,10 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
           {/* Email Address */}
           <div className="bg-slate-800/60 border border-slate-700/60 rounded-xl px-4 py-3">
             <p className="text-[11px] uppercase tracking-wider text-slate-400 font-medium mb-1">
-              Email Address
+              {t('profile.emailAddress')}
             </p>
             <p className="text-sm font-medium text-white break-all">
-              {user.email || 'Email not available'}
+              {user.email || t('profile.emailNotAvailable')}
             </p>
           </div>
         </div>
@@ -218,7 +220,7 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
             onClick={onClose}
             className="w-full py-2.5 rounded-xl border border-slate-600/80 text-slate-200 font-medium text-sm hover:bg-slate-800 hover:text-white active:scale-[0.98] transition-all cursor-pointer"
           >
-            Close
+            {t('profile.close')}
           </button>
         </div>
       </div>

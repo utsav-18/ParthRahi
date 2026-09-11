@@ -1,27 +1,5 @@
 import { SacredKicker } from "./SacredOrnaments";
-
-const STEPS = [
-  {
-    icon: "🧭",
-    title: "Browse & choose",
-    body: "Open a yatra to see the full day-wise plan, what's included, the fares and the next departure dates.",
-  },
-  {
-    icon: "📝",
-    title: "Reserve your seat",
-    body: "Fill in the lead traveller's details and number of seats. Your seats are held for you the moment you confirm.",
-  },
-  {
-    icon: "💳",
-    title: "Pay the advance",
-    body: "Pay a small advance per seat over UPI or WhatsApp. The balance is due before departure — no hidden charges.",
-  },
-  {
-    icon: "🙏",
-    title: "Get confirmed & travel",
-    body: "We confirm on WhatsApp with your booking reference, share the pickup details, and our tour manager takes it from there.",
-  },
-];
+import { useLanguage } from "../../lib/i18n/LanguageContext";
 
 /**
  * "How booking works" explainer.
@@ -29,12 +7,21 @@ const STEPS = [
  * variant="compact" → slim 4-step strip (detail / booking pages)
  */
 export default function HowItWorks({ variant = "full", advanceHint }) {
+  const { t } = useLanguage();
+
+  const steps = [
+    { icon: "🧭", title: t("howItWorks.step1Title"), body: t("howItWorks.step1Body") },
+    { icon: "📝", title: t("howItWorks.step2Title"), body: t("howItWorks.step2Body") },
+    { icon: "💳", title: t("howItWorks.step3Title"), body: t("howItWorks.step3Body") },
+    { icon: "🙏", title: t("howItWorks.step4Title"), body: t("howItWorks.step4Body") },
+  ];
+
   if (variant === "compact") {
     return (
       <div className="rounded-2xl border border-amber-200/12 bg-amber-950/15 p-4 sm:p-5">
-        <SacredKicker>How booking works</SacredKicker>
+        <SacredKicker>{t("howItWorks.kicker")}</SacredKicker>
         <ol className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 mt-3">
-          {STEPS.map((s, i) => (
+          {steps.map((s, i) => (
             <li key={s.title} className="flex gap-3">
               <span className="shrink-0 grid place-items-center w-7 h-7 rounded-full bg-amber-400/15 border border-amber-300/30 text-amber-200 text-xs font-bold">
                 {i + 1}
@@ -56,15 +43,15 @@ export default function HowItWorks({ variant = "full", advanceHint }) {
   return (
     <section className="relative">
       <div className="text-center mb-8">
-        <SacredKicker hindi="सरल व पारदर्शी">Simple &amp; transparent</SacredKicker>
-        <h2 className="text-2xl md:text-3xl font-bold text-amber-50 mt-2">How your yatra booking works</h2>
+        <SacredKicker hindi="सरल व पारदर्शी">{t("howItWorks.fullKicker")}</SacredKicker>
+        <h2 className="text-2xl md:text-3xl font-bold text-amber-50 mt-2">{t("howItWorks.title")}</h2>
         <p className="text-amber-100/55 text-sm mt-2 max-w-2xl mx-auto">
-          Four clear steps from choosing a journey to boarding the coach. No app download, no paperwork queues.
+          {t("howItWorks.subtitle")}
         </p>
       </div>
 
       <ol className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {STEPS.map((s, i) => (
+        {steps.map((s, i) => (
           <li
             key={s.title}
             className="relative rounded-2xl border border-amber-200/12 bg-[#160f06]/55 p-5 transition-all duration-300 hover:-translate-y-1 hover:border-amber-300/35"
@@ -77,7 +64,7 @@ export default function HowItWorks({ variant = "full", advanceHint }) {
             </div>
             <p className="text-amber-50 font-semibold">{s.title}</p>
             <p className="text-amber-100/55 text-sm mt-1 leading-relaxed">{s.body}</p>
-            {i < STEPS.length - 1 && (
+            {i < steps.length - 1 && (
               <span className="hidden lg:block absolute top-10 -right-2 text-amber-300/25 text-lg">→</span>
             )}
           </li>

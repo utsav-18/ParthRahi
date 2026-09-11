@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useLanguage } from "../lib/i18n/LanguageContext";
 
 const STORAGE_KEY = "pr-announce-yatra-v1";
 
@@ -19,6 +20,7 @@ const initiallyDismissed = () => {
 export default function AnnouncementBar({ onVisibilityChange }) {
   const [show, setShow] = useState(() => !initiallyDismissed());
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   useEffect(() => {
     onVisibilityChange?.(show);
@@ -45,14 +47,14 @@ export default function AnnouncementBar({ onVisibilityChange }) {
       >
         <span aria-hidden="true">🕉️</span>
         <span>
-          <span className="font-semibold">New — ParthRahi Yatra:</span> guided pilgrimage &amp; group tours.
+          <span className="font-semibold">{t("announcement.badge")}</span> {t("announcement.text")}
         </span>
-        <span className="hidden sm:inline underline underline-offset-2">Explore journeys →</span>
+        <span className="hidden sm:inline underline underline-offset-2">{t("announcement.cta")}</span>
       </button>
       <button
         type="button"
         onClick={dismiss}
-        aria-label="Dismiss announcement"
+        aria-label={t("announcement.dismiss")}
         className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 grid place-items-center rounded-full text-[#2a1400]/70 hover:text-[#2a1400] hover:bg-black/10 cursor-pointer"
       >
         ✕

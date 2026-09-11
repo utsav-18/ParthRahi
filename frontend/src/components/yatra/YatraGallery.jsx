@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
+import { useLanguage } from "../../lib/i18n/LanguageContext";
 
 // Adapted from the Lightbox / HotelGallery pattern in EventsSection.jsx,
 // generalised to accept a plain list of image URLs.
@@ -76,6 +77,7 @@ function Lightbox({ images, index, onClose }) {
 }
 
 export default function YatraGallery({ images = [], title = "" }) {
+  const { t } = useLanguage();
   const list = images.filter(Boolean);
   const [active, setActive] = useState(0);
   const [lightbox, setLightbox] = useState(null);
@@ -126,7 +128,7 @@ export default function YatraGallery({ images = [], title = "" }) {
           ))}
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
           <div className="absolute top-3 right-3">
-            <span className="text-white/60 text-[10px] bg-black/40 px-2 py-0.5 rounded-full border border-white/10">tap to expand</span>
+            <span className="text-white/60 text-[10px] bg-black/40 px-2 py-0.5 rounded-full border border-white/10">{t("gallery.tapToExpand")}</span>
           </div>
           {list.length > 1 && (
             <>

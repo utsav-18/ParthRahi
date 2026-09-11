@@ -1,7 +1,7 @@
 /* global google */
 
 import { useState, useEffect, useRef } from "react";
-import Silk from "./Silk";
+import { useLanguage } from "./lib/i18n/LanguageContext";
 
 const RATES = {
   auto:      { baseFare: 40, costPerKm: 10, minimumFare: 80 },
@@ -18,32 +18,12 @@ const calculateFare = (type, km) => {
 
 // Each vehicle gets its own accent so the options are distinguishable at a glance,
 // not just by the selection outline.
-const RIDE_OPTIONS = [
-  {
-    value: "auto",
-    label: "Auto",
-    desc: "3-seater comfort",
-    accent: { ring: "border-amber-300/80", bg: "bg-amber-300/12", glow: "shadow-[0_0_22px_rgba(252,211,77,0.18)]", icon: "text-amber-200", iconBox: "border-amber-200 bg-amber-300/15" },
-  },
-  {
-    value: "bike",
-    label: "Bike",
-    desc: "Fastest in traffic",
-    accent: { ring: "border-sky-300/80", bg: "bg-sky-300/12", glow: "shadow-[0_0_22px_rgba(125,211,252,0.18)]", icon: "text-sky-200", iconBox: "border-sky-200 bg-sky-300/15" },
-  },
-  {
-    value: "cab",
-    label: "Cab",
-    desc: "4-seater, AC ride",
-    accent: { ring: "border-violet-300/80", bg: "bg-violet-300/12", glow: "shadow-[0_0_22px_rgba(196,181,253,0.18)]", icon: "text-violet-200", iconBox: "border-violet-200 bg-violet-300/15" },
-  },
-  {
-    value: "erickshaw",
-    label: "E-Rickshaw",
-    desc: "Eco-friendly hop",
-    accent: { ring: "border-emerald-300/80", bg: "bg-emerald-300/12", glow: "shadow-[0_0_22px_rgba(110,231,183,0.18)]", icon: "text-emerald-200", iconBox: "border-emerald-200 bg-emerald-300/15" },
-  },
-];
+const RIDE_ACCENTS = {
+  auto: { ring: "border-amber-300/80", bg: "bg-amber-300/12", glow: "shadow-[0_0_22px_rgba(252,211,77,0.18)]", icon: "text-amber-200", iconBox: "border-amber-200 bg-amber-300/15" },
+  bike: { ring: "border-sky-300/80", bg: "bg-sky-300/12", glow: "shadow-[0_0_22px_rgba(125,211,252,0.18)]", icon: "text-sky-200", iconBox: "border-sky-200 bg-sky-300/15" },
+  cab: { ring: "border-violet-300/80", bg: "bg-violet-300/12", glow: "shadow-[0_0_22px_rgba(196,181,253,0.18)]", icon: "text-violet-200", iconBox: "border-violet-200 bg-violet-300/15" },
+  erickshaw: { ring: "border-emerald-300/80", bg: "bg-emerald-300/12", glow: "shadow-[0_0_22px_rgba(110,231,183,0.18)]", icon: "text-emerald-200", iconBox: "border-emerald-200 bg-emerald-300/15" },
+};
 
 // Distinct, filled-style silhouettes so vehicles read clearly even at small sizes,
 // instead of similar-looking outline glyphs.
@@ -66,6 +46,7 @@ function VehicleSymbol({ type, className = "w-6 h-6" }) {
 }
 
 export default function BookRideSection() {
+  const { t } = useLanguage();
   const [rideType,    setRideType]    = useState("auto");
   const [source,      setSource]      = useState("");
   const [destination, setDestination] = useState("");
@@ -84,6 +65,13 @@ export default function BookRideSection() {
   const dirRenderer    = useRef(null);
   const sourceInputRef = useRef(null);
   const destInputRef   = useRef(null);
+
+  const RIDE_OPTIONS = [
+    { value: "auto", label: t("bookRide.vehicleAutoLabel"), desc: t("bookRide.vehicleAutoDesc"), accent: RIDE_ACCENTS.auto },
+    { value: "bike", label: t("bookRide.vehicleBikeLabel"), desc: t("bookRide.vehicleBikeDesc"), accent: RIDE_ACCENTS.bike },
+    { value: "cab", label: t("bookRide.vehicleCabLabel"), desc: t("bookRide.vehicleCabDesc"), accent: RIDE_ACCENTS.cab },
+    { value: "erickshaw", label: t("bookRide.vehicleErickshawLabel"), desc: t("bookRide.vehicleErickshawDesc"), accent: RIDE_ACCENTS.erickshaw },
+  ];
 
   useEffect(() => {
     const initMap = () => {
@@ -110,8 +98,8 @@ export default function BookRideSection() {
     if (!key) { console.error("Missing VITE_GOOGLE_MAPS_API_KEY in .env"); return; }
 
     if (document.getElementById("gmaps-script")) {
-      const t = setInterval(() => { if (window.google?.maps?.Map) { clearInterval(t); initMap(); } }, 100);
-      return () => clearInterval(t);
+      const poll = setInterval(() => { if (window.google?.maps?.Map) { clearInterval(poll); initMap(); } }, 100);
+      return () => clearInterval(poll);
     }
 
     window.__bookRideMapInit = initMap;
@@ -131,15 +119,15 @@ export default function BookRideSection() {
     const src = sourceInputRef.current?.value?.trim();
     const dst = destInputRef.current?.value?.trim();
     const errs = {};
-    if (!src) errs.source      = "Enter pickup location";
-    if (!dst) errs.destination = "Enter drop location";
+    if (!src) errs.source      = t("bookRide.errSource");
+    if (!dst) errs.destination = t("bookRide.errDestination");
     if (Object.keys(errs).length) { setErrors(errs); return; }
     setErrors({}); setLoading(true);
     dirService.current.route(
       { origin: src, destination: dst, travelMode: google.maps.TravelMode.DRIVING },
       (result, status) => {
         setLoading(false);
-        if (status !== "OK") { setErrors({ route: "Could not find route. Try a nearby landmark." }); return; }
+        if (status !== "OK") { setErrors({ route: t("bookRide.errRoute") }); return; }
         dirRenderer.current.setDirections(result);
         const km = parseFloat((result.routes[0].legs[0].distance.value / 1000).toFixed(2));
         setDistanceKm(km);
@@ -168,10 +156,12 @@ export default function BookRideSection() {
 
   const bookRide = () => {
     const errs = {};
-    if (!/^[A-Za-z ]{3,}$/.test(userName))  errs.userName  = "Enter valid name (letters only, min 3)";
-    if (!/^[6-9]\d{9}$/.test(userPhone))     errs.userPhone = "Enter valid 10-digit mobile number";
+    if (!/^[A-Za-z ]{3,}$/.test(userName))  errs.userName  = t("bookRide.errName");
+    if (!/^[6-9]\d{9}$/.test(userPhone))     errs.userPhone = t("bookRide.errPhone");
     if (Object.keys(errs).length) { setErrors(errs); return; }
     const mapLink = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(source)}&destination=${encodeURIComponent(destination)}&travelmode=driving`;
+    // This message goes to the ParthRahi ops WhatsApp number, so it stays in a
+    // fixed English format regardless of site language (kept consistent for the team).
     const message =
 `*ParthRahi – Booking Request*
 
@@ -201,16 +191,16 @@ ${mapLink}`;
   const inputCls = (field) =>
     `w-full bg-slate-900/85 border ${errors[field] ? "border-red-300/80" : "border-slate-200/20"} rounded-lg px-4 py-3 text-white text-sm placeholder:text-slate-300 focus:outline-none focus:border-cyan-200 focus:ring-2 focus:ring-cyan-300/25 transition-all duration-200`;
 
-  const stepLabel = step === 1 ? "Trip Setup" : "Rider Profile";
+  const stepLabel = step === 1 ? t("bookRide.stepTripSetup") : t("bookRide.stepRiderProfile");
 
   return (
     <section id="book" className="relative py-16 sm:py-20 md:py-24 px-4 sm:px-6 md:px-16 overflow-hidden border-t border-slate-100/20">
 
       <div className="relative z-10 text-center mb-10 sm:mb-14">
-        <p className="text-[11px] sm:text-xs uppercase tracking-[0.28em] text-slate-200 mb-3">ParthRahi Mobility</p>
-        <h2 className="text-2xl sm:text-3xl md:text-5xl font-semibold text-white">Advance Booking</h2>
+        <p className="text-[11px] sm:text-xs uppercase tracking-[0.28em] text-slate-200 mb-3">{t("bookRide.kicker")}</p>
+        <h2 className="text-2xl sm:text-3xl md:text-5xl font-semibold text-white">{t("bookRide.title")}</h2>
         <p className="text-slate-200 mt-3 sm:mt-4 max-w-2xl mx-auto text-sm md:text-base px-2">
-          Plan a route, compare vehicle options, and place your booking with transparent pricing and verified trip details.
+          {t("bookRide.subtitle")}
         </p>
       </div>
 
@@ -228,15 +218,15 @@ ${mapLink}`;
               ))}
             </div>
             <p className="text-xs uppercase tracking-wide text-slate-300">
-              Step {step} of 2 · <span className="text-slate-50">{stepLabel}</span>
+              {t("bookRide.stepLabel", { n: step })} <span className="text-slate-50">{stepLabel}</span>
             </p>
           </div>
 
           <div className="space-y-3">
             <div className="space-y-1">
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[10px] tracking-wider text-slate-300 pointer-events-none">FROM</span>
-                <input ref={sourceInputRef} placeholder="Enter pickup location" autoComplete="off" onFocus={ensureFieldVisibility} className={`${inputCls("source")} pl-16`} />
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[10px] tracking-wider text-slate-300 pointer-events-none">{t("bookRide.from")}</span>
+                <input ref={sourceInputRef} placeholder={t("bookRide.fromPlaceholder")} autoComplete="off" onFocus={ensureFieldVisibility} className={`${inputCls("source")} pl-16`} />
               </div>
               {errors.source && <p className="text-red-400 text-xs pl-1">{errors.source}</p>}
             </div>
@@ -247,21 +237,21 @@ ${mapLink}`;
               className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg border border-cyan-200/55 text-cyan-100 text-sm cursor-pointer hover:bg-cyan-300/15 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/50"
             >
               {locLoading
-                ? <><span className="w-3 h-3 border-2 border-cyan-300 border-t-transparent rounded-full animate-spin" />Detecting location…</>
-                : "Use current GPS location"}
+                ? <><span className="w-3 h-3 border-2 border-cyan-300 border-t-transparent rounded-full animate-spin" />{t("bookRide.detectingLocation")}</>
+                : t("bookRide.useCurrentLocation")}
             </button>
 
             <div className="space-y-1">
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[10px] tracking-wider text-slate-300 pointer-events-none">TO</span>
-                <input ref={destInputRef} placeholder="Enter destination" autoComplete="off" onFocus={ensureFieldVisibility} className={`${inputCls("destination")} pl-16`} />
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[10px] tracking-wider text-slate-300 pointer-events-none">{t("bookRide.to")}</span>
+                <input ref={destInputRef} placeholder={t("bookRide.toPlaceholder")} autoComplete="off" onFocus={ensureFieldVisibility} className={`${inputCls("destination")} pl-16`} />
               </div>
               {errors.destination && <p className="text-red-400 text-xs pl-1">{errors.destination}</p>}
             </div>
           </div>
 
           <div className="space-y-2.5">
-            <p className="text-slate-200 text-xs uppercase tracking-[0.18em]">Choose a vehicle</p>
+            <p className="text-slate-200 text-xs uppercase tracking-[0.18em]">{t("bookRide.chooseVehicle")}</p>
             <div className="grid grid-cols-2 gap-2 sm:gap-3">
               {RIDE_OPTIONS.map(({ value, label, desc, accent }) => {
                 const selected = rideType === value;
@@ -281,7 +271,7 @@ ${mapLink}`;
                       <span className={`block text-[13px] sm:text-sm font-semibold truncate ${selected ? "text-white" : "text-slate-50"}`}>{label}</span>
                       <span className="block text-[10px] sm:text-[11px] text-slate-300 leading-tight truncate">{desc}</span>
                       <span className={`block text-[11px] sm:text-xs font-semibold mt-0.5 ${selected ? "text-cyan-100" : "text-slate-200"}`}>
-                        {price ? `₹${price}` : `From ₹${RATES[value].baseFare}`}
+                        {price ? `₹${price}` : t("bookRide.fromPrice", { amount: RATES[value].baseFare })}
                       </span>
                     </span>
                     {selected && (
@@ -307,13 +297,13 @@ ${mapLink}`;
             className="w-full py-3.5 rounded-lg bg-cyan-300 hover:bg-cyan-200 text-slate-950 font-semibold text-sm cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/60"
           >
             {loading
-              ? <><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Calculating…</>
-              : "Calculate Route & Estimate"}
+              ? <><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />{t("bookRide.calculating")}</>
+              : t("bookRide.calculateRoute")}
           </button>
 
           {!mapsReady && (
             <p className="text-center text-slate-300 text-xs">
-              {import.meta.env.VITE_GOOGLE_MAPS_API_KEY ? "Loading Google Maps…" : "⚠ Add VITE_GOOGLE_MAPS_API_KEY to .env"}
+              {import.meta.env.VITE_GOOGLE_MAPS_API_KEY ? t("bookRide.loadingMaps") : t("bookRide.missingKey")}
             </p>
           )}
 
@@ -325,29 +315,29 @@ ${mapLink}`;
                     <VehicleSymbol type={rideType} className="w-full h-full p-1" />
                   </span>
                   <div className="min-w-0">
-                    <p className="text-slate-200 text-[11px] sm:text-xs uppercase tracking-wide">Distance</p>
+                    <p className="text-slate-200 text-[11px] sm:text-xs uppercase tracking-wide">{t("bookRide.distance")}</p>
                     <p className="text-white font-semibold text-sm sm:text-base">{distanceKm} km</p>
                   </div>
                 </div>
                 <div className="text-right shrink-0">
-                  <p className="text-slate-200 text-[11px] sm:text-xs uppercase tracking-wide">Estimated fare</p>
+                  <p className="text-slate-200 text-[11px] sm:text-xs uppercase tracking-wide">{t("bookRide.estimatedFare")}</p>
                   <p className="text-xl sm:text-2xl font-bold text-cyan-100">₹{fare}</p>
                 </div>
               </div>
               <p className="text-[10px] sm:text-[11px] text-slate-300 border-t border-cyan-100/20 pt-2.5">
-                Base ₹{activeRate.baseFare} + ₹{activeRate.costPerKm}/km · Minimum fare ₹{activeRate.minimumFare}
+                {t("bookRide.fareNote", { base: activeRate.baseFare, perKm: activeRate.costPerKm, min: activeRate.minimumFare })}
               </p>
             </div>
           )}
 
           {step >= 2 && (
             <div className="space-y-4 pt-2 border-t border-slate-200/10">
-              <p className="text-slate-200 text-xs uppercase tracking-[0.18em] pt-1">Rider Details</p>
+              <p className="text-slate-200 text-xs uppercase tracking-[0.18em] pt-1">{t("bookRide.riderDetails")}</p>
 
               <div className="space-y-1">
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[10px] tracking-wider text-slate-300 pointer-events-none">NAME</span>
-                  <input value={userName} onChange={(e) => setUserName(e.target.value)} onFocus={ensureFieldVisibility} placeholder="Enter full name" autoComplete="off" className={`${inputCls("userName")} pl-16`} />
+                  <input value={userName} onChange={(e) => setUserName(e.target.value)} onFocus={ensureFieldVisibility} placeholder={t("bookRide.namePlaceholder")} autoComplete="off" className={`${inputCls("userName")} pl-16`} />
                 </div>
                 {errors.userName && <p className="text-red-400 text-xs pl-1">{errors.userName}</p>}
               </div>
@@ -359,7 +349,7 @@ ${mapLink}`;
                     value={userPhone}
                     onChange={(e) => setUserPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
                     onFocus={ensureFieldVisibility}
-                    placeholder="10-digit mobile number"
+                    placeholder={t("bookRide.phonePlaceholder")}
                     inputMode="numeric"
                     autoComplete="off"
                     className={`${inputCls("userPhone")} pl-16`}
@@ -372,11 +362,11 @@ ${mapLink}`;
                 onClick={bookRide}
                 className="w-full py-4 rounded-lg bg-linear-to-r from-emerald-500 to-emerald-400 hover:from-emerald-400 hover:to-emerald-300 text-slate-950 font-bold text-sm cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 shadow-xl shadow-emerald-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/60"
               >
-                Confirm Booking on WhatsApp
+                {t("bookRide.confirmBooking")}
               </button>
 
               <p className="text-center text-slate-300 text-[11px]">
-                You will be redirected to WhatsApp to complete confirmation.
+                {t("bookRide.redirectNote")}
               </p>
             </div>
           )}
@@ -389,7 +379,7 @@ ${mapLink}`;
               <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
                 <div className="text-center space-y-3">
                   <div className="w-8 h-8 border-2 border-cyan-300 border-t-transparent rounded-full animate-spin mx-auto" />
-                  <p className="text-slate-200 text-sm">Loading map…</p>
+                  <p className="text-slate-200 text-sm">{t("common.loading")}</p>
                 </div>
               </div>
             )}
