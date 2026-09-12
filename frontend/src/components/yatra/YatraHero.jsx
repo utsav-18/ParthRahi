@@ -26,7 +26,7 @@ export default function YatraHero({ yatra }) {
         <div className="absolute inset-0 bg-gradient-to-r from-[#0b0906]/85 via-transparent to-transparent" />
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 md:px-16 pt-28 md:pt-36 pb-10 md:pb-14">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 md:px-16 pt-52 md:pt-64 pb-10 md:pb-14">
         <nav className="text-xs text-amber-200/60 mb-5">
           <Link to="/events" className="hover:text-amber-100">{t("yatraDetail.yatras")}</Link>
           <span className="mx-1.5">/</span>

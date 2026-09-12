@@ -7,9 +7,9 @@ import LoginModal from "../LoginModal";
 import ConfirmLogoutModal from "../ConfirmLogoutModal";
 import ProfileModal from "../ProfileModal";
 import AdminLoginModal from "./AdminLoginModal";
-import WhatsAppFab from "./WhatsAppFab";
 import AnnouncementBar from "./AnnouncementBar";
 import LanguageSwitcher from "./LanguageSwitcher";
+import { ADMIN_BASE } from "../lib/adminPath";
 
 const btnSecondary =
   "inline-flex items-center justify-center px-6 md:px-8 py-2.5 md:py-3 rounded-full border border-slate-500 text-white whitespace-nowrap cursor-pointer bg-slate-900/40 shadow-md shadow-blue-900/30 transition-all duration-300 hover:bg-slate-700/60 hover:border-white/55 hover:-translate-y-0.5 hover:shadow-lg shadow-blue-500/20 active:translate-y-0";
@@ -32,6 +32,7 @@ export default function Layout() {
   const location = useLocation();
   const onHome = location.pathname === "/";
   const onEvents = location.pathname.startsWith("/events");
+  const onAdmin = location.pathname.startsWith(ADMIN_BASE);
 
   const navItems = [
     { label: t("nav.home"), id: "home" },
@@ -296,105 +297,106 @@ export default function Layout() {
         </div>
 
         {/* Footer / Contact */}
-        <footer id="contact" className="relative overflow-x-hidden border-t border-slate-700/50">
-          <div className="pointer-events-none absolute top-14 left-1/2 -translate-x-1/2 w-[72%] h-48 bg-[radial-gradient(circle_at_center,rgba(62,120,255,0.2),transparent_72%)] blur-3xl" />
-          <div className="relative z-10 max-w-6xl mx-auto px-6 lg:px-10 py-16 md:py-20 rounded-t-[2rem] border-x border-t border-slate-700/50 bg-[linear-gradient(to_bottom,rgba(15,23,42,0.6),rgba(15,23,42,0.9))] backdrop-blur-sm shadow-[0_-22px_70px_rgba(25,60,160,0.16)]">
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-[1.15fr_0.85fr_0.85fr_1.15fr] gap-12 xl:gap-10">
-              <div className="min-w-0 space-y-5">
-                <h3 className="text-xl font-semibold tracking-wide text-white">ParthRahi</h3>
-                <p className="text-sm leading-6 text-slate-300 max-w-xs">
-                  {t("footer.description")}
-                </p>
-                <div className="pt-1">
-                  <p className="text-xs uppercase tracking-wider text-slate-400 mb-2">{t("footer.support")}</p>
-                  <div className="space-y-1">
-                    <a href="tel:8252224027" className="block text-sm text-slate-300 hover:text-white hover:underline transition">8252224027</a>
-                    <a href="tel:9296218764" className="block text-sm text-slate-300 hover:text-white hover:underline transition">9296218764</a>
+        {!onAdmin && (
+          <footer id="contact" className="relative overflow-x-hidden border-t border-slate-700/50">
+            <div className="pointer-events-none absolute top-14 left-1/2 -translate-x-1/2 w-[72%] h-48 bg-[radial-gradient(circle_at_center,rgba(62,120,255,0.2),transparent_72%)] blur-3xl" />
+            <div className="relative z-10 max-w-6xl mx-auto px-6 lg:px-10 py-16 md:py-20 rounded-t-[2rem] border-x border-t border-slate-700/50 bg-[linear-gradient(to_bottom,rgba(15,23,42,0.6),rgba(15,23,42,0.9))] backdrop-blur-sm shadow-[0_-22px_70px_rgba(25,60,160,0.16)]">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-[1.15fr_0.85fr_0.85fr_1.15fr] gap-12 xl:gap-10">
+                <div className="min-w-0 space-y-5">
+                  <h3 className="text-xl font-semibold tracking-wide text-white">ParthRahi</h3>
+                  <p className="text-sm leading-6 text-slate-300 max-w-xs">
+                    {t("footer.description")}
+                  </p>
+                  <div className="pt-1">
+                    <p className="text-xs uppercase tracking-wider text-slate-400 mb-2">{t("footer.support")}</p>
+                    <div className="space-y-1">
+                      <a href="tel:8252224027" className="block text-sm text-slate-300 hover:text-white hover:underline transition">8252224027</a>
+                      <a href="tel:9296218764" className="block text-sm text-slate-300 hover:text-white hover:underline transition">9296218764</a>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="min-w-0">
+                  <h4 className="text-xs font-semibold mb-6 uppercase tracking-wider text-slate-400">{t("footer.company")}</h4>
+                  <ul className="space-y-4 text-sm text-slate-300">
+                    {[
+                      { label: t("footer.about"), id: "about" },
+                      { label: t("footer.yatraTours"), id: "events" },
+                      { label: t("footer.book"), id: "book" },
+                      { label: t("footer.contact"), id: "contact" },
+                    ].map((item) => (
+                      <li key={item.id} onClick={() => goToSection(item.id)} className="w-fit hover:text-white hover:translate-x-1 transition-all cursor-pointer">
+                        {item.label}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="min-w-0">
+                  <h4 className="text-xs font-semibold mb-6 uppercase tracking-wider text-slate-400">{t("footer.riders")}</h4>
+                  <ul className="space-y-4 text-sm text-slate-300">
+                    <li onClick={() => goToSection("book")} className="w-fit hover:text-white hover:translate-x-1 transition-all cursor-pointer">{t("footer.bookARide")}</li>
+                    <li onClick={() => goToSection("events")} className="w-fit hover:text-white hover:translate-x-1 transition-all cursor-pointer">{t("footer.yatraTours")}</li>
+                    <li onClick={() => goToSection("features")} className="w-fit hover:text-white hover:translate-x-1 transition-all cursor-pointer">{t("footer.safetyGuidelines")}</li>
+                    <li onClick={() => goToSection("contact")} className="w-fit hover:text-white hover:translate-x-1 transition-all cursor-pointer">{t("footer.helpSupport")}</li>
+                  </ul>
+                </div>
+
+                <div className="min-w-0">
+                  <h4 className="text-xs font-semibold mb-6 uppercase tracking-wider text-slate-400">{t("footer.getStarted")}</h4>
+                  <div className="flex flex-col gap-3 w-full max-w-xs">
+                    <button onClick={() => goToSection("book")} className={`${btnPrimary} w-full`}>{t("footer.bookRide")}</button>
+                    <a href="https://play.google.com/store/apps/details?id=com.parthrahi.parthrahi" target="_blank" rel="noopener noreferrer" className={`${btnSecondary} w-full text-center`}>{t("footer.downloadApp")}</a>
+                    <a href="https://play.google.com/store/apps/details?id=com.parthrahi.parth" target="_blank" rel="noopener noreferrer" className={`${btnSecondary} w-full text-center`}>{t("footer.driveWithUs")}</a>
                   </div>
                 </div>
               </div>
 
-              <div className="min-w-0">
-                <h4 className="text-xs font-semibold mb-6 uppercase tracking-wider text-slate-400">{t("footer.company")}</h4>
-                <ul className="space-y-4 text-sm text-slate-300">
+              <div className="mt-12 pt-8 border-t border-slate-700/50">
+                <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400 text-center mb-4">{t("footer.followUs")}</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-w-3xl mx-auto">
                   {[
-                    { label: t("footer.about"), id: "about" },
-                    { label: t("footer.yatraTours"), id: "events" },
-                    { label: t("footer.book"), id: "book" },
-                    { label: t("footer.contact"), id: "contact" },
-                  ].map((item) => (
-                    <li key={item.id} onClick={() => goToSection(item.id)} className="w-fit hover:text-white hover:translate-x-1 transition-all cursor-pointer">
-                      {item.label}
-                    </li>
+                    { name: t("footer.instagram"), detail: t("footer.instagramDetail"), logo: "/Insta-logo.png", url: "https://www.instagram.com/parthrahiofficial/" },
+                    { name: t("footer.youtube"), detail: t("footer.youtubeDetail"), logo: "/youtube-logo.webp", url: "https://www.youtube.com/@parthrahimobility" },
+                    { name: t("footer.facebook"), detail: t("footer.facebookDetail"), logo: "/facebook-logo.png", url: "https://www.facebook.com/profile.php?id=61579536731846" },
+                  ].map((social) => (
+                    <a
+                      key={social.name}
+                      href={social.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group w-full rounded-xl border border-slate-700/60 bg-slate-900/60 px-4 py-3.5 flex items-center justify-between gap-3 transition-all duration-300 hover:bg-white/[0.08] hover:border-slate-500 hover:-translate-y-0.5 hover:shadow-[0_12px_28px_rgba(31,74,190,0.24)]"
+                      aria-label={`${t("footer.open")} ${social.name}`}
+                    >
+                      <span className="min-w-0 flex items-center gap-3">
+                        <span aria-hidden="true" className="w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden flex items-center justify-center transition-transform group-hover:scale-110">
+                          <img src={social.logo} alt={social.name} className="w-[120%] h-[120%] object-contain drop-shadow-md" />
+                        </span>
+                        <span className="min-w-0">
+                          <span className="block text-sm font-medium text-white group-hover:text-white">{social.name}</span>
+                          <span className="block text-[11px] text-slate-400 truncate group-hover:text-slate-200">{social.detail}</span>
+                        </span>
+                      </span>
+                      <span className="text-[11px] text-slate-400 group-hover:text-slate-100 transition">{t("footer.open")}</span>
+                    </a>
                   ))}
-                </ul>
-              </div>
-
-              <div className="min-w-0">
-                <h4 className="text-xs font-semibold mb-6 uppercase tracking-wider text-slate-400">{t("footer.riders")}</h4>
-                <ul className="space-y-4 text-sm text-slate-300">
-                  <li onClick={() => goToSection("book")} className="w-fit hover:text-white hover:translate-x-1 transition-all cursor-pointer">{t("footer.bookARide")}</li>
-                  <li onClick={() => goToSection("events")} className="w-fit hover:text-white hover:translate-x-1 transition-all cursor-pointer">{t("footer.yatraTours")}</li>
-                  <li onClick={() => goToSection("features")} className="w-fit hover:text-white hover:translate-x-1 transition-all cursor-pointer">{t("footer.safetyGuidelines")}</li>
-                  <li onClick={() => goToSection("contact")} className="w-fit hover:text-white hover:translate-x-1 transition-all cursor-pointer">{t("footer.helpSupport")}</li>
-                </ul>
-              </div>
-
-              <div className="min-w-0">
-                <h4 className="text-xs font-semibold mb-6 uppercase tracking-wider text-slate-400">{t("footer.getStarted")}</h4>
-                <div className="flex flex-col gap-3 w-full max-w-xs">
-                  <button onClick={() => goToSection("book")} className={`${btnPrimary} w-full`}>{t("footer.bookRide")}</button>
-                  <a href="https://play.google.com/store/apps/details?id=com.parthrahi.parthrahi" target="_blank" rel="noopener noreferrer" className={`${btnSecondary} w-full text-center`}>{t("footer.downloadApp")}</a>
-                  <a href="https://play.google.com/store/apps/details?id=com.parthrahi.parth" target="_blank" rel="noopener noreferrer" className={`${btnSecondary} w-full text-center`}>{t("footer.driveWithUs")}</a>
                 </div>
               </div>
             </div>
 
-            <div className="mt-12 pt-8 border-t border-slate-700/50">
-              <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400 text-center mb-4">{t("footer.followUs")}</p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-w-3xl mx-auto">
-                {[
-                  { name: t("footer.instagram"), detail: t("footer.instagramDetail"), logo: "/Insta-logo.png", url: "https://www.instagram.com/parthrahiofficial/" },
-                  { name: t("footer.youtube"), detail: t("footer.youtubeDetail"), logo: "/youtube-logo.webp", url: "https://www.youtube.com/@parthrahimobility" },
-                  { name: t("footer.facebook"), detail: t("footer.facebookDetail"), logo: "/facebook-logo.png", url: "https://www.facebook.com/profile.php?id=61579536731846" },
-                ].map((social) => (
-                  <a
-                    key={social.name}
-                    href={social.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group w-full rounded-xl border border-slate-700/60 bg-slate-900/60 px-4 py-3.5 flex items-center justify-between gap-3 transition-all duration-300 hover:bg-white/[0.08] hover:border-slate-500 hover:-translate-y-0.5 hover:shadow-[0_12px_28px_rgba(31,74,190,0.24)]"
-                    aria-label={`${t("footer.open")} ${social.name}`}
-                  >
-                    <span className="min-w-0 flex items-center gap-3">
-                      <span aria-hidden="true" className="w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden flex items-center justify-center transition-transform group-hover:scale-110">
-                        <img src={social.logo} alt={social.name} className="w-[120%] h-[120%] object-contain drop-shadow-md" />
-                      </span>
-                      <span className="min-w-0">
-                        <span className="block text-sm font-medium text-white group-hover:text-white">{social.name}</span>
-                        <span className="block text-[11px] text-slate-400 truncate group-hover:text-slate-200">{social.detail}</span>
-                      </span>
-                    </span>
-                    <span className="text-[11px] text-slate-400 group-hover:text-slate-100 transition">{t("footer.open")}</span>
-                  </a>
-                ))}
+            <div className="relative z-10 border-t border-slate-700/50">
+              <div className="max-w-6xl mx-auto px-6 lg:px-10 py-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
+                <p className="text-center sm:text-left">{t("footer.copyright", { year: new Date().getFullYear() })}</p>
+                <div className="flex items-center gap-6">
+                  <span onClick={() => window.open("https://parthrahi-backend.web.app/privacy", "_blank")} className="hover:text-white cursor-pointer transition">{t("footer.privacyPolicy")}</span>
+                  <span onClick={() => window.open("https://parthrahi-backend.web.app/privacy", "_blank")} className="hover:text-white cursor-pointer transition">{t("footer.termsOfService")}</span>
+                </div>
               </div>
             </div>
-          </div>
-
-          <div className="relative z-10 border-t border-slate-700/50">
-            <div className="max-w-6xl mx-auto px-6 lg:px-10 py-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
-              <p className="text-center sm:text-left">{t("footer.copyright", { year: new Date().getFullYear() })}</p>
-              <div className="flex items-center gap-6">
-                <span onClick={() => window.open("https://parthrahi-backend.web.app/privacy", "_blank")} className="hover:text-white cursor-pointer transition">{t("footer.privacyPolicy")}</span>
-                <span onClick={() => window.open("https://parthrahi-backend.web.app/privacy", "_blank")} className="hover:text-white cursor-pointer transition">{t("footer.termsOfService")}</span>
-              </div>
-            </div>
-          </div>
-        </footer>
+          </footer>
+        )}
       </div>
 
-      {onEvents && <WhatsAppFab />}
 
       <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
       <AdminLoginModal isOpen={isAdminLoginOpen} onClose={() => setIsAdminLoginOpen(false)} />

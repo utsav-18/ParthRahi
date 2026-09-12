@@ -69,7 +69,7 @@ export default function YatraListPage() {
   return (
     <div className="relative z-10 pb-24">
       {/* ── Hero ─────────────────────────────────────────────── */}
-      <header className="relative overflow-hidden pt-28 md:pt-36 pb-14 md:pb-20 px-4 sm:px-6 md:px-16">
+      <header className="relative overflow-hidden pt-52 md:pt-64 pb-14 md:pb-20 px-4 sm:px-6 md:px-16">
         <div className="absolute inset-0 -z-10">
           <img src={HERO_IMG} alt="" className="w-full h-full object-cover opacity-25" />
           <div className="absolute inset-0 bg-gradient-to-b from-[#1c1204]/80 via-[#140c03]/90 to-[#0b0a08]" />
@@ -79,10 +79,10 @@ export default function YatraListPage() {
 
         <div className="relative max-w-4xl mx-auto text-center">
           <SacredKicker hindi="पवित्र तीर्थ यात्राएँ">{t("yatraList.kicker")}</SacredKicker>
-          <h1 className="text-3xl md:text-5xl font-bold text-amber-50 mt-3 leading-tight">
+          <h1 className="text-5xl md:text-7xl font-bold text-amber-50 mt-3 leading-tight">
             {t("yatraList.title1")}<br className="hidden sm:block" /> {t("yatraList.title2")}
           </h1>
-          <p className="text-amber-100/65 mt-5 max-w-2xl mx-auto text-sm md:text-base">
+          <p className="text-amber-100/65 mt-5 max-w-2xl mx-auto text-lg md:text-xl">
             {t("yatraList.subtitle")}
           </p>
           <div className="flex flex-wrap gap-3 justify-center mt-7">

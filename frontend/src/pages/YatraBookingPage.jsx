@@ -152,7 +152,7 @@ export default function YatraBookingPage() {
   }
 
   return (
-    <div className="relative z-10 pt-24 md:pt-28 pb-20 px-4 sm:px-6 md:px-16">
+    <div className="relative z-10 pt-48 md:pt-56 pb-20 px-4 sm:px-6 md:px-16">
       <div className="max-w-3xl mx-auto">
         <nav className="text-xs text-amber-200/40 mb-4">
           <Link to="/events" className="hover:text-amber-200/70">{t("booking.yatras")}</Link>
