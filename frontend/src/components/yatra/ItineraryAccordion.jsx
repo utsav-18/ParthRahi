@@ -9,14 +9,14 @@ function DayCard({ day, index, defaultOpen }) {
   const num = day.dayNumber ?? index + 1;
 
   return (
-    <div className="relative pl-12">
+    <div className="relative pl-11 sm:pl-14">
       {/* timeline rail */}
-      <span className="absolute left-[18px] top-11 bottom-0 w-px bg-amber-200/15" aria-hidden="true" />
-      <span className="absolute left-0 top-1.5 grid place-items-center w-9 h-9 rounded-full bg-gradient-to-br from-amber-300 to-orange-500 text-[#3a1c02] text-xs font-bold shadow-[0_4px_14px_rgba(251,146,60,0.3)]">
+      <span className="absolute left-[18px] sm:left-[22px] top-11 bottom-0 w-px bg-amber-200/15" aria-hidden="true" />
+      <span className="absolute left-0 top-1.5 grid place-items-center w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-gradient-to-br from-amber-300 to-orange-500 text-[#3a1c02] text-sm font-bold shadow-[0_4px_14px_rgba(251,146,60,0.3)]">
         {num}
       </span>
 
-      <div className="rounded-xl border border-amber-200/10 bg-[#160f06]/45 overflow-hidden">
+      <div className="rounded-xl border border-amber-200/12 bg-[#0b1224]/75 overflow-hidden shadow-lg shadow-black/10">
         <h3 className="m-0">
           <button
             type="button"
@@ -24,13 +24,13 @@ function DayCard({ day, index, defaultOpen }) {
             aria-controls={`${id}-panel`}
             id={`${id}-btn`}
             onClick={() => setOpen((v) => !v)}
-            className="w-full flex items-center gap-3 px-4 py-3.5 text-left cursor-pointer transition-colors hover:bg-amber-400/[0.05] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300/40"
+            className="w-full flex items-center gap-3 px-4 sm:px-5 py-4 text-left cursor-pointer transition-colors hover:bg-amber-400/[0.05] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300/40"
           >
             <span className="flex-1 min-w-0">
-              <span className="block text-[10px] font-semibold uppercase tracking-widest text-amber-300/75">
+              <span className="block text-xs font-semibold uppercase tracking-widest text-amber-300/75">
                 {t("itinerary.day", { n: num })}{day.date ? ` · ${formatDate(day.date)}` : ""}
               </span>
-              <span className="block text-sm font-semibold text-amber-50 truncate">{day.title || t("itinerary.day", { n: num })}</span>
+              <span className="block text-base sm:text-lg font-semibold text-amber-50 truncate">{day.title || t("itinerary.day", { n: num })}</span>
             </span>
             <svg
               viewBox="0 0 16 16"
@@ -41,7 +41,7 @@ function DayCard({ day, index, defaultOpen }) {
             </svg>
           </button>
         </h3>
-        <div id={`${id}-panel`} role="region" aria-labelledby={`${id}-btn`} hidden={!open} className="px-4 pb-4 pt-1 space-y-3">
+        <div id={`${id}-panel`} role="region" aria-labelledby={`${id}-btn`} hidden={!open} className="px-4 sm:px-5 pb-5 pt-1 space-y-4">
           {day.image && (
             <img
               src={day.image}
@@ -57,9 +57,9 @@ function DayCard({ day, index, defaultOpen }) {
                   <span className="text-base leading-none shrink-0 mt-0.5">{act.icon || "•"}</span>
                   <div className="min-w-0">
                     {act.time && (
-                      <span className="block text-[11px] font-semibold uppercase tracking-wide text-orange-300">{act.time}</span>
+                      <span className="block text-xs font-semibold uppercase tracking-wide text-orange-300">{act.time}</span>
                     )}
-                    <span className="block text-amber-100/75 text-sm leading-relaxed">{act.description}</span>
+                    <span className="block text-amber-100/75 text-base leading-relaxed">{act.description}</span>
                   </div>
                 </li>
               ))}
@@ -68,7 +68,7 @@ function DayCard({ day, index, defaultOpen }) {
             <p className="text-white/50 text-sm">{t("itinerary.detailsTba")}</p>
           )}
           {day.stayNight && (
-            <p className="text-[12px] text-amber-200/60 border-t border-amber-200/10 pt-2">
+            <p className="text-sm text-amber-200/60 border-t border-amber-200/10 pt-3">
               🛏️ {t("itinerary.night")} <span className="text-amber-100/80">{day.stayNight}</span>
             </p>
           )}

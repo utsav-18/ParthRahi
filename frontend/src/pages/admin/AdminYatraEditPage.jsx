@@ -8,6 +8,7 @@ import { ADMIN_BASE } from "../../lib/adminPath";
 const EMPTY = {
   title: "", slug: "", tagline: "", category: "bus",
   heroImages: [], route: [], startingPoint: "",
+  seatLayout: [],
   departureDates: [], durationDays: "", durationNights: "",
   vehicleType: "", totalSeats: "", reportingTime: "", departureTime: "",
   price: { amount: "", currency: "INR", unit: "per person", advanceAmount: "", variants: [] },
@@ -121,6 +122,7 @@ export default function AdminYatraEditPage() {
         advanceAmount: form.price.advanceAmount === "" ? undefined : Number(form.price.advanceAmount),
         variants: (form.price.variants || []).map((v) => ({ label: v.label, amount: Number(v.amount) })),
       },
+      seatLayout: (form.seatLayout || []).filter((seat) => seat.seatId && seat.label).map((seat) => ({ ...seat, row: Number(seat.row), column: Number(seat.column), type: seat.type || "seat" })),
     };
     try {
       if (isNew) {
@@ -186,6 +188,24 @@ export default function AdminYatraEditPage() {
           <StringList label="Exclusions" items={form.exclusions} onChange={(v) => set({ exclusions: v })} />
           <StringList label="Important notes" items={form.importantNotes} onChange={(v) => set({ importantNotes: v })} />
           <StringList label="Terms & conditions" items={form.termsAndConditions} onChange={(v) => set({ termsAndConditions: v })} />
+        </section>
+
+        {/* Pricing */}
+        <section className="rounded-xl border border-white/10 bg-white/[0.02] p-5 space-y-3">
+          <div>
+            <p className="text-xs uppercase tracking-wide text-white/50">Seat layout</p>
+            <p className="text-[11px] text-white/30 mt-1">Leave empty to use automatic S1, S2… seats. Confirmed seats cannot be removed.</p>
+          </div>
+          {(form.seatLayout || []).map((seat, i) => (
+            <div key={i} className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+              <input className={adminInput} placeholder="Seat ID" value={seat.seatId || ""} onChange={(e) => set({ seatLayout: form.seatLayout.map((x, j) => j === i ? { ...x, seatId: e.target.value } : x) })} />
+              <input className={adminInput} placeholder="Label" value={seat.label || ""} onChange={(e) => set({ seatLayout: form.seatLayout.map((x, j) => j === i ? { ...x, label: e.target.value } : x) })} />
+              <input className={adminInput} type="number" min="1" placeholder="Row" value={seat.row ?? ""} onChange={(e) => set({ seatLayout: form.seatLayout.map((x, j) => j === i ? { ...x, row: e.target.value } : x) })} />
+              <input className={adminInput} type="number" min="1" placeholder="Column" value={seat.column ?? ""} onChange={(e) => set({ seatLayout: form.seatLayout.map((x, j) => j === i ? { ...x, column: e.target.value } : x) })} />
+              <button type="button" onClick={() => set({ seatLayout: form.seatLayout.filter((_, j) => j !== i) })} className="px-2 rounded-md border border-red-500/30 text-red-300 text-sm cursor-pointer hover:bg-red-500/10">Remove</button>
+            </div>
+          ))}
+          <button type="button" onClick={() => set({ seatLayout: [...(form.seatLayout || []), { seatId: "", label: "", row: 1, column: 1, type: "seat" }] })} className="text-xs text-cyan-300 hover:underline cursor-pointer">+ Add seat</button>
         </section>
 
         {/* Pricing */}

@@ -9,7 +9,7 @@ export default function YatraFaq({ faqs }) {
     : getDefaultFaqs(t);
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="w-full max-w-4xl mx-auto flex flex-col gap-3">
       {list.map((f, i) => (
         <AccordionItem key={i} title={f.q}>
           <p className="text-amber-100/70 leading-relaxed whitespace-pre-line">{f.a}</p>

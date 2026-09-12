@@ -224,18 +224,18 @@ export default function HomePage() {
       </section>
 
       {/* FEATURES */}
-      <section id="features" className="relative min-h-[80vh] py-24 px-6 md:px-16 flex items-center overflow-hidden border-t border-slate-700/50">
+      <section id="features" className="relative py-24 md:py-28 px-6 md:px-16 overflow-hidden border-t border-slate-700/50">
         <div className="pointer-events-none absolute top-20 left-[10%] w-64 h-64 rounded-full bg-[radial-gradient(circle_at_center,rgba(67,124,255,0.22),transparent_72%)] blur-3xl" />
-        <div className="relative z-10 max-w-6xl mx-auto w-full rounded-[2rem] border border-slate-700/50 bg-slate-900/60 backdrop-blur-sm px-6 py-12 md:px-10 md:py-14 shadow-2xl shadow-blue-500/10">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-6 text-white">{t("features.title")}</h2>
-          <p className="text-center text-slate-200 max-w-2xl mx-auto mb-16">
+        <div className="relative z-10 site-container rounded-[2rem] border border-slate-700/50 bg-slate-900/60 backdrop-blur-sm px-6 py-12 md:px-10 md:py-14 shadow-2xl shadow-blue-500/10">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-5 text-white">{t("features.title")}</h2>
+          <p className="readable-copy text-center text-slate-200 max-w-2xl mx-auto mb-12 md:mb-14">
             {t("features.subtitle")}
           </p>
-          <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-4">
+          <div className="grid gap-5 sm:grid-cols-2 md:grid-cols-4">
             {features.map(([title, desc]) => (
-              <div key={title} className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-8 transition-all duration-300 hover:-translate-y-2 hover:bg-slate-700/60 hover:border-slate-600 hover:shadow-xl shadow-blue-500/20">
+              <div key={title} className="h-full bg-slate-800/50 border border-slate-700/50 rounded-xl p-6 md:p-7 transition-all duration-300 hover:-translate-y-2 hover:bg-slate-700/60 hover:border-slate-600 hover:shadow-xl shadow-blue-500/20">
                 <h3 className="text-lg font-semibold mb-3 text-white">{title}</h3>
-                <p className="text-sm text-slate-200">{desc}</p>
+                <p className="readable-copy text-slate-200">{desc}</p>
               </div>
             ))}
           </div>

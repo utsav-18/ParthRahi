@@ -39,7 +39,7 @@ export default function AdminBookingsPage() {
       await api.patch(`/api/admin/bookings/${bookingId}`, body);
       load();
     } catch (err) {
-      alert(err.message);
+      setError(err.message);
     } finally {
       setSavingId(null);
     }
@@ -65,7 +65,7 @@ export default function AdminBookingsPage() {
         <p className="text-white/50 py-10">No bookings yet.</p>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-white/10">
-          <table className="w-full text-sm min-w-[820px]">
+          <table className="w-full text-sm min-w-[1050px]">
             <thead className="bg-white/[0.04] text-white/50 text-xs uppercase tracking-wide">
               <tr>
                 <th className="text-left px-3 py-3">Ref / Date</th>
@@ -73,6 +73,7 @@ export default function AdminBookingsPage() {
                 <th className="text-left px-3 py-3">Seats</th>
                 <th className="text-left px-3 py-3">Amount</th>
                 <th className="text-left px-3 py-3">Payment</th>
+                <th className="text-left px-3 py-3">Razorpay</th>
                 <th className="text-left px-3 py-3">Booking</th>
               </tr>
             </thead>
@@ -86,8 +87,9 @@ export default function AdminBookingsPage() {
                   <td className="px-3 py-3">
                     <p className="text-white">{b.travelerName}</p>
                     <p className="text-white/40 text-xs">{b.phone}{b.city ? ` · ${b.city}` : ""}</p>
+                    <p className="text-white/30 text-xs">{b.email || "No email"}</p>
                   </td>
-                  <td className="px-3 py-3 text-white/70">{b.numberOfSeats}{b.fareVariant ? ` · ${b.fareVariant}` : ""}</td>
+                  <td className="px-3 py-3 text-white/70">{b.seatIds?.length ? b.seatIds.join(", ") : "Legacy booking — seat information unavailable"}{b.fareVariant ? ` · ${b.fareVariant}` : ""}</td>
                   <td className="px-3 py-3 text-white/70">
                     {formatCurrency(b.totalAmount)}
                     <span className="block text-white/40 text-xs">adv {formatCurrency(b.advanceAmount)}</span>
@@ -101,6 +103,7 @@ export default function AdminBookingsPage() {
                       {PAYMENT.map((p) => <option key={p} value={p}>{p}</option>)}
                     </select>
                   </td>
+                  <td className="px-3 py-3 text-white/40 text-xs font-mono">{b.razorpayPaymentId || b.paymentReferenceId || "—"}<span className="block">{b.razorpayOrderId || "—"}</span></td>
                   <td className="px-3 py-3">
                     <select
                       className={`${adminInput} !py-1 text-xs`}

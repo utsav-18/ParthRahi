@@ -1,7 +1,7 @@
 // Fallback copy used when a yatra has no page-specific version in the database.
 // Built from the active-language dictionary, so it switches with the site language.
 export function getDefaultFaqs(t) {
-  return [1, 2, 3, 4, 5].map((n) => ({
+  return [1, 2, 3, 4, 5, 6, 7].map((n) => ({
     q: t(`yatraFaq.q${n}`),
     a: t(`yatraFaq.a${n}`),
   }));

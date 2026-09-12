@@ -25,12 +25,12 @@ import TrustBand from "../components/yatra/TrustBand";
 import YatraFaq from "../components/yatra/YatraFaq";
 import { SacredDivider, SacredKicker } from "../components/yatra/SacredOrnaments";
 
-const Section = ({ id, kicker: k, hindi, title, children }) => (
-  <section id={id} className="scroll-mt-28">
+const Section = ({ id, kicker: k, hindi, title, children, className = "" }) => (
+  <section id={id} className={`scroll-mt-28 ${className}`}>
     {(k || title) && (
       <div className="mb-4">
         {k && <SacredKicker hindi={hindi}>{k}</SacredKicker>}
-        {title && <h2 className="text-xl md:text-2xl font-bold text-amber-50 mt-1.5">{title}</h2>}
+        {title && <h2 className="text-2xl md:text-3xl font-bold text-amber-50 mt-1.5">{title}</h2>}
       </div>
     )}
     {children}
@@ -107,11 +107,15 @@ export default function YatraDetailPage() {
   const galleryImages = (yatra.heroImages || []).filter(Boolean);
 
   return (
-    <div className="relative z-10 pb-28 lg:pb-20">
+    <div className="relative z-10 yatra-experience pb-28 lg:pb-20">
       <YatraHero yatra={yatra} />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-16 pt-10 md:pt-12">
-        <div className="grid lg:grid-cols-[1fr_360px] gap-8 items-start">
+      <div className="site-container pt-10 md:pt-14">
+        <div className="max-w-5xl mx-auto w-full space-y-10">
+          <div className="max-w-xl mx-auto w-full">
+            <TripSummaryCard yatra={yatra} />
+          </div>
+
           {/* Main column */}
           <div className="min-w-0 space-y-10">
             {yatra.highlights?.length > 0 && (
@@ -134,24 +138,25 @@ export default function YatraDetailPage() {
               </div>
             )}
 
-            {/* Mobile summary (sidebar is hidden on small screens) */}
-            <div className="lg:hidden">
-              <TripSummaryCard yatra={yatra} />
-            </div>
-
             <HowItWorks variant="compact" advanceHint={advanceHint} />
 
             <SacredDivider />
+          </div>
 
-            <Section id="itinerary" kicker={t("yatraDetail.itineraryKicker")} hindi="दिन-प्रतिदिन" title={t("yatraDetail.itineraryTitle")}>
+          <Section id="itinerary" className="w-full" kicker={t("yatraDetail.itineraryKicker")} hindi="दिन-प्रतिदिन" title={t("yatraDetail.itineraryTitle")}>
+            <div className="w-full max-w-5xl mx-auto px-1 sm:px-3">
               <ItineraryAccordion itinerary={yatra.itinerary} />
-              {yatra.mapImageUrl && (
-                <div className="mt-4 rounded-xl overflow-hidden border border-amber-200/12">
+            </div>
+            {yatra.mapImageUrl && (
+              <div className="max-w-5xl mx-auto mt-5 px-1 sm:px-3">
+                <div className="rounded-xl overflow-hidden border border-amber-200/12">
                   <img src={yatra.mapImageUrl} alt={`Route map — ${yatra.title}`} loading="lazy" className="w-full object-cover" />
                 </div>
-              )}
-            </Section>
+              </div>
+            )}
+          </Section>
 
+          <div className="min-w-0 space-y-10">
             <Section id="inclusions" kicker={t("yatraDetail.inclusionsKicker")} hindi="शुल्क में क्या है" title={t("yatraDetail.inclusionsTitle")}>
               <InclusionExclusionList
                 inclusions={yatra.inclusions}
@@ -201,11 +206,6 @@ export default function YatraDetailPage() {
                 <RelatedYatrasCarousel yatras={relatedYatras} />
               </Section>
             )}
-          </div>
-
-          {/* Sticky sidebar (desktop) */}
-          <div className="hidden lg:block">
-            <TripSummaryCard yatra={yatra} />
           </div>
         </div>
       </div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from './AuthContext';
 import { useLanguage } from './lib/i18n/LanguageContext';
+import { formatCurrency, formatDate } from './lib/format';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
@@ -13,6 +14,9 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
   const [phoneInput, setPhoneInput] = useState('');
   const [phoneError, setPhoneError] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [bookings, setBookings] = useState([]);
+  const [bookingsLoading, setBookingsLoading] = useState(false);
+  const [bookingsError, setBookingsError] = useState('');
 
   useEffect(() => {
     if (isOpen && user) {
@@ -20,6 +24,13 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
       setPhoneInput(user.phone || '');
       setPhoneError('');
       setIsSaving(false);
+      setBookings([]);
+      setBookingsError('');
+      setBookingsLoading(true);
+      axios.get(`${API_BASE_URL}/api/bookings/my`, { withCredentials: true })
+        .then((response) => setBookings(response.data.bookings || []))
+        .catch((error) => setBookingsError(error.response?.data?.error || 'Unable to load bookings'))
+        .finally(() => setBookingsLoading(false));
     }
   }, [isOpen, user]);
 
@@ -97,7 +108,7 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
       onClick={onClose}
     >
       <div
-        className="relative bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl p-6 sm:p-8 w-full max-w-sm text-center transform transition-all duration-300"
+        className="relative bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl p-6 sm:p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto text-center transform transition-all duration-300"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close Button */}
@@ -212,6 +223,47 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
             </p>
           </div>
         </div>
+
+        <section className="mt-8 pt-6 border-t border-slate-700/70 text-left">
+          <div className="flex items-center justify-between gap-3 mb-3">
+            <h3 className="text-sm uppercase tracking-[0.16em] text-cyan-300/90 font-medium">My Yatra Bookings</h3>
+            <span className="text-xs text-slate-500">{bookings.length} booking{bookings.length === 1 ? '' : 's'}</span>
+          </div>
+          {bookingsLoading ? (
+            <p className="text-sm text-slate-400 py-4">Loading your bookings…</p>
+          ) : bookingsError ? (
+            <p className="text-sm text-red-400 py-4">{bookingsError}</p>
+          ) : bookings.length === 0 ? (
+            <p className="text-sm text-slate-400 py-4">No Yatra bookings yet.</p>
+          ) : (
+            <div className="space-y-3">
+              {bookings.map((booking) => {
+                const departure = booking.yatra?.departureDates?.[0];
+                const status = booking.bookingStatus === 'confirmed' ? 'Confirmed' : booking.bookingStatus === 'cancelled' ? 'Cancelled' : 'Pending';
+                return (
+                  <article key={booking.bookingReference} className="rounded-xl border border-slate-700/70 bg-slate-800/50 p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <h4 className="font-semibold text-white truncate">{booking.yatra?.title || 'ParthRahi Yatra'}</h4>
+                        <p className="text-xs text-slate-400 mt-1">{booking.yatra?.startingPoint || 'Starting point to be confirmed'}{booking.yatra?.route?.length ? ` → ${booking.yatra.route[booking.yatra.route.length - 1]}` : ''}</p>
+                      </div>
+                      <span className={`shrink-0 text-xs font-semibold ${booking.bookingStatus === 'confirmed' ? 'text-emerald-300' : booking.bookingStatus === 'cancelled' ? 'text-red-300' : 'text-amber-300'}`}>{status}</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-3 mt-4 text-xs">
+                      <div><p className="text-slate-500">Start date</p><p className="text-slate-200 mt-0.5">{formatDate(departure) || 'To be announced'}</p></div>
+                      <div><p className="text-slate-500">Seats</p><p className="text-slate-200 mt-0.5">{booking.seatIds?.length ? booking.seatIds.join(', ') : 'Legacy booking'}</p></div>
+                      <div><p className="text-slate-500">Amount paid</p><p className="text-slate-200 mt-0.5">{formatCurrency(booking.amountPaid)}</p></div>
+                      <div><p className="text-slate-500">Payment</p><p className="text-slate-200 mt-0.5 capitalize">{booking.paymentStatus || 'pending'}</p></div>
+                      <div><p className="text-slate-500">Booking ID</p><p className="text-cyan-200 mt-0.5 font-mono select-all">{booking.bookingReference}</p></div>
+                      <div><p className="text-slate-500">Booked on</p><p className="text-slate-200 mt-0.5">{formatDate(booking.createdAt)}</p></div>
+                    </div>
+                    {booking.razorpayPaymentId && <p className="text-[11px] text-slate-500 mt-3 break-all">Payment reference: <span className="text-slate-300 font-mono">{booking.razorpayPaymentId}</span></p>}
+                  </article>
+                );
+              })}
+            </div>
+          )}
+        </section>
 
         {/* Action Button */}
         <div className="mt-8">

@@ -14,7 +14,7 @@ export default function YatraHero({ yatra }) {
   const duration = durationLabel(yatra.durationDays, yatra.durationNights);
 
   return (
-    <header className="relative overflow-hidden">
+    <header className="relative overflow-hidden border-b border-amber-200/10">
       {/* backdrop */}
       <div className="absolute inset-0 -z-10">
         {bg ? (
@@ -22,11 +22,11 @@ export default function YatraHero({ yatra }) {
         ) : (
           <div className="w-full h-full bg-[#160f06]" />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0b0906] via-[#0b0906]/80 to-[#0b0906]/45" />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0b0906]/85 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#071020] via-[#071020]/88 to-[#071020]/55" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#071020]/90 via-[#071020]/35 to-transparent" />
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 md:px-16 pt-52 md:pt-64 pb-10 md:pb-14">
+      <div className="relative site-container pt-44 md:pt-56 pb-14 md:pb-20">
         <nav className="text-xs text-amber-200/60 mb-5">
           <Link to="/events" className="hover:text-amber-100">{t("yatraDetail.yatras")}</Link>
           <span className="mx-1.5">/</span>
@@ -46,11 +46,11 @@ export default function YatraHero({ yatra }) {
             <SeatsLeftBadge seatsLeft={seatsLeft} totalSeats={yatra.totalSeats} />
           </div>
 
-          <h1 className="text-3xl md:text-5xl font-bold text-amber-50 leading-tight drop-shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
+          <h1 className="text-4xl md:text-6xl font-bold text-amber-50 leading-tight drop-shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
             {yatra.title}
           </h1>
           {yatra.tagline && (
-            <p className="text-amber-100/80 mt-3 text-sm md:text-base">{yatra.tagline}</p>
+            <p className="text-amber-100/80 mt-3 text-base md:text-lg leading-relaxed">{yatra.tagline}</p>
           )}
 
           {yatra.route?.length > 0 && (
@@ -74,7 +74,7 @@ export default function YatraHero({ yatra }) {
                 {yatra.price?.advanceAmount ? ` ${t("yatraDetail.reserveWithInline", { amount: formatCurrency(yatra.price.advanceAmount, yatra.price.currency) })}` : ""}
               </p>
             </div>
-            <div className="text-sm text-amber-100/80">
+            <div className="text-base text-amber-100/80">
               <p>📍 {yatra.startingPoint}</p>
               <p className="mt-1">🗓 {t("yatraDetail.nextDeparture")}: {dep ? formatDate(dep) : t("yatraDetail.tba")}</p>
             </div>

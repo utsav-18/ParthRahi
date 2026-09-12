@@ -14,14 +14,14 @@ export function AccordionItem({ title, subtitle, defaultOpen = false, children, 
           aria-controls={`${id}-panel`}
           id={`${id}-btn`}
           onClick={() => setOpen((v) => !v)}
-          className="w-full flex items-center gap-3 px-4 py-3.5 text-left cursor-pointer transition-colors hover:bg-white/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300/40"
+            className="w-full flex items-center gap-3 px-4 sm:px-5 py-4 text-left cursor-pointer transition-colors hover:bg-white/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300/40"
         >
           {badge != null && (
             <span className="shrink-0 text-xs font-bold text-amber-300 min-w-[52px]">{badge}</span>
           )}
           <span className="flex-1 min-w-0">
-            <span className="block text-sm font-semibold text-white truncate">{title}</span>
-            {subtitle && <span className="block text-xs text-white/45 truncate">{subtitle}</span>}
+            <span className="block text-base font-semibold text-white leading-snug">{title}</span>
+            {subtitle && <span className="block text-sm text-white/45 truncate">{subtitle}</span>}
           </span>
           <svg
             viewBox="0 0 16 16"
@@ -41,7 +41,7 @@ export function AccordionItem({ title, subtitle, defaultOpen = false, children, 
         role="region"
         aria-labelledby={`${id}-btn`}
         hidden={!open}
-        className="px-4 pb-4 pt-1 text-sm text-white/75 leading-relaxed"
+        className="px-4 sm:px-5 pb-5 pt-1 text-base text-white/75 leading-relaxed"
       >
         {children}
       </div>
