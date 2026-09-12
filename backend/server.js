@@ -36,20 +36,12 @@ app.set('trust proxy', 1);
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // Middleware
-// CORS_ORIGINS (comma-separated, set on the hosting platform e.g. Render) lets you
-// add your deployed frontend URL (e.g. https://your-app.vercel.app) without a code change.
-const extraOrigins = (process.env.CORS_ORIGINS || '')
-  .split(',')
-  .map((o) => o.trim())
-  .filter(Boolean);
-
+// Allow the permanent deployed frontend origin plus local Vite development.
+// FRONTEND_URL must be an exact origin, without a trailing slash or path.
+const frontendUrl = (process.env.FRONTEND_URL || '').trim().replace(/\/$/, '');
 const allowedOrigins = [
   'http://localhost:5173',
-  'http://localhost:5000',
-  'http://localhost:3000',
-  'https://parthrahi.com',
-  'https://www.parthrahi.com',
-  ...extraOrigins,
+  ...(frontendUrl ? [frontendUrl] : []),
 ];
 
 app.use(cors({
