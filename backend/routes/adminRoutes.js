@@ -1,6 +1,7 @@
 const express = require('express');
 const Yatra = require('../models/Yatra');
 const Booking = require('../models/Booking');
+const SeatLock = require('../models/SeatLock');
 const Enquiry = require('../models/Enquiry');
 const Testimonial = require('../models/Testimonial');
 const { requireAdmin } = require('../middleware/auth');
@@ -64,6 +65,19 @@ router.put('/yatras/:id', async (req, res) => {
     delete body.seatsBooked; // never overwrite the live counter from the form
     if (body.slug) body.slug = slugify(body.slug);
 
+    if (Array.isArray(body.seatLayout)) {
+      const seatIds = body.seatLayout.map((seat) => String(seat.seatId || '').trim());
+      if (seatIds.some((seatId) => !seatId) || new Set(seatIds).size !== seatIds.length) {
+        return res.status(400).json({ error: 'Seat IDs must be present and unique' });
+      }
+      const confirmed = await Booking.find({ yatraId: req.params.id, bookingStatus: 'confirmed', seatIds: { $exists: true, $ne: [] } }).select('seatIds').lean();
+      const confirmedSeats = new Set(confirmed.flatMap((booking) => booking.seatIds || []));
+      const nextSeats = new Set(seatIds);
+      const removed = [...confirmedSeats].filter((seatId) => !nextSeats.has(seatId));
+      if (removed.length) return res.status(409).json({ error: `Cannot remove confirmed seat(s): ${removed.join(', ')}` });
+      if (body.totalSeats != null && Number(body.totalSeats) < seatIds.length) return res.status(400).json({ error: 'Total seats cannot be less than the configured seat layout' });
+    }
+
     if (body.slug) {
       const clash = await Yatra.findOne({ slug: body.slug, _id: { $ne: req.params.id } });
       if (clash) return res.status(409).json({ error: 'Another yatra already uses this slug' });
@@ -124,6 +138,7 @@ router.patch('/bookings/:id', async (req, res) => {
     if (!booking) return res.status(404).json({ error: 'Booking not found' });
 
     const wasCancelled = booking.bookingStatus === 'cancelled';
+    const wasConfirmed = booking.bookingStatus === 'confirmed';
 
     if (paymentStatus) booking.paymentStatus = paymentStatus;
     if (bookingStatus) booking.bookingStatus = bookingStatus;
@@ -133,10 +148,10 @@ router.patch('/bookings/:id', async (req, res) => {
 
     // Release seats when a booking transitions into cancelled.
     if (!wasCancelled && booking.bookingStatus === 'cancelled') {
-      await Yatra.updateOne(
-        { _id: booking.yatraId },
-        { $inc: { seatsBooked: -booking.numberOfSeats } }
-      );
+      if (wasConfirmed || !booking.seatIds?.length) {
+        await Yatra.updateOne({ _id: booking.yatraId }, { $inc: { seatsBooked: -booking.numberOfSeats } });
+      }
+      await SeatLock.deleteMany({ bookingId: booking._id });
       await Yatra.updateOne(
         { _id: booking.yatraId, seatsBooked: { $lt: 0 } },
         { $set: { seatsBooked: 0 } }
@@ -144,10 +159,21 @@ router.patch('/bookings/:id', async (req, res) => {
     }
     // Re-hold seats if a cancelled booking is reactivated.
     if (wasCancelled && booking.bookingStatus !== 'cancelled') {
-      await Yatra.updateOne(
-        { _id: booking.yatraId },
-        { $inc: { seatsBooked: booking.numberOfSeats } }
-      );
+      if (booking.seatIds?.length) {
+        const clash = await Booking.findOne({ yatraId: booking.yatraId, _id: { $ne: booking._id }, bookingStatus: 'confirmed', seatIds: { $in: booking.seatIds } });
+        if (clash) return res.status(409).json({ error: 'One or more seats are already confirmed in another booking' });
+        if (booking.bookingStatus === 'confirmed') {
+          try {
+            await SeatLock.insertMany(booking.seatIds.map((seatId) => ({ yatraId: booking.yatraId, seatId, bookingId: booking._id, status: 'booked' })));
+          } catch (error) {
+            if (error?.code === 11000) return res.status(409).json({ error: 'One or more seats are already occupied' });
+            throw error;
+          }
+        }
+      }
+      if (booking.paymentStatus === 'paid' || !booking.seatIds?.length) {
+        await Yatra.updateOne({ _id: booking.yatraId }, { $inc: { seatsBooked: booking.numberOfSeats } });
+      }
     }
 
     await booking.save();

@@ -8,7 +8,7 @@ const generateReference = () => {
 
 const bookingSchema = new mongoose.Schema({
   yatraId: { type: mongoose.Schema.Types.ObjectId, ref: 'Yatra', required: true, index: true },
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', index: true },
 
   bookingReference: { type: String, unique: true, index: true },
 
@@ -19,6 +19,7 @@ const bookingSchema = new mongoose.Schema({
   pickupPoint: { type: String, trim: true },
 
   numberOfSeats: { type: Number, required: true, min: 1 },
+  seatIds: { type: [String], default: undefined },
 
   fareVariant: { type: String, trim: true },
   totalAmount: { type: Number },
@@ -27,6 +28,10 @@ const bookingSchema = new mongoose.Schema({
 
   paymentStatus: { type: String, enum: ['pending', 'partial', 'paid'], default: 'pending' },
   paymentReferenceId: { type: String, trim: true },
+  razorpayOrderId: { type: String, trim: true, index: true },
+  razorpayPaymentId: { type: String, trim: true, index: true },
+  razorpaySignature: { type: String, trim: true },
+  holdToken: { type: String, trim: true, index: true, select: false },
   bookingStatus: { type: String, enum: ['pending', 'confirmed', 'cancelled'], default: 'pending' },
 
   notes: { type: String, trim: true },

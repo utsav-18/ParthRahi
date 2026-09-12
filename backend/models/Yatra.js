@@ -35,6 +35,14 @@ const ruleSchema = new mongoose.Schema({
   description: { type: String, trim: true },
 }, { _id: false });
 
+const seatSchema = new mongoose.Schema({
+  seatId: { type: String, required: true, trim: true },
+  label: { type: String, required: true, trim: true },
+  row: { type: Number, required: true, min: 1 },
+  column: { type: Number, required: true, min: 1 },
+  type: { type: String, enum: ['seat', 'aisle', 'blocked'], default: 'seat' },
+}, { _id: false });
+
 const yatraSchema = new mongoose.Schema({
   slug: { type: String, required: true, unique: true, index: true, lowercase: true, trim: true },
   title: { type: String, required: true, trim: true },
@@ -55,6 +63,7 @@ const yatraSchema = new mongoose.Schema({
   vehicleType: { type: String, trim: true },
   totalSeats: { type: Number, required: true, min: 1 },
   seatsBooked: { type: Number, default: 0, min: 0 },
+  seatLayout: { type: [seatSchema], default: [] },
 
   reportingTime: { type: String, trim: true },
   departureTime: { type: String, trim: true },
