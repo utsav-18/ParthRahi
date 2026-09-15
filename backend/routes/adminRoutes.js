@@ -5,6 +5,7 @@ const SeatLock = require('../models/SeatLock');
 const Enquiry = require('../models/Enquiry');
 const Testimonial = require('../models/Testimonial');
 const { requireAdmin } = require('../middleware/auth');
+const { buildHindiTranslation } = require('../utils/translateYatra');
 
 const router = express.Router();
 
@@ -18,6 +19,16 @@ const slugify = (str) =>
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-')
     .replace(/^-|-$/g, '');
+
+// Auto-translate the yatra's text to Hindi so the site can show it the
+// moment an admin saves — best-effort, never blocks the save on failure.
+const attachHindiTranslation = async (body) => {
+  try {
+    body.translations = { hi: await buildHindiTranslation(body) };
+  } catch (err) {
+    console.error('Auto-translate yatra error:', err.message);
+  }
+};
 
 // ── Yatras ────────────────────────────────────────────────
 router.get('/yatras', async (req, res) => {
@@ -51,6 +62,7 @@ router.post('/yatras', async (req, res) => {
     const exists = await Yatra.findOne({ slug: body.slug });
     if (exists) return res.status(409).json({ error: 'A yatra with this slug already exists' });
 
+    await attachHindiTranslation(body);
     const yatra = await Yatra.create(body);
     res.status(201).json({ yatra });
   } catch (e) {
@@ -83,6 +95,7 @@ router.put('/yatras/:id', async (req, res) => {
       if (clash) return res.status(409).json({ error: 'Another yatra already uses this slug' });
     }
 
+    await attachHindiTranslation(body);
     const yatra = await Yatra.findByIdAndUpdate(req.params.id, body, { returnDocument: 'after', runValidators: true });
     if (!yatra) return res.status(404).json({ error: 'Yatra not found' });
     res.json({ yatra });

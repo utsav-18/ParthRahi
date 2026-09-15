@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import api from "../lib/api";
 import useDocumentMeta from "../lib/useDocumentMeta";
 import useJsonLd from "../lib/useJsonLd";
 import { yatraJsonLd } from "../lib/yatraContent";
+import { localizeYatra } from "../lib/localizeYatra";
 import { useLanguage } from "../lib/i18n/LanguageContext";
 import { btnPrimary, btnSecondary } from "../lib/theme";
 import { formatCurrency } from "../lib/format";
@@ -40,34 +41,48 @@ const Section = ({ id, kicker: k, hindi, title, children, className = "" }) => (
 export default function YatraDetailPage() {
   const { slug } = useParams();
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [yatra, setYatra] = useState(null);
   const [testimonials, setTestimonials] = useState([]);
   const [related, setRelated] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const rawYatraRef = useRef(null);
+  const rawRelatedRef = useRef([]);
 
   useEffect(() => {
     let active = true;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- data fetch: reset state when slug changes
     setLoading(true);
     setError("");
     api
       .get(`/api/yatras/${slug}`)
       .then((res) => {
         if (!active) return;
-        setYatra(res.data.yatra);
+        rawYatraRef.current = res.data.yatra;
+        setYatra(localizeYatra(res.data.yatra, lang));
       })
       .catch((err) => active && setError(err.message))
       .finally(() => active && setLoading(false));
 
     api.get(`/api/yatras/${slug}/testimonials`).then((r) => active && setTestimonials(r.data.testimonials || [])).catch(() => {});
-    api.get("/api/yatras").then((r) => active && setRelated(r.data.yatras || [])).catch(() => {});
+    api.get("/api/yatras").then((r) => {
+      if (!active) return;
+      rawRelatedRef.current = r.data.yatras || [];
+      setRelated(rawRelatedRef.current.map((y) => localizeYatra(y, lang)));
+    }).catch(() => {});
 
     return () => {
       active = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- language changes are handled by the effect below, not a refetch
   }, [slug]);
+
+  // Re-apply the Hindi/English overlay instantly when the language switcher
+  // changes, without refetching from the server.
+  useEffect(() => {
+    if (rawYatraRef.current) setYatra(localizeYatra(rawYatraRef.current, lang));
+    if (rawRelatedRef.current.length) setRelated(rawRelatedRef.current.map((y) => localizeYatra(y, lang)));
+  }, [lang]);
 
   useDocumentMeta({
     title: yatra?.metaTitle || yatra?.title,

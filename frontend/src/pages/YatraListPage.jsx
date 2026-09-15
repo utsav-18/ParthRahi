@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import api from "../lib/api";
 import useDocumentMeta from "../lib/useDocumentMeta";
+import { localizeYatra } from "../lib/localizeYatra";
 import { useLanguage } from "../lib/i18n/LanguageContext";
 import { btnPrimary, btnSecondary } from "../lib/theme";
 import YatraCard from "../components/yatra/YatraCard";
@@ -16,13 +17,14 @@ const HERO_IMG =
   "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=1900&q=70";
 
 export default function YatraListPage() {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [yatras, setYatras] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [category, setCategory] = useState("");
   const [destination, setDestination] = useState("");
   const [upcomingOnly, setUpcomingOnly] = useState(false);
+  const rawYatrasRef = useRef([]);
 
   const CATEGORIES = [
     { value: "", label: t("yatraList.allJourneys") },
@@ -38,7 +40,6 @@ export default function YatraListPage() {
 
   useEffect(() => {
     let active = true;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- data fetch: reset loading on filter change
     setLoading(true);
     const params = {};
     if (category) params.category = category;
@@ -46,14 +47,22 @@ export default function YatraListPage() {
     api
       .get("/api/yatras", { params })
       .then((res) => {
-        if (active) setYatras(res.data.yatras || []);
+        if (!active) return;
+        rawYatrasRef.current = res.data.yatras || [];
+        setYatras(rawYatrasRef.current.map((y) => localizeYatra(y, lang)));
       })
       .catch((err) => active && setError(err.message))
       .finally(() => active && setLoading(false));
     return () => {
       active = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- language changes are handled by the effect below, not a refetch
   }, [category, upcomingOnly]);
+
+  // Re-apply the Hindi/English overlay instantly when the language switcher changes.
+  useEffect(() => {
+    if (rawYatrasRef.current.length) setYatras(rawYatrasRef.current.map((y) => localizeYatra(y, lang)));
+  }, [lang]);
 
   const filtered = useMemo(() => {
     const q = destination.trim().toLowerCase();

@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../lib/api";
 import YatraCard from "./yatra/YatraCard";
 import { SacredKicker } from "./yatra/SacredOrnaments";
+import { localizeYatra } from "../lib/localizeYatra";
 import { useLanguage } from "../lib/i18n/LanguageContext";
 
 const btnGold =
@@ -18,18 +19,29 @@ const btnGoldOutline =
  */
 export default function HomeYatraTeaser() {
   const [yatras, setYatras] = useState([]);
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
+  const rawYatrasRef = useRef([]);
 
   useEffect(() => {
     let active = true;
     api
       .get("/api/yatras")
-      .then((r) => active && setYatras((r.data.yatras || []).slice(0, 2)))
+      .then((r) => {
+        if (!active) return;
+        rawYatrasRef.current = (r.data.yatras || []).slice(0, 2);
+        setYatras(rawYatrasRef.current.map((y) => localizeYatra(y, lang)));
+      })
       .catch(() => {});
     return () => {
       active = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- language changes are handled by the effect below, not a refetch
   }, []);
+
+  // Re-apply the Hindi/English overlay instantly when the language switcher changes.
+  useEffect(() => {
+    if (rawYatrasRef.current.length) setYatras(rawYatrasRef.current.map((y) => localizeYatra(y, lang)));
+  }, [lang]);
 
   const points = [
     ["🗓", t("homeTeaser.point1Title"), t("homeTeaser.point1Desc")],
