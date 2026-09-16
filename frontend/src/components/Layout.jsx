@@ -44,9 +44,13 @@ export default function Layout() {
   ];
 
   useEffect(() => {
+    if (onAdmin) {
+      setIntroDone(true);
+      return;
+    }
     const timer = window.setTimeout(() => setIntroDone(true), 1800);
     return () => window.clearTimeout(timer);
-  }, []);
+  }, [onAdmin]);
 
   useEffect(() => {
     document.body.style.overflow = menuOpen ? "hidden" : "";
@@ -77,20 +81,22 @@ export default function Layout() {
   return (
     <div className="relative w-full min-h-screen bg-black text-white overflow-x-hidden">
       {/* Intro splash */}
-      <div
-        className={`fixed inset-0 z-80 pointer-events-none transition-opacity duration-700 ${introDone ? "opacity-0" : "opacity-100"}`}
-        aria-hidden="true"
-      >
-        <div className="absolute inset-0 bg-black" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(37,82,205,0.42),transparent_60%)]" />
-        <div className="relative h-full w-full flex items-center justify-center">
-          <div className={`text-center transition-all duration-700 ${introDone ? "opacity-0 scale-95" : "opacity-100 scale-100"}`}>
-            <p className="text-[11px] tracking-[0.38em] uppercase text-slate-300/90">ParthRahi</p>
-            <h1 className="mt-3 text-3xl md:text-5xl font-semibold text-white">Mobility Platform</h1>
-            <p className="mt-4 text-sm text-slate-200">Reliable rides, professionally delivered</p>
+      {!onAdmin && (
+        <div
+          className={`fixed inset-0 z-80 pointer-events-none transition-opacity duration-700 ${introDone ? "opacity-0" : "opacity-100"}`}
+          aria-hidden="true"
+        >
+          <div className="absolute inset-0 bg-black" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(37,82,205,0.42),transparent_60%)]" />
+          <div className="relative h-full w-full flex items-center justify-center">
+            <div className={`text-center transition-all duration-700 ${introDone ? "opacity-0 scale-95" : "opacity-100 scale-100"}`}>
+              <p className="text-[11px] tracking-[0.38em] uppercase text-slate-300/90">ParthRahi</p>
+              <h1 className="mt-3 text-3xl md:text-5xl font-semibold text-white">Mobility Platform</h1>
+              <p className="mt-4 text-sm text-slate-200">Reliable rides, professionally delivered</p>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Single global Silk background */}
       <div className="fixed inset-0 z-0 pointer-events-none">
@@ -106,8 +112,10 @@ export default function Layout() {
       </div>
 
       <div className={`relative z-10 transition-opacity duration-900 ease-out ${introDone ? "opacity-100" : "opacity-0"}`}>
-        {/* Announcement bar + Navbar (stacked, fixed to top together) */}
-        <div className="fixed top-0 inset-x-0 z-50">
+        {!onAdmin && (
+          <>
+            {/* Announcement bar + Navbar (stacked, fixed to top together) */}
+            <div className="fixed top-0 inset-x-0 z-50">
         <AnnouncementBar onVisibilityChange={setAnnounceOpen} />
         <nav className="w-full px-6 md:px-14 py-5 flex items-center justify-between bg-slate-950/80 backdrop-blur-xl border-b border-slate-700/60 shadow-[0_8px_30px_rgba(0,0,0,0.35)]">
           <div
@@ -290,9 +298,11 @@ export default function Layout() {
             </button>
           </div>
         </div>
+          </>
+        )}
 
         {/* Page content — nudged down when the announcement bar is visible */}
-        <div className={announceOpen ? "pt-8" : ""}>
+        <div className={!onAdmin && announceOpen ? "pt-8" : ""}>
           <Outlet context={{ openLogin: () => setIsLoginOpen(true) }} />
         </div>
 
