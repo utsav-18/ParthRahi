@@ -6,6 +6,7 @@ const Enquiry = require('../models/Enquiry');
 const Testimonial = require('../models/Testimonial');
 const { requireAdmin } = require('../middleware/auth');
 const { buildHindiTranslation } = require('../utils/translateYatra');
+const { reconcileYatraSeats } = require('../utils/reconcileSeats');
 
 const router = express.Router();
 
@@ -34,6 +35,51 @@ const attachHindiTranslation = async (body) => {
 router.get('/yatras', async (req, res) => {
   try {
     const yatras = await Yatra.find().sort({ createdAt: -1 });
+
+    const confirmedCounts = await Booking.aggregate([
+      { $match: { bookingStatus: 'confirmed' } },
+      {
+        $project: {
+          yatraId: 1,
+          seatCount: {
+            $cond: {
+              if: { $and: [{ $isArray: '$seatIds' }, { $gt: [{ $size: '$seatIds' }, 0] }] },
+              then: { $size: '$seatIds' },
+              else: { $ifNull: ['$numberOfSeats', 0] },
+            },
+          },
+        },
+      },
+      {
+        $group: {
+          _id: '$yatraId',
+          totalBooked: { $sum: '$seatCount' },
+        },
+      },
+    ]);
+
+    const countMap = new Map();
+    for (const item of confirmedCounts) {
+      countMap.set(String(item._id), item.totalBooked);
+    }
+
+    const bulkOps = [];
+    for (const y of yatras) {
+      const actual = countMap.get(String(y._id)) || 0;
+      if (y.seatsBooked !== actual) {
+        y.seatsBooked = actual;
+        bulkOps.push({
+          updateOne: {
+            filter: { _id: y._id },
+            update: { $set: { seatsBooked: actual } },
+          },
+        });
+      }
+    }
+    if (bulkOps.length > 0) {
+      await Yatra.bulkWrite(bulkOps);
+    }
+
     res.json({ yatras });
   } catch (e) {
     res.status(500).json({ error: 'Failed to load yatras' });
@@ -128,6 +174,23 @@ router.get('/yatras/:id/bookings', async (req, res) => {
   try {
     const bookings = await Booking.find({ yatraId: req.params.id }).sort({ createdAt: -1 });
     const yatra = await Yatra.findById(req.params.id).select('title totalSeats seatsBooked');
+    if (!yatra) return res.status(404).json({ error: 'Yatra not found' });
+
+    // Calculate confirmed reserved seats directly from actual confirmed booking records.
+    // Ignores cancelled, pending, failed, expired, or temporary bookings.
+    const confirmedSeats = bookings
+      .filter((b) => b.bookingStatus === 'confirmed')
+      .reduce((sum, b) => {
+        const count = Array.isArray(b.seatIds) && b.seatIds.length > 0 ? b.seatIds.length : (b.numberOfSeats || 0);
+        return sum + count;
+      }, 0);
+
+    // Reconcile in DB if drifted
+    if (yatra.seatsBooked !== confirmedSeats) {
+      await Yatra.updateOne({ _id: yatra._id }, { $set: { seatsBooked: confirmedSeats } });
+      yatra.seatsBooked = confirmedSeats;
+    }
+
     res.json({ bookings, yatra });
   } catch (e) {
     res.status(500).json({ error: 'Failed to load bookings' });
@@ -150,46 +213,38 @@ router.patch('/bookings/:id', async (req, res) => {
     const booking = await Booking.findById(req.params.id);
     if (!booking) return res.status(404).json({ error: 'Booking not found' });
 
-    const wasCancelled = booking.bookingStatus === 'cancelled';
-    const wasConfirmed = booking.bookingStatus === 'confirmed';
-
     if (paymentStatus) booking.paymentStatus = paymentStatus;
     if (bookingStatus) booking.bookingStatus = bookingStatus;
     if (advancePaid != null) booking.advancePaid = advancePaid;
     if (paymentReferenceId != null) booking.paymentReferenceId = paymentReferenceId;
     if (notes != null) booking.notes = notes;
 
-    // Release seats when a booking transitions into cancelled.
-    if (!wasCancelled && booking.bookingStatus === 'cancelled') {
-      if (wasConfirmed || !booking.seatIds?.length) {
-        await Yatra.updateOne({ _id: booking.yatraId }, { $inc: { seatsBooked: -booking.numberOfSeats } });
-      }
+    // Handle seat locks for cancellations / confirmations
+    if (booking.bookingStatus === 'cancelled') {
       await SeatLock.deleteMany({ bookingId: booking._id });
-      await Yatra.updateOne(
-        { _id: booking.yatraId, seatsBooked: { $lt: 0 } },
-        { $set: { seatsBooked: 0 } }
-      );
-    }
-    // Re-hold seats if a cancelled booking is reactivated.
-    if (wasCancelled && booking.bookingStatus !== 'cancelled') {
-      if (booking.seatIds?.length) {
-        const clash = await Booking.findOne({ yatraId: booking.yatraId, _id: { $ne: booking._id }, bookingStatus: 'confirmed', seatIds: { $in: booking.seatIds } });
-        if (clash) return res.status(409).json({ error: 'One or more seats are already confirmed in another booking' });
-        if (booking.bookingStatus === 'confirmed') {
-          try {
-            await SeatLock.insertMany(booking.seatIds.map((seatId) => ({ yatraId: booking.yatraId, seatId, bookingId: booking._id, status: 'booked' })));
-          } catch (error) {
-            if (error?.code === 11000) return res.status(409).json({ error: 'One or more seats are already occupied' });
-            throw error;
-          }
-        }
-      }
-      if (booking.paymentStatus === 'paid' || !booking.seatIds?.length) {
-        await Yatra.updateOne({ _id: booking.yatraId }, { $inc: { seatsBooked: booking.numberOfSeats } });
+    } else if (booking.bookingStatus === 'confirmed' && Array.isArray(booking.seatIds) && booking.seatIds.length) {
+      const clash = await Booking.findOne({
+        yatraId: booking.yatraId,
+        _id: { $ne: booking._id },
+        bookingStatus: 'confirmed',
+        seatIds: { $in: booking.seatIds },
+      });
+      if (clash) return res.status(409).json({ error: 'One or more seats are already confirmed in another booking' });
+
+      for (const seatId of booking.seatIds) {
+        await SeatLock.updateOne(
+          { yatraId: booking.yatraId, seatId },
+          { $set: { bookingId: booking._id, status: 'booked', expiresAt: null } },
+          { upsert: true }
+        );
       }
     }
 
     await booking.save();
+
+    // Reconcile yatra.seatsBooked directly from confirmed bookings
+    await reconcileYatraSeats(booking.yatraId);
+
     res.json({ booking });
   } catch (e) {
     console.error('Patch booking error:', e.message);

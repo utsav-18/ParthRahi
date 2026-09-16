@@ -224,7 +224,7 @@ const kamakhyaSikkim = {
   durationNights: 12,
   vehicleType: 'AC Sleeper Bus (2x1 berths) — same bus throughout',
   totalSeats: 36,
-  seatsBooked: 6,
+  seatsBooked: 0,
   reportingTime: '3:00 PM (Patna boarding point)',
   departureTime: '4:00 PM — overnight sleeper to Siliguri',
   price: {
