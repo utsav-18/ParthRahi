@@ -7,6 +7,7 @@ const Yatra = require('../models/Yatra');
 const Booking = require('../models/Booking');
 const SeatLock = require('../models/SeatLock');
 const { optionalAuth, requireAuth } = require('../middleware/auth');
+const { streamReceiptPdf } = require('../utils/receiptPdf');
 
 const router = express.Router();
 const HOLD_MINUTES = Number(process.env.SEAT_HOLD_MINUTES) || 5;
@@ -345,6 +346,25 @@ router.get('/:bookingReference', requireAuth, async (req, res) => {
     if (booking.userId && (!req.user || String(booking.userId) !== String(req.user._id))) return res.status(404).json({ error: 'Booking not found' });
     res.json({ booking });
   } catch (error) { console.error('Get booking error:', error.message); res.status(500).json({ error: 'Failed to load booking' }); }
+});
+
+// Payment receipt — server-generated PDF, built entirely from the booking
+// and yatra records already stored in the database (never from request
+// input). Only reachable by the booking's own owner; independent of the
+// Razorpay webhook, /verify remains the sole confirmation authority.
+router.get('/:bookingReference/receipt', requireAuth, async (req, res) => {
+  try {
+    const booking = await Booking.findOne({ bookingReference: req.params.bookingReference }).populate('yatraId', 'title startingPoint route departureDates');
+    if (!booking) return res.status(404).json({ error: 'Booking not found' });
+    if (booking.userId && (!req.user || String(booking.userId) !== String(req.user._id))) return res.status(404).json({ error: 'Booking not found' });
+    if (booking.bookingStatus !== 'confirmed' || booking.paymentStatus !== 'paid') {
+      return res.status(409).json({ error: 'A receipt is only available once payment is confirmed.' });
+    }
+    streamReceiptPdf(res, { booking, yatra: booking.yatraId });
+  } catch (error) {
+    console.error('Generate receipt error:', error.message);
+    if (!res.headersSent) res.status(500).json({ error: 'Failed to generate receipt' });
+  }
 });
 
 module.exports = router;

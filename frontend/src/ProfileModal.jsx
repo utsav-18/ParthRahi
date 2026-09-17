@@ -258,6 +258,16 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
                       <div><p className="text-slate-500">Booked on</p><p className="text-slate-200 mt-0.5">{formatDate(booking.createdAt)}</p></div>
                     </div>
                     {booking.razorpayPaymentId && <p className="text-[11px] text-slate-500 mt-3 break-all">Payment reference: <span className="text-slate-300 font-mono">{booking.razorpayPaymentId}</span></p>}
+                    {booking.bookingStatus === 'confirmed' && booking.paymentStatus === 'paid' && (
+                      <a
+                        href={`${API_BASE_URL}/api/bookings/${booking.bookingReference}/receipt`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 mt-3 text-xs font-semibold text-cyan-300 hover:text-cyan-200 transition-colors"
+                      >
+                        🧾 Download Receipt
+                      </a>
+                    )}
                   </article>
                 );
               })}

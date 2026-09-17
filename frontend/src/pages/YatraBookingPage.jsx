@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, Link, useOutletContext } from "react-router-dom";
-import api from "../lib/api";
+import api, { API_BASE_URL } from "../lib/api";
 import { useAuth } from "../AuthContext";
 import useDocumentMeta from "../lib/useDocumentMeta";
 import { useLanguage } from "../lib/i18n/LanguageContext";
@@ -469,6 +469,9 @@ export default function YatraBookingPage() {
           {step === 3 && confirmation && (
             <div className="max-w-2xl mx-auto w-full text-center space-y-4 py-4">
               <p className="text-4xl">🙏</p>
+              <span className="inline-block text-[11px] font-semibold uppercase tracking-widest text-green-300 bg-green-400/10 border border-green-300/25 rounded-full px-3 py-1">
+                ✅ {t("booking.paymentSuccessful")}
+              </span>
               <h2 className="text-xl font-bold text-amber-50">{t("booking.bookingConfirmedTitle")}</h2>
               <p className="text-amber-100/60 text-sm">{t("booking.bookingConfirmedDesc")}</p>
 
@@ -486,12 +489,20 @@ export default function YatraBookingPage() {
 
               <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
                 <a
+                  href={`${API_BASE_URL}/api/bookings/${confirmation.bookingReference}/receipt`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={btnAccent}
+                >
+                  🧾 {t("booking.downloadReceipt")}
+                </a>
+                <a
                   href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
                     `Hi ParthRahi, my confirmed booking is ${confirmation.bookingReference}. Yatra: ${confirmation.yatra?.title}. Traveller: ${confirmation.travelerName}. Seats: ${confirmation.seatIds?.join(", ")}. Amount: ₹${confirmation.totalAmount}. Payment: ${confirmation.razorpayPaymentId || "verified"}.`
                   )}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={btnAccent}
+                  className={btnSecondary}
                 >
                   💬 {t("booking.sendConfirmationWhatsapp")}
                 </a>

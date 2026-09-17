@@ -1,0 +1,173 @@
+const fs = require('fs');
+const path = require('path');
+const PDFDocument = require('pdfkit');
+const SVGtoPDF = require('svg-to-pdfkit');
+
+const BRAND_COLOR = '#b8860b'; // amber/gold, matches the site's accent
+const INK = '#1f2933';
+const MUTED = '#6b7280';
+const LINE = '#e5e7eb';
+
+// PDFKit's 14 built-in fonts (Helvetica etc.) only support WinAnsi/Latin-1 —
+// they have no Devanagari glyphs, so any Hindi text (e.g. a yatra title) sent
+// through them renders as .notdef boxes/garbage. This is the actual official
+// logo asset (frontend/public/logo.svg, copied here so the backend doesn't
+// depend on the frontend folder existing at deploy time) and a bundled
+// Unicode font that covers both Devanagari and Latin — both are loaded
+// defensively so a missing asset degrades the receipt instead of crashing it.
+const UNICODE_FONT_PATH = path.join(__dirname, '../assets/fonts/NotoSansDevanagari-Regular.ttf');
+const LOGO_SVG_PATH = path.join(__dirname, '../assets/images/logo.svg');
+const UNICODE_FONT_AVAILABLE = fs.existsSync(UNICODE_FONT_PATH);
+const LOGO_SVG = fs.existsSync(LOGO_SVG_PATH) ? fs.readFileSync(LOGO_SVG_PATH, 'utf8') : null;
+if (!UNICODE_FONT_AVAILABLE) {
+  console.warn('[Receipt] Unicode font missing at', UNICODE_FONT_PATH, '— non-Latin booking/yatra text may not render correctly.');
+}
+
+// Value cells hold real database content (names, yatra titles, place names)
+// which may be in Hindi/Devanagari — always render those with the bundled
+// Unicode font (it has full Latin coverage too). Static labels we author
+// ourselves are always plain ASCII, so they keep using the standard fonts.
+const valueFont = () => (UNICODE_FONT_AVAILABLE ? 'Unicode' : 'Helvetica-Bold');
+
+const formatCurrency = (amount) => {
+  if (amount == null || Number.isNaN(Number(amount))) return '—';
+  return `Rs. ${Number(amount).toLocaleString('en-IN')}`;
+};
+
+const formatDate = (value, withTime = false) => {
+  if (!value) return 'To be announced';
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return 'To be announced';
+  const opts = { day: 'numeric', month: 'short', year: 'numeric' };
+  if (withTime) return d.toLocaleString('en-IN', { ...opts, hour: '2-digit', minute: '2-digit' });
+  return d.toLocaleDateString('en-IN', opts);
+};
+
+// Same convention used across the frontend (format.js: nextDeparture) — the
+// booking itself doesn't record which departure date was picked, only the
+// yatra it belongs to, so we show the next upcoming date from that yatra.
+const journeyDate = (departureDates = []) => {
+  const now = new Date();
+  const dates = (departureDates || [])
+    .map((d) => new Date(d))
+    .filter((d) => !Number.isNaN(d.getTime()))
+    .sort((a, b) => a - b);
+  const next = dates.find((d) => d >= now) || dates[dates.length - 1];
+  return next ? formatDate(next) : 'To be announced';
+};
+
+const row = (doc, label, value, x, y, width) => {
+  doc.font('Helvetica').fontSize(9).fillColor(MUTED).text(label, x, y, { width });
+  doc.font(valueFont()).fontSize(10.5).fillColor(INK).text(value ?? '—', x, y + 13, { width });
+};
+
+/**
+ * Streams a one-page A4 payment receipt for a confirmed booking directly to
+ * an Express response. Only ever fed data already loaded from the database
+ * by the caller — never trusts client input.
+ */
+function streamReceiptPdf(res, { booking, yatra }) {
+  const doc = new PDFDocument({ size: 'A4', margin: 50 });
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', `attachment; filename="ParthRahi-Receipt-${booking.bookingReference}.pdf"`);
+  doc.pipe(res);
+
+  if (UNICODE_FONT_AVAILABLE) doc.registerFont('Unicode', UNICODE_FONT_PATH);
+
+  const pageWidth = doc.page.width - doc.page.margins.left - doc.page.margins.right;
+  const left = doc.page.margins.left;
+
+  // ── Header ──────────────────────────────────────────────
+  const LOGO_SIZE = 36;
+  let brandTextX = left;
+  if (LOGO_SVG) {
+    // preserveAspectRatio keeps the (square) logo undistorted regardless of
+    // the box it's placed in.
+    SVGtoPDF(doc, LOGO_SVG, left, 46, { width: LOGO_SIZE, height: LOGO_SIZE, preserveAspectRatio: 'xMidYMid meet' });
+    brandTextX = left + LOGO_SIZE + 12;
+  }
+  doc.font('Helvetica-Bold').fontSize(22).fillColor(BRAND_COLOR).text('ParthRahi', brandTextX, 50);
+  doc.font('Helvetica').fontSize(9).fillColor(MUTED).text('Guided Pilgrimage & Group Tours', brandTextX, 76);
+
+  doc.font('Helvetica-Bold').fontSize(16).fillColor(INK).text('Payment Receipt', left, 50, { width: pageWidth, align: 'right' });
+  doc.font('Helvetica').fontSize(9).fillColor(MUTED).text(`Issued: ${formatDate(new Date(), true)}`, left, 72, { width: pageWidth, align: 'right' });
+
+  doc.moveTo(left, 100).lineTo(left + pageWidth, 100).strokeColor(LINE).lineWidth(1).stroke();
+
+  // ── Status + reference ─────────────────────────────────
+  const paid = booking.paymentStatus === 'paid';
+  doc.font('Helvetica-Bold').fontSize(11).fillColor(paid ? '#15803d' : '#b45309')
+    .text(paid ? 'PAYMENT SUCCESSFUL' : String(booking.paymentStatus || '').toUpperCase() || 'PENDING', left, 116);
+  doc.font('Helvetica').fontSize(10).fillColor(MUTED).text('Booking Reference', left, 140);
+  doc.font('Helvetica-Bold').fontSize(14).fillColor(INK).text(booking.bookingReference, left, 154);
+
+  // ── Passenger details ───────────────────────────────────
+  let y = 190;
+  doc.font('Helvetica-Bold').fontSize(11).fillColor(INK).text('Passenger Details', left, y);
+  y += 20;
+  const colWidth = pageWidth / 2 - 10;
+  row(doc, 'Passenger Name', booking.travelerName || '—', left, y, colWidth);
+  row(doc, 'Mobile Number', booking.phone || '—', left + colWidth + 20, y, colWidth);
+  y += 40;
+  row(doc, 'Email', booking.email || 'Not provided', left, y, pageWidth);
+
+  // ── Journey details ─────────────────────────────────────
+  y += 45;
+  doc.moveTo(left, y).lineTo(left + pageWidth, y).strokeColor(LINE).lineWidth(1).stroke();
+  y += 16;
+  doc.font('Helvetica-Bold').fontSize(11).fillColor(INK).text('Journey Details', left, y);
+  y += 20;
+  row(doc, 'Yatra / Tour', yatra?.title || 'ParthRahi Yatra', left, y, pageWidth);
+  y += 40;
+  row(doc, 'Journey Date', journeyDate(yatra?.departureDates), left, y, colWidth);
+  row(doc, 'Seats Booked', booking.seatIds?.length ? booking.seatIds.join(', ') : booking.numberOfSeats ? `${booking.numberOfSeats} seat(s)` : 'N/A', left + colWidth + 20, y, colWidth);
+  y += 40;
+  row(doc, 'Start Location', yatra?.startingPoint || 'N/A', left, y, colWidth);
+  row(doc, 'Destination', yatra?.route?.length ? yatra.route[yatra.route.length - 1] : 'N/A', left + colWidth + 20, y, colWidth);
+
+  // ── Fare breakdown ───────────────────────────────────────
+  y += 45;
+  doc.moveTo(left, y).lineTo(left + pageWidth, y).strokeColor(LINE).lineWidth(1).stroke();
+  y += 16;
+  doc.font('Helvetica-Bold').fontSize(11).fillColor(INK).text('Fare Breakdown', left, y);
+  y += 22;
+
+  const fareRows = [
+    ['Fare option', booking.fareVariant || 'Standard'],
+    ['Total fare', formatCurrency(booking.totalAmount)],
+  ];
+  if (booking.advanceAmount) fareRows.push(['Advance required', formatCurrency(booking.advanceAmount)]);
+  const amountPaid = paid ? (booking.advanceAmount || booking.totalAmount) : booking.advancePaid || 0;
+  fareRows.push(['Amount paid', formatCurrency(amountPaid)]);
+
+  for (const [label, value] of fareRows) {
+    doc.font('Helvetica').fontSize(10).fillColor(MUTED).text(label, left, y, { width: pageWidth * 0.6 });
+    doc.font(valueFont()).fontSize(10).fillColor(INK).text(value, left, y, { width: pageWidth, align: 'right' });
+    y += 18;
+  }
+
+  // ── Payment details ──────────────────────────────────────
+  y += 10;
+  doc.rect(left, y, pageWidth, 74).fillAndStroke('#faf7f0', LINE);
+  const padY = y + 12;
+  doc.font('Helvetica-Bold').fontSize(10).fillColor(INK).text('Payment Details', left + 14, padY);
+  row(doc, 'Payment Status', paid ? 'Paid' : booking.paymentStatus || 'Pending', left + 14, padY + 18, colWidth);
+  row(doc, 'Razorpay Payment ID', booking.razorpayPaymentId || 'N/A', left + colWidth + 20, padY + 18, colWidth - 14);
+  y += 74;
+
+  y += 16;
+  row(doc, 'Razorpay Order ID', booking.razorpayOrderId || 'N/A', left, y, colWidth);
+  row(doc, 'Booking Date & Time', formatDate(booking.createdAt, true), left + colWidth + 20, y, colWidth);
+
+  // ── Footer ───────────────────────────────────────────────
+  const footerY = doc.page.height - doc.page.margins.bottom - 40;
+  doc.moveTo(left, footerY).lineTo(left + pageWidth, footerY).strokeColor(LINE).lineWidth(1).stroke();
+  doc.font('Helvetica-Oblique').fontSize(8).fillColor(MUTED)
+    .text('This is a computer-generated receipt and does not require a signature.', left, footerY + 10, { width: pageWidth, align: 'center' });
+  doc.font('Helvetica').fontSize(8).fillColor(MUTED)
+    .text('ParthRahi · For support, contact us via the number listed on parthrahi.com', left, footerY + 22, { width: pageWidth, align: 'center' });
+
+  doc.end();
+}
+
+module.exports = { streamReceiptPdf };

@@ -487,6 +487,8 @@ export default {
     paySecurely: "सुरक्षित भुगतान करें",
     paymentVerifiedNote: "सीटें पक्की होने से पहले भुगतान की जांच ParthRahi द्वारा सुरक्षित रूप से की जाती है।",
     bookingConfirmedTitle: "बुकिंग पक्की हुई",
+    paymentSuccessful: "भुगतान सफल",
+    downloadReceipt: "भुगतान रसीद डाउनलोड करें",
     bookingConfirmedDesc: "आपका भुगतान सत्यापित हो गया है और आपकी सीटें अब बुक हो चुकी हैं।",
     sendConfirmationWhatsapp: "WhatsApp पर पुष्टि भेजें",
     unableToLoadRazorpay: "Razorpay चेकआउट लोड नहीं हो सका। कृपया अपना कनेक्शन जांचें और दोबारा कोशिश करें।",
