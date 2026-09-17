@@ -308,7 +308,7 @@ export default function YatraBookingPage() {
 
   return (
     <div className="relative z-10 yatra-experience pt-48 md:pt-56 pb-20 px-4 sm:px-6 md:px-16">
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-5xl mx-auto">
         <nav className="text-xs text-amber-200/40 mb-4">
           <Link to="/events" className="hover:text-amber-200/70">{t("booking.yatras")}</Link>
           <span className="mx-1.5">/</span>
@@ -334,7 +334,9 @@ export default function YatraBookingPage() {
         </div>
 
         <div className="rounded-2xl border border-amber-200/15 bg-[#160f06]/85 p-5 sm:p-7 space-y-6">
-          <BookingStepper step={step} steps={STEPS} />
+          <div className="max-w-2xl mx-auto w-full">
+            <BookingStepper step={step} steps={STEPS} />
+          </div>
 
           {/* STEP 1 */}
           {step === 1 && (
@@ -343,7 +345,7 @@ export default function YatraBookingPage() {
                   appears once a fare is picked (or immediately, if there's
                   only one fare and nothing to choose). */}
               {hasFareChoice && (
-                <div className="space-y-2">
+                <div className="max-w-2xl mx-auto w-full space-y-2">
                   <p className="text-amber-200/70 text-xs uppercase tracking-[0.18em]">{t("booking.chooseFareHeading")}</p>
                   <FareBox price={yatra.price} selectedVariant={form.fareVariant} onSelectVariant={(label) => setForm((current) => ({ ...current, fareVariant: label }))} />
                   {!fareChosen && <p className="text-amber-100/50 text-xs">{t("booking.selectFarePrompt")}</p>}
@@ -352,41 +354,43 @@ export default function YatraBookingPage() {
 
               {fareChosen && (
                 <>
-                  <p className="text-amber-200/70 text-xs uppercase tracking-[0.18em]">{t("booking.travellerDetailsLabel")}</p>
+                  <div className="max-w-2xl mx-auto w-full space-y-4">
+                    <p className="text-amber-200/70 text-xs uppercase tracking-[0.18em]">{t("booking.travellerDetailsLabel")}</p>
 
-                  {reservationExpired && (
-                    <div className="rounded-xl border border-red-300/25 bg-red-400/[0.06] p-4 text-sm text-red-100">
-                      <p className="font-semibold">{t("booking.reservationExpiredTitle")}</p>
-                      <p className="mt-1 text-red-100/75">{t("booking.reservationExpiredBody")}</p>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setReservationExpired(false);
-                          setServerError("");
-                          refreshSeats().catch(() => {});
-                        }}
-                        className="mt-3 text-red-100 underline underline-offset-2"
-                      >
-                        {t("booking.chooseSeatsAgain")}
-                      </button>
-                    </div>
-                  )}
+                    {reservationExpired && (
+                      <div className="rounded-xl border border-red-300/25 bg-red-400/[0.06] p-4 text-sm text-red-100">
+                        <p className="font-semibold">{t("booking.reservationExpiredTitle")}</p>
+                        <p className="mt-1 text-red-100/75">{t("booking.reservationExpiredBody")}</p>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setReservationExpired(false);
+                            setServerError("");
+                            refreshSeats().catch(() => {});
+                          }}
+                          className="mt-3 text-red-100 underline underline-offset-2"
+                        >
+                          {t("booking.chooseSeatsAgain")}
+                        </button>
+                      </div>
+                    )}
 
-                  <div className="grid sm:grid-cols-2 gap-3">
-                    <div className="space-y-1 sm:col-span-2">
-                      <input className={inputCls(errors.travelerName)} placeholder={t("booking.leadTravellerName")} value={form.travelerName} onChange={set("travelerName")} />
-                      {errors.travelerName && <p className="text-red-400 text-xs">{errors.travelerName}</p>}
+                    <div className="grid sm:grid-cols-2 gap-3">
+                      <div className="space-y-1 sm:col-span-2">
+                        <input className={inputCls(errors.travelerName)} placeholder={t("booking.leadTravellerName")} value={form.travelerName} onChange={set("travelerName")} />
+                        {errors.travelerName && <p className="text-red-400 text-xs">{errors.travelerName}</p>}
+                      </div>
+                      <div className="space-y-1">
+                        <input className={inputCls(errors.phone)} placeholder={t("booking.mobileNumber")} inputMode="tel" value={form.phone} onChange={set("phone")} />
+                        {errors.phone && <p className="text-red-400 text-xs">{errors.phone}</p>}
+                      </div>
+                      <div className="space-y-1">
+                        <input className={inputCls(errors.email)} placeholder={t("booking.emailOptional")} type="email" value={form.email} onChange={set("email")} />
+                        {errors.email && <p className="text-red-400 text-xs">{errors.email}</p>}
+                      </div>
+                      <input className={inputCls(false)} placeholder={t("booking.cityOptional")} value={form.city} onChange={set("city")} />
+                      <input className={inputCls(false)} placeholder={t("booking.pickupPoint")} value={form.pickupPoint} onChange={set("pickupPoint")} />
                     </div>
-                    <div className="space-y-1">
-                      <input className={inputCls(errors.phone)} placeholder={t("booking.mobileNumber")} inputMode="tel" value={form.phone} onChange={set("phone")} />
-                      {errors.phone && <p className="text-red-400 text-xs">{errors.phone}</p>}
-                    </div>
-                    <div className="space-y-1">
-                      <input className={inputCls(errors.email)} placeholder={t("booking.emailOptional")} type="email" value={form.email} onChange={set("email")} />
-                      {errors.email && <p className="text-red-400 text-xs">{errors.email}</p>}
-                    </div>
-                    <input className={inputCls(false)} placeholder={t("booking.cityOptional")} value={form.city} onChange={set("city")} />
-                    <input className={inputCls(false)} placeholder={t("booking.pickupPoint")} value={form.pickupPoint} onChange={set("pickupPoint")} />
                   </div>
 
                   <div className="space-y-2">
@@ -405,22 +409,24 @@ export default function YatraBookingPage() {
                     {errors.seats && <p className="text-red-400 text-xs">{errors.seats}</p>}
                   </div>
 
-                  {serverError && <p className="text-red-400 text-sm">{serverError}</p>}
+                  <div className="max-w-2xl mx-auto w-full space-y-4">
+                    {serverError && <p className="text-red-400 text-sm">{serverError}</p>}
 
-                  <div className="rounded-xl bg-amber-400/[0.04] border border-amber-200/12 p-4 text-sm space-y-1.5">
-                    <div className="flex items-center justify-between text-amber-100/70">
-                      <span>{t("booking.totalFare", { seats: selectedSeats.length, unit: formatCurrency(unitPrice) })}</span>
-                      <span className="text-amber-50 font-semibold">{formatCurrency(totalAmount)}</span>
+                    <div className="rounded-xl bg-amber-400/[0.04] border border-amber-200/12 p-4 text-sm space-y-1.5">
+                      <div className="flex items-center justify-between text-amber-100/70">
+                        <span>{t("booking.totalFare", { seats: selectedSeats.length, unit: formatCurrency(unitPrice) })}</span>
+                        <span className="text-amber-50 font-semibold">{formatCurrency(totalAmount)}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-amber-100 border-t border-amber-200/12 pt-1.5">
+                        <span>{yatra.price?.advanceAmount ? t("booking.payNowReserveAdvance") : t("booking.payNowReserve")}</span>
+                        <span className="font-semibold">{formatCurrency(dueNow)}</span>
+                      </div>
                     </div>
-                    <div className="flex items-center justify-between text-amber-100 border-t border-amber-200/12 pt-1.5">
-                      <span>{yatra.price?.advanceAmount ? t("booking.payNowReserveAdvance") : t("booking.payNowReserve")}</span>
-                      <span className="font-semibold">{formatCurrency(dueNow)}</span>
-                    </div>
+
+                    <button onClick={goToPayment} disabled={submitting || Boolean(activeHold)} className={`${btnAccent} w-full`}>
+                      {submitting ? t("booking.reservingSeatsBtn") : t("booking.continueToPayment")}
+                    </button>
                   </div>
-
-                  <button onClick={goToPayment} disabled={submitting || Boolean(activeHold)} className={`${btnAccent} w-full`}>
-                    {submitting ? t("booking.reservingSeatsBtn") : t("booking.continueToPayment")}
-                  </button>
                 </>
               )}
             </div>
@@ -428,7 +434,7 @@ export default function YatraBookingPage() {
 
           {/* STEP 2 */}
           {step === 2 && (
-            <div className="space-y-4">
+            <div className="max-w-2xl mx-auto w-full space-y-4">
               <p className="text-amber-200/70 text-xs uppercase tracking-[0.18em]">{t("booking.paymentLabel")}</p>
 
               {remainingSeconds != null && (
@@ -461,7 +467,7 @@ export default function YatraBookingPage() {
 
           {/* STEP 3 — confirmation */}
           {step === 3 && confirmation && (
-            <div className="text-center space-y-4 py-4">
+            <div className="max-w-2xl mx-auto w-full text-center space-y-4 py-4">
               <p className="text-4xl">🙏</p>
               <h2 className="text-xl font-bold text-amber-50">{t("booking.bookingConfirmedTitle")}</h2>
               <p className="text-amber-100/60 text-sm">{t("booking.bookingConfirmedDesc")}</p>

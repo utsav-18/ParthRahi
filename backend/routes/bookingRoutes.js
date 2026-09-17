@@ -18,6 +18,22 @@ const readEnvValue = (name) => {
   return value.replace(/^(['"])(.*)\1$/, '$2').trim();
 };
 
+// Webhook recovery is optional — the primary payment flow (/order -> Razorpay
+// Checkout -> /verify) never depends on it. Treat the .env.example placeholder
+// the same as "unset" so a copy-pasted example value can't be mistaken for a
+// real secret. Re-read on every call (not cached) so setting a real secret
+// and restarting the server is enough to turn webhooks back on — no code
+// changes needed.
+const WEBHOOK_SECRET_PLACEHOLDER = 'your_webhook_secret';
+const isWebhookConfigured = () => {
+  const secret = readEnvValue('RAZORPAY_WEBHOOK_SECRET');
+  return Boolean(secret) && secret !== WEBHOOK_SECRET_PLACEHOLDER;
+};
+
+if (!isWebhookConfigured()) {
+  console.warn('[Razorpay] Webhook recovery disabled: RAZORPAY_WEBHOOK_SECRET is not set. Payments are confirmed via /api/bookings/verify only.');
+}
+
 const getRazorpayConfig = () => ({
   keyId: readEnvValue('RAZORPAY_KEY_ID'),
   keySecret: readEnvValue('RAZORPAY_KEY_SECRET'),
@@ -155,12 +171,16 @@ router.get('/availability/:slug', optionalAuth, async (req, res) => {
   try {
     const yatra = await Yatra.findOne({ slug: String(req.params.slug).toLowerCase(), status: { $in: ['published', 'closed'] } });
     if (!yatra) return res.status(404).json({ error: 'Yatra not found' });
-    const layout = getLayout(yatra).filter((seat) => seat.type !== 'blocked');
+    // Keep blocked cells (e.g. the driver-side gap on a sleeper coach) in the
+    // layout so the frontend can render them in place — just leave them out
+    // of the bookable seat/state list below.
+    const layout = getLayout(yatra);
+    const bookableLayout = layout.filter((seat) => seat.type !== 'blocked');
     const bookings = await Booking.find({ yatraId: yatra._id, bookingStatus: 'confirmed', seatIds: { $exists: true, $ne: [] } }).select('seatIds').lean();
     const booked = new Set(bookings.flatMap((booking) => booking.seatIds || []));
     const locks = await SeatLock.find({ yatraId: yatra._id, $or: [{ status: 'booked' }, { status: 'locked', expiresAt: { $gt: new Date() } }] }).select('seatId').lean();
     const locked = new Set(locks.map((lock) => lock.seatId));
-    res.json({ layout, seats: layout.map((seat) => ({ seatId: seat.seatId, state: booked.has(seat.seatId) ? 'booked' : locked.has(seat.seatId) ? 'locked' : 'available' })) });
+    res.json({ layout, seats: bookableLayout.map((seat) => ({ seatId: seat.seatId, state: booked.has(seat.seatId) ? 'booked' : locked.has(seat.seatId) ? 'locked' : 'available' })) });
   } catch (error) { console.error('Seat availability error:', error.message); res.status(500).json({ error: 'Failed to load seat availability' }); }
 });
 
@@ -285,9 +305,11 @@ router.post('/verify', requireAuth, async (req, res) => {
 });
 
 // Razorpay can call this endpoint when the browser closes after payment.
+// Optional recovery path only — disabled (503) until a real
+// RAZORPAY_WEBHOOK_SECRET is configured; /verify remains authoritative.
 router.post('/webhook', async (req, res) => {
+  if (!isWebhookConfigured() || !req.rawBody) return res.status(503).json({ error: 'Payment webhook is not configured' });
   const webhookSecret = readEnvValue('RAZORPAY_WEBHOOK_SECRET');
-  if (!webhookSecret || !req.rawBody) return res.status(503).json({ error: 'Payment webhook is not configured' });
   const signature = req.headers['x-razorpay-signature'];
   const expected = crypto.createHmac('sha256', webhookSecret).update(req.rawBody).digest('hex');
   if (!signature || expected.length !== signature.length || !crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(signature))) return res.status(400).json({ error: 'Invalid webhook signature' });

@@ -41,6 +41,13 @@ const seatSchema = new mongoose.Schema({
   row: { type: Number, required: true, min: 1 },
   column: { type: Number, required: true, min: 1 },
   type: { type: String, enum: ['seat', 'aisle', 'blocked'], default: 'seat' },
+  // Optional multi-deck bus layout metadata (e.g. sleeper coaches with a
+  // lower + upper deck, each split into side-by-side panels like
+  // "Sleeper"/"Seater"). Seats without these fields render as a single flat
+  // grid (the original behaviour) — see frontend SeatMap.jsx.
+  deck: { type: String, trim: true },
+  panel: { type: Number, min: 0 },
+  berthType: { type: String, enum: ['sleeper', 'seater'] },
 }, { _id: false });
 
 // Auto-translated (English → Hindi) mirror of the customer-facing text fields
