@@ -43,17 +43,18 @@ const formatDate = (value, withTime = false) => {
   return d.toLocaleDateString('en-IN', opts);
 };
 
-// Same convention used across the frontend (format.js: nextDeparture) — the
-// booking itself doesn't record which departure date was picked, only the
-// yatra it belongs to, so we show the next upcoming date from that yatra.
-const journeyDate = (departureDates = []) => {
+// LEGACY FALLBACK ONLY: bookings made before journeySnapshot existed have no
+// record of which date the customer actually picked. For those (only those
+// — see streamReceiptPdf below), approximate with the yatra's next upcoming
+// departure date, same convention as the frontend's format.js:nextDeparture.
+const legacyNextDeparture = (departureDates = []) => {
   const now = new Date();
   const dates = (departureDates || [])
     .map((d) => new Date(d))
     .filter((d) => !Number.isNaN(d.getTime()))
     .sort((a, b) => a - b);
   const next = dates.find((d) => d >= now) || dates[dates.length - 1];
-  return next ? formatDate(next) : 'To be announced';
+  return next ? formatDate(next) : 'Not available';
 };
 
 const row = (doc, label, value, x, y, width) => {
@@ -89,8 +90,11 @@ function streamReceiptPdf(res, { booking, yatra }) {
   doc.font('Helvetica-Bold').fontSize(22).fillColor(BRAND_COLOR).text('ParthRahi', brandTextX, 50);
   doc.font('Helvetica').fontSize(9).fillColor(MUTED).text('Guided Pilgrimage & Group Tours', brandTextX, 76);
 
+  // No "Issued" timestamp here on purpose — PDF-generation time (i.e. whenever
+  // someone happens to click download) is not the payment time and must
+  // never be labelled as one. The actual payment moment is shown further
+  // down, in Payment Details, from booking.paidAt.
   doc.font('Helvetica-Bold').fontSize(16).fillColor(INK).text('Payment Receipt', left, 50, { width: pageWidth, align: 'right' });
-  doc.font('Helvetica').fontSize(9).fillColor(MUTED).text(`Issued: ${formatDate(new Date(), true)}`, left, 72, { width: pageWidth, align: 'right' });
 
   doc.moveTo(left, 100).lineTo(left + pageWidth, 100).strokeColor(LINE).lineWidth(1).stroke();
 
@@ -112,18 +116,27 @@ function streamReceiptPdf(res, { booking, yatra }) {
   row(doc, 'Email', booking.email || 'Not provided', left, y, pageWidth);
 
   // ── Journey details ─────────────────────────────────────
+  // Journey info comes from booking.journeySnapshot — frozen at the moment
+  // this booking was made — NOT from the live `yatra` document. An admin
+  // editing the yatra's route/title/dates later must never change what a
+  // past receipt shows. `yatra` (the current document) is only ever used
+  // as a fallback for bookings made before this snapshot existed.
+  const snapshot = booking.journeySnapshot;
+  const yatraTitle = snapshot?.yatraTitle || yatra?.title || 'ParthRahi Yatra';
+  const startLocation = snapshot?.startingPoint || yatra?.startingPoint || 'Not available';
+  const journeyDateLabel = snapshot?.departureDate ? formatDate(snapshot.departureDate) : legacyNextDeparture(yatra?.departureDates);
+
   y += 45;
   doc.moveTo(left, y).lineTo(left + pageWidth, y).strokeColor(LINE).lineWidth(1).stroke();
   y += 16;
   doc.font('Helvetica-Bold').fontSize(11).fillColor(INK).text('Journey Details', left, y);
   y += 20;
-  row(doc, 'Yatra / Tour', yatra?.title || 'ParthRahi Yatra', left, y, pageWidth);
+  row(doc, 'Yatra / Tour', yatraTitle, left, y, pageWidth);
   y += 40;
-  row(doc, 'Journey Date', journeyDate(yatra?.departureDates), left, y, colWidth);
+  row(doc, 'Journey Date', journeyDateLabel, left, y, colWidth);
   row(doc, 'Seats Booked', booking.seatIds?.length ? booking.seatIds.join(', ') : booking.numberOfSeats ? `${booking.numberOfSeats} seat(s)` : 'N/A', left + colWidth + 20, y, colWidth);
   y += 40;
-  row(doc, 'Start Location', yatra?.startingPoint || 'N/A', left, y, colWidth);
-  row(doc, 'Destination', yatra?.route?.length ? yatra.route[yatra.route.length - 1] : 'N/A', left + colWidth + 20, y, colWidth);
+  row(doc, 'Start Location', startLocation, left, y, colWidth);
 
   // ── Fare breakdown ───────────────────────────────────────
   y += 45;
@@ -145,7 +158,10 @@ function streamReceiptPdf(res, { booking, yatra }) {
     fareRows.push(['Sleeper Seat', `${breakdown.sleeperSeats} × ${formatCurrency(breakdown.sleeperSeatPrice)} = ${formatCurrency(breakdown.sleeperSeats * breakdown.sleeperSeatPrice)}`]);
   }
   fareRows.push(['Total Fare', formatCurrency(booking.totalAmount)]);
-  if (booking.advanceAmount) fareRows.push(['Advance required', formatCurrency(booking.advanceAmount)]);
+  // New bookings always pay the full total (no advance/partial option), so
+  // this naturally shows the full amount for them. booking.advanceAmount
+  // only remains set on bookings made before advance payments were removed
+  // — kept here so those older receipts still show what was actually paid.
   const amountPaid = paid ? (booking.advanceAmount || booking.totalAmount) : booking.advancePaid || 0;
   fareRows.push(['Amount Paid', formatCurrency(amountPaid)]);
 
@@ -156,17 +172,27 @@ function streamReceiptPdf(res, { booking, yatra }) {
   }
 
   // ── Payment details ──────────────────────────────────────
+  // Payment Date & Time is booking.paidAt — set once, inside completePayment(),
+  // preferring Razorpay's own payment.created_at. It is never the moment this
+  // PDF happens to be generated, and never the browser/frontend clock. Older
+  // paid bookings made before paidAt existed fall back to updatedAt (the
+  // Mongoose save that confirmed them), which is a reasonable proxy but not
+  // exact — never "Not available" for a booking that IS marked paid, since
+  // that would look like the payment never happened.
+  const paymentTimestamp = paid ? (booking.paidAt || booking.updatedAt) : null;
+  const BOX_HEIGHT = 114;
   y += 10;
-  doc.rect(left, y, pageWidth, 74).fillAndStroke('#faf7f0', LINE);
+  doc.rect(left, y, pageWidth, BOX_HEIGHT).fillAndStroke('#faf7f0', LINE);
   const padY = y + 12;
   doc.font('Helvetica-Bold').fontSize(10).fillColor(INK).text('Payment Details', left + 14, padY);
   row(doc, 'Payment Status', paid ? 'Paid' : booking.paymentStatus || 'Pending', left + 14, padY + 18, colWidth);
-  row(doc, 'Razorpay Payment ID', booking.razorpayPaymentId || 'N/A', left + colWidth + 20, padY + 18, colWidth - 14);
-  y += 74;
+  row(doc, 'Payment Date & Time', paymentTimestamp ? formatDate(paymentTimestamp, true) : 'Not available', left + colWidth + 20, padY + 18, colWidth - 14);
+  row(doc, 'Razorpay Payment ID', booking.razorpayPaymentId || 'N/A', left + 14, padY + 58, colWidth);
+  row(doc, 'Razorpay Order ID', booking.razorpayOrderId || 'N/A', left + colWidth + 20, padY + 58, colWidth - 14);
+  y += BOX_HEIGHT;
 
   y += 16;
-  row(doc, 'Razorpay Order ID', booking.razorpayOrderId || 'N/A', left, y, colWidth);
-  row(doc, 'Booking Date & Time', formatDate(booking.createdAt, true), left + colWidth + 20, y, colWidth);
+  row(doc, 'Booking Created', formatDate(booking.createdAt, true), left, y, pageWidth);
 
   // ── Footer ───────────────────────────────────────────────
   const footerY = doc.page.height - doc.page.margins.bottom - 40;

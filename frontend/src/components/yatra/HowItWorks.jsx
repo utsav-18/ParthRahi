@@ -6,7 +6,7 @@ import { useLanguage } from "../../lib/i18n/LanguageContext";
  * variant="full"    → titled section with 4 cards + connector line (list page)
  * variant="compact" → slim 4-step strip (detail / booking pages)
  */
-export default function HowItWorks({ variant = "full", advanceHint }) {
+export default function HowItWorks({ variant = "full" }) {
   const { t } = useLanguage();
 
   const steps = [
@@ -33,9 +33,6 @@ export default function HowItWorks({ variant = "full", advanceHint }) {
             </li>
           ))}
         </ol>
-        {advanceHint && (
-          <p className="mt-3 text-xs text-amber-200/80 border-t border-amber-200/10 pt-3">{advanceHint}</p>
-        )}
       </div>
     );
   }

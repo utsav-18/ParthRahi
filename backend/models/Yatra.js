@@ -112,7 +112,6 @@ const yatraSchema = new mongoose.Schema({
     sleeperSeat: { type: Number, required: true, min: [1, 'Sleeper seat price must be a positive number'] },
     currency: { type: String, default: 'INR' },
     unit: { type: String, default: 'per person' },
-    advanceAmount: { type: Number },
   },
 
   quickInclusions: { type: [quickInclusionSchema], default: [] },

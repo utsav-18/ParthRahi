@@ -58,9 +58,9 @@ const logRazorpayError = (context, error, keyId) => {
 
 const publicBooking = (booking, yatra) => ({
   bookingReference: booking.bookingReference, travelerName: booking.travelerName, phone: booking.phone, email: booking.email,
-  numberOfSeats: booking.numberOfSeats, seatIds: booking.seatIds, fareBreakdown: booking.fareBreakdown, totalAmount: booking.totalAmount,
+  numberOfSeats: booking.numberOfSeats, seatIds: booking.seatIds, journeySnapshot: booking.journeySnapshot, fareBreakdown: booking.fareBreakdown, totalAmount: booking.totalAmount,
   advanceAmount: booking.advanceAmount, paymentStatus: booking.paymentStatus, bookingStatus: booking.bookingStatus,
-  razorpayOrderId: booking.razorpayOrderId, razorpayPaymentId: booking.razorpayPaymentId,
+  razorpayOrderId: booking.razorpayOrderId, razorpayPaymentId: booking.razorpayPaymentId, paidAt: booking.paidAt,
   yatra: yatra ? { title: yatra.title, slug: yatra.slug } : undefined,
 });
 
@@ -69,6 +69,7 @@ const profileBooking = (booking) => ({
   travelerName: booking.travelerName,
   seatIds: booking.seatIds || [],
   numberOfSeats: booking.numberOfSeats,
+  journeySnapshot: booking.journeySnapshot,
   fareBreakdown: booking.fareBreakdown,
   totalAmount: booking.totalAmount,
   advanceAmount: booking.advanceAmount,
@@ -76,6 +77,7 @@ const profileBooking = (booking) => ({
   paymentStatus: booking.paymentStatus,
   bookingStatus: booking.bookingStatus,
   razorpayPaymentId: booking.razorpayPaymentId,
+  paidAt: booking.paidAt,
   createdAt: booking.createdAt,
   yatra: booking.yatraId ? {
     title: booking.yatraId.title,
@@ -100,7 +102,8 @@ const resolveYatra = (body) => Yatra.findOne(body.yatraSlug ? { slug: String(bod
 // berthType (set on the Yatra's seatLayout — 'sleeper' or the default
 // 'normal'/'seater') picks which of the admin-configured per-seat prices
 // applies. The frontend only ever displays this; it's recomputed here from
-// the database on every booking, never trusted from the request.
+// the database on every booking, never trusted from the request. There is
+// no advance/partial-payment option — the full total is always charged.
 const resolveSeatPricing = (yatra, seatIds) => {
   const berthById = new Map(getLayout(yatra).map((seat) => [seat.seatId, seat.berthType === 'sleeper' ? 'sleeper' : 'normal']));
   let normalSeats = 0;
@@ -113,15 +116,42 @@ const resolveSeatPricing = (yatra, seatIds) => {
   const sleeperSeatPrice = yatra.price.sleeperSeat;
   return {
     totalAmount: normalSeats * normalSeatPrice + sleeperSeats * sleeperSeatPrice,
-    advanceAmount: (yatra.price.advanceAmount || 0) * seatIds.length,
     fareBreakdown: { normalSeats, normalSeatPrice, sleeperSeats, sleeperSeatPrice },
   };
 };
 
+// Matches the requested departure date against the Yatra's own configured
+// dates. Returns: a Date if valid/resolved, undefined if the yatra has no
+// dates configured at all (nothing to validate), or null if the yatra DOES
+// have dates but the request didn't pick a valid one (caller should reject).
+const resolveDepartureDate = (yatra, requestedDate) => {
+  const dates = (yatra.departureDates || []).map((d) => new Date(d)).filter((d) => !Number.isNaN(d.getTime()));
+  if (!dates.length) return undefined;
+  if (!requestedDate) return dates.length === 1 ? dates[0] : null;
+  const requested = new Date(requestedDate);
+  if (Number.isNaN(requested.getTime())) return null;
+  return dates.find((d) => d.getTime() === requested.getTime()) || null;
+};
+
+// Snapshot of the journey info as it exists right now, frozen onto the
+// booking so a later admin edit to the Yatra (route, title, start point)
+// can never retroactively change what a past receipt shows.
+const buildJourneySnapshot = (yatra, departureDate) => ({
+  yatraTitle: yatra.title,
+  startingPoint: yatra.startingPoint,
+  destination: yatra.route?.length ? yatra.route[yatra.route.length - 1] : undefined,
+  departureDate,
+});
+
 const ownerMatches = (booking, req, holdToken) => Boolean(holdToken && booking.holdToken === holdToken && (!booking.userId || (req.user && String(booking.userId) === String(req.user._id))));
 
-const expectedPaymentAmount = (booking) => Math.round((booking.advanceAmount || booking.totalAmount) * 100);
+// Razorpay always charges the full booking total — there is no advance/
+// partial-payment option.
+const expectedPaymentAmount = (booking) => Math.round(booking.totalAmount * 100);
 
+// Returns the verified Razorpay payment object so the caller can read its
+// own created_at (Razorpay's authoritative record of when the payment
+// actually completed) rather than guessing from our own server clock.
 const verifyPaymentWithRazorpay = async (booking, orderId, paymentId) => {
   const { keyId, keySecret } = getRazorpayConfig();
   const razorpay = new Razorpay({ key_id: keyId, key_secret: keySecret });
@@ -135,9 +165,16 @@ const verifyPaymentWithRazorpay = async (booking, orderId, paymentId) => {
   if (payment.id !== paymentId || payment.order_id !== orderId || payment.amount !== order.amount || !['authorized', 'captured'].includes(payment.status)) {
     throw Object.assign(new Error('Payment details are not valid for this booking'), { status: 400 });
   }
+  return payment;
 };
 
-const completePayment = async ({ booking, paymentId, orderId, signature }) => {
+// Razorpay's payment.created_at is a Unix timestamp in seconds; prefer it
+// (it's Razorpay's own record of when the payment happened) and only fall
+// back to "now" if it's ever missing.
+const paymentTimestampFrom = (payment) =>
+  Number.isFinite(payment?.created_at) ? new Date(payment.created_at * 1000) : new Date();
+
+const completePayment = async ({ booking, paymentId, orderId, signature, paidAt }) => {
   const session = await mongoose.startSession();
   try {
     let confirmed;
@@ -150,6 +187,7 @@ const completePayment = async ({ booking, paymentId, orderId, signature }) => {
       if (locks.length !== (current.seatIds || []).length) throw Object.assign(new Error('The seat hold has expired. Please select your seats again.'), { status: 409 });
       current.paymentStatus = 'paid'; current.bookingStatus = 'confirmed'; current.paymentReferenceId = paymentId;
       current.razorpayPaymentId = paymentId; current.razorpayOrderId = orderId; current.razorpaySignature = signature;
+      current.paidAt = paidAt || new Date();
       await current.save({ session });
       await Yatra.updateOne({ _id: current.yatraId }, { $inc: { seatsBooked: current.numberOfSeats } }).session(session);
       await SeatLock.updateMany({ bookingId: current._id }, { $set: { status: 'booked', expiresAt: null } }).session(session);
@@ -163,7 +201,7 @@ const completePayment = async ({ booking, paymentId, orderId, signature }) => {
 // It has no seatIds (just a headcount), so it can't know each seat's type —
 // every seat is priced as Normal Seat, the base tier.
 router.post('/', bookingLimiter, requireAuth, async (req, res) => {
-  const { travelerName, phone, email, city, pickupPoint, numberOfSeats } = req.body;
+  const { travelerName, phone, email, city, pickupPoint, numberOfSeats, departureDate } = req.body;
   const seats = parseInt(numberOfSeats, 10);
   if (!travelerName || !String(travelerName).trim()) return res.status(400).json({ error: 'Traveler name is required' });
   if (!phone || !phoneRegex.test(String(phone).trim().replace(/[\s-]/g, ''))) return res.status(400).json({ error: 'A valid mobile number is required' });
@@ -172,15 +210,16 @@ router.post('/', bookingLimiter, requireAuth, async (req, res) => {
     const yatra = await resolveYatra(req.body);
     if (!yatra) return res.status(404).json({ error: 'Yatra not found' });
     if (yatra.status !== 'published') return res.status(409).json({ error: 'Bookings are closed for this yatra' });
+    const resolvedDate = resolveDepartureDate(yatra, departureDate);
+    if (resolvedDate === null) return res.status(400).json({ error: 'Please select a valid departure date for this yatra' });
     const price = {
       totalAmount: seats * yatra.price.normalSeat,
-      advanceAmount: (yatra.price.advanceAmount || 0) * seats,
       fareBreakdown: { normalSeats: seats, normalSeatPrice: yatra.price.normalSeat, sleeperSeats: 0, sleeperSeatPrice: yatra.price.sleeperSeat },
     };
     const reserved = await Yatra.findOneAndUpdate({ _id: yatra._id, status: 'published', $expr: { $lte: [{ $add: ['$seatsBooked', seats] }, '$totalSeats'] } }, { $inc: { seatsBooked: seats } }, { returnDocument: 'after' });
     if (!reserved) return res.status(409).json({ error: 'Not enough seats available for this yatra' });
     try {
-      const booking = await Booking.create({ yatraId: yatra._id, userId: req.user._id, travelerName: String(travelerName).trim(), phone: String(phone).trim(), email: email ? String(email).trim() : undefined, city, pickupPoint, numberOfSeats: seats, ...price, paymentStatus: 'pending', bookingStatus: 'pending' });
+      const booking = await Booking.create({ yatraId: yatra._id, userId: req.user._id, travelerName: String(travelerName).trim(), phone: String(phone).trim(), email: email ? String(email).trim() : undefined, city, pickupPoint, numberOfSeats: seats, journeySnapshot: buildJourneySnapshot(yatra, resolvedDate), ...price, paymentStatus: 'pending', bookingStatus: 'pending' });
       return res.status(201).json({ message: 'Seats reserved. Complete payment to confirm your booking.', booking: publicBooking(booking, yatra) });
     } catch (error) { await Yatra.updateOne({ _id: yatra._id }, { $inc: { seatsBooked: -seats } }); throw error; }
   } catch (error) { console.error('Create legacy booking error:', error.message); return res.status(500).json({ error: 'Failed to create booking' }); }
@@ -218,7 +257,7 @@ router.get('/my', requireAuth, async (req, res) => {
 });
 
 router.post('/lock', bookingLimiter, requireAuth, async (req, res) => {
-  const { seatIds, travelerName, phone, email, city, pickupPoint } = req.body;
+  const { seatIds, travelerName, phone, email, city, pickupPoint, departureDate } = req.body;
   if (!Array.isArray(seatIds) || seatIds.length < 1 || seatIds.length > 20) return res.status(400).json({ error: 'Select between 1 and 20 seats' });
   const normalizedSeats = seatIds.map((seat) => String(seat).trim());
   if (new Set(normalizedSeats).size !== normalizedSeats.length) return res.status(400).json({ error: 'Duplicate seats are not allowed' });
@@ -230,10 +269,12 @@ router.post('/lock', bookingLimiter, requireAuth, async (req, res) => {
     if (yatra.status !== 'published') return res.status(409).json({ error: 'Bookings are closed for this yatra' });
     const validSeats = new Set(getLayout(yatra).filter((seat) => seat.type !== 'blocked').map((seat) => seat.seatId));
     if (normalizedSeats.some((seat) => !validSeats.has(seat))) return res.status(400).json({ error: 'One or more selected seats are invalid for this yatra' });
+    const resolvedDate = resolveDepartureDate(yatra, departureDate);
+    if (resolvedDate === null) return res.status(400).json({ error: 'Please select a valid departure date for this yatra' });
     const price = resolveSeatPricing(yatra, normalizedSeats);
     const holdToken = crypto.randomBytes(32).toString('hex');
     const expiresAt = new Date(Date.now() + HOLD_MINUTES * 60 * 1000);
-    const booking = new Booking({ yatraId: yatra._id, userId: req.user._id, travelerName: String(travelerName).trim(), phone: String(phone).trim(), email: email ? String(email).trim() : undefined, city, pickupPoint, numberOfSeats: normalizedSeats.length, seatIds: normalizedSeats, ...price, holdToken, paymentStatus: 'pending', bookingStatus: 'pending' });
+    const booking = new Booking({ yatraId: yatra._id, userId: req.user._id, travelerName: String(travelerName).trim(), phone: String(phone).trim(), email: email ? String(email).trim() : undefined, city, pickupPoint, numberOfSeats: normalizedSeats.length, seatIds: normalizedSeats, journeySnapshot: buildJourneySnapshot(yatra, resolvedDate), ...price, holdToken, paymentStatus: 'pending', bookingStatus: 'pending' });
     const session = await mongoose.startSession();
     try {
       await session.withTransaction(async () => {
@@ -315,8 +356,8 @@ router.post('/verify', requireAuth, async (req, res) => {
   try {
     const booking = await Booking.findOne({ bookingReference }).select('+holdToken');
     if (!booking || !ownerMatches(booking, req, holdToken)) return res.status(404).json({ error: 'Booking hold not found' });
-    await verifyPaymentWithRazorpay(booking, orderId, paymentId);
-    const confirmed = await completePayment({ booking, paymentId, orderId, signature });
+    const payment = await verifyPaymentWithRazorpay(booking, orderId, paymentId);
+    const confirmed = await completePayment({ booking, paymentId, orderId, signature, paidAt: paymentTimestampFrom(payment) });
     const yatra = await Yatra.findById(confirmed.yatraId);
     res.json({ message: 'Payment verified and booking confirmed', booking: publicBooking(confirmed, yatra) });
   } catch (error) { console.error('Verify payment error:', error.message); res.status(error.status || 500).json({ error: error.status ? error.message : 'Failed to confirm payment' }); }
@@ -349,8 +390,8 @@ router.post('/webhook', async (req, res) => {
         paymentId = payments.items?.find((payment) => ['authorized', 'captured'].includes(payment.status))?.id;
       }
       if (!paymentId) return res.status(202).json({ received: true });
-      await verifyPaymentWithRazorpay(booking, orderId, paymentId);
-      await completePayment({ booking, paymentId, orderId, signature });
+      const payment = await verifyPaymentWithRazorpay(booking, orderId, paymentId);
+      await completePayment({ booking, paymentId, orderId, signature, paidAt: paymentTimestampFrom(payment) });
     }
     res.json({ received: true });
   } catch (error) { console.error('Payment webhook error:', error.message); res.status(500).json({ error: 'Webhook processing failed' }); }

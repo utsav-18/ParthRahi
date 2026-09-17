@@ -68,7 +68,6 @@ const tirthYatra2026 = {
     sleeperSeat: 6500,
     currency: 'INR',
     unit: 'per person',
-    advanceAmount: 1000,
   },
   quickInclusions: [
     { icon: '🛏️', label: 'AC Sleeper Bus' },
@@ -229,7 +228,6 @@ const kamakhyaSikkim = {
     sleeperSeat: 21500,
     currency: 'INR',
     unit: 'per person',
-    advanceAmount: 3000,
   },
   quickInclusions: [
     { icon: '🛏️', label: 'AC Sleeper Bus' },

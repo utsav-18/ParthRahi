@@ -71,9 +71,6 @@ export default function YatraCard({ yatra }) {
 
         <div className="mt-auto flex items-center justify-between gap-3 pt-3 border-t border-amber-200/10 text-sm text-amber-100/60">
           <span>{dep ? `🗓 ${t("yatraCard.nextLabel")} ${formatDate(dep)}` : `🗓 ${t("yatraCard.datesSoon")}`}</span>
-          {yatra.price?.advanceAmount ? (
-            <span className="text-amber-200/80">{t("yatraCard.toReserve", { amount: `₹${yatra.price.advanceAmount.toLocaleString("en-IN")}` })}</span>
-          ) : null}
         </div>
 
         <span className="text-center text-sm font-semibold text-amber-200 border border-amber-300/30 rounded-lg py-2.5 transition-colors group-hover:bg-amber-300/10">

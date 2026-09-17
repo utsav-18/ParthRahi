@@ -11,7 +11,7 @@ const EMPTY = {
   seatLayout: [],
   departureDates: [], durationDays: "", durationNights: "",
   vehicleType: "", totalSeats: "", reportingTime: "", departureTime: "",
-  price: { normalSeat: "", sleeperSeat: "", currency: "INR", unit: "per person", advanceAmount: "" },
+  price: { normalSeat: "", sleeperSeat: "", currency: "INR", unit: "per person" },
   quickInclusions: [], itinerary: [],
   highlights: [], mapImageUrl: "",
   inclusions: [], exclusions: [], importantNotes: [],
@@ -113,6 +113,14 @@ export default function AdminYatraEditPage() {
       setError("Normal Seat and Sleeper Seat prices must be positive numbers.");
       return;
     }
+    // totalSeats is bookable capacity — a 'blocked' layout entry (e.g. the
+    // driver-side gap on a sleeper coach) is a placeholder, not a seat, so
+    // it must not count against this check. Mirrors the backend check.
+    const bookableCount = (form.seatLayout || []).filter((seat) => seat.type !== "blocked").length;
+    if (bookableCount > 0 && Number(form.totalSeats) < bookableCount) {
+      setError(`Total seats (${form.totalSeats || 0}) cannot be less than the number of bookable seats in the layout (${bookableCount}).`);
+      return;
+    }
     setSaving(true);
     const payload = {
       ...form,
@@ -126,7 +134,6 @@ export default function AdminYatraEditPage() {
         ...form.price,
         normalSeat: Number(form.price.normalSeat),
         sleeperSeat: Number(form.price.sleeperSeat),
-        advanceAmount: form.price.advanceAmount === "" ? undefined : Number(form.price.advanceAmount),
       },
       seatLayout: (form.seatLayout || []).filter((seat) => seat.seatId && seat.label).map((seat) => ({ ...seat, row: Number(seat.row), column: Number(seat.column), type: seat.type || "seat" })),
     };
@@ -224,7 +231,7 @@ export default function AdminYatraEditPage() {
               confirmed bookings keep the amount they actually paid.
             </p>
           </div>
-          <div className="grid sm:grid-cols-4 gap-4">
+          <div className="grid sm:grid-cols-3 gap-4">
             <Field label="Normal Seat Price (₹)">
               <input type="number" min="1" step="1" className={adminInput} value={form.price.normalSeat} onChange={(e) => setPrice({ normalSeat: e.target.value })} required />
             </Field>
@@ -232,7 +239,6 @@ export default function AdminYatraEditPage() {
               <input type="number" min="1" step="1" className={adminInput} value={form.price.sleeperSeat} onChange={(e) => setPrice({ sleeperSeat: e.target.value })} required />
             </Field>
             <Field label="Currency"><input className={adminInput} value={form.price.currency} onChange={(e) => setPrice({ currency: e.target.value })} /></Field>
-            <Field label="Advance / seat"><input type="number" className={adminInput} value={form.price.advanceAmount} onChange={(e) => setPrice({ advanceAmount: e.target.value })} /></Field>
           </div>
         </section>
 

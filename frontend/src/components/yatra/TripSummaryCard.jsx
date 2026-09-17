@@ -39,11 +39,6 @@ export default function TripSummaryCard({ yatra }) {
           <p className="text-xs text-amber-200/40">{t("tripSummary.startingFrom")}</p>
           <p className="text-4xl font-bold text-amber-50 leading-tight">{formatCurrency(startingPrice(yatra.price), yatra.price?.currency)}</p>
           <p className="text-xs text-amber-200/40">{yatra.price?.unit || "per person"}</p>
-          {yatra.price?.advanceAmount ? (
-            <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-amber-300/10 border border-amber-300/25 px-2.5 py-1 text-[11px] text-amber-100">
-              {t("tripSummary.reserveWithPerSeat", { amount: formatCurrency(yatra.price.advanceAmount, yatra.price.currency) })}
-            </div>
-          ) : null}
         </div>
 
         <Row icon="📍" label={t("tripSummary.departureFrom")} value={yatra.startingPoint} />

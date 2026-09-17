@@ -142,7 +142,11 @@ router.put('/yatras/:id', async (req, res) => {
       const nextSeats = new Set(seatIds);
       const removed = [...confirmedSeats].filter((seatId) => !nextSeats.has(seatId));
       if (removed.length) return res.status(409).json({ error: `Cannot remove confirmed seat(s): ${removed.join(', ')}` });
-      if (body.totalSeats != null && Number(body.totalSeats) < seatIds.length) return res.status(400).json({ error: 'Total seats cannot be less than the configured seat layout' });
+      // totalSeats is bookable capacity — a 'blocked' entry (e.g. the
+      // driver-side gap on a sleeper coach) is a placeholder in the physical
+      // layout, not a seat anyone can book, so it must not count against it.
+      const bookableCount = body.seatLayout.filter((seat) => seat.type !== 'blocked').length;
+      if (body.totalSeats != null && Number(body.totalSeats) < bookableCount) return res.status(400).json({ error: 'Total seats cannot be less than the number of bookable seats in the layout' });
     }
 
     if (body.slug) {

@@ -103,7 +103,8 @@ export default function AdminBookingsPage() {
                   </td>
                   <td className="px-3 py-3 text-white/70">
                     {formatCurrency(b.totalAmount)}
-                    <span className="block text-white/40 text-xs">adv {formatCurrency(b.advanceAmount)}</span>
+                    {/* Advance payments were removed — this only ever shows for bookings made before that, to preserve their historical record. */}
+                    {b.advanceAmount ? <span className="block text-white/40 text-xs">adv {formatCurrency(b.advanceAmount)}</span> : null}
                   </td>
                   <td className="px-3 py-3">
                     <select

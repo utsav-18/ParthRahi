@@ -35,7 +35,7 @@ export default function YatraBookingPage() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [step, setStep] = useState(1);
-  const [form, setForm] = useState({ travelerName: "", phone: "", email: "", city: "", pickupPoint: "" });
+  const [form, setForm] = useState({ travelerName: "", phone: "", email: "", city: "", pickupPoint: "", departureDate: "" });
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
@@ -62,9 +62,13 @@ export default function YatraBookingPage() {
         rawYatraRef.current = loaded;
         setYatra(localizeYatra(loaded, lang));
         setAvailability(seatsRes.data);
+        const dates = loaded.departureDates || [];
         setForm((current) => ({
           ...current,
           pickupPoint: loaded.startingPoint || "",
+          // Only auto-pick when there's exactly one date — with 2+, the
+          // customer must actively choose (validated server-side too).
+          departureDate: dates.length === 1 ? new Date(dates[0]).toISOString() : "",
         }));
       })
       .catch((err) => active && setLoadError(err.message))
@@ -171,8 +175,9 @@ export default function YatraBookingPage() {
     const sleeperSeatPrice = yatra?.price?.sleeperSeat || 0;
     return { normalSeats, normalSeatPrice, sleeperSeats, sleeperSeatPrice };
   }, [availability, selectedSeats, yatra]);
+  // Razorpay always charges the full total — there's no advance/partial-
+  // payment option, so this is the one and only amount shown/charged.
   const totalAmount = fareBreakdown.normalSeats * fareBreakdown.normalSeatPrice + fareBreakdown.sleeperSeats * fareBreakdown.sleeperSeatPrice;
-  const dueNow = (yatra?.price?.advanceAmount || 0) * selectedSeats.length || totalAmount;
   const seatStates = Object.fromEntries((availability?.seats || []).map((seat) => [seat.seatId, seat.state]));
   const countdownLabel =
     remainingSeconds == null ? "" : `${String(Math.floor(remainingSeconds / 60)).padStart(2, "0")}:${String(remainingSeconds % 60).padStart(2, "0")}`;
@@ -187,6 +192,7 @@ export default function YatraBookingPage() {
     if (!form.travelerName.trim()) next.travelerName = t("booking.errTravellerName");
     if (!phoneOk(form.phone)) next.phone = t("booking.errPhone");
     if (form.email && !/^\S+@\S+\.\S+$/.test(form.email)) next.email = t("booking.errEmail");
+    if ((yatra?.departureDates?.length || 0) > 1 && !form.departureDate) next.departureDate = t("booking.errDepartureDate");
     if (!selectedSeats.length) next.seats = t("booking.selectAtLeastOneSeat");
     setErrors(next);
     return !Object.keys(next).length;
@@ -372,6 +378,25 @@ export default function YatraBookingPage() {
                     <input className={inputCls(errors.travelerName)} placeholder={t("booking.leadTravellerName")} value={form.travelerName} onChange={set("travelerName")} />
                     {errors.travelerName && <p className="text-red-400 text-xs">{errors.travelerName}</p>}
                   </div>
+                  {/* Only shown when the yatra actually has more than one
+                      departure date to choose from — with just one, it's
+                      auto-selected and stored on the booking without asking. */}
+                  {(yatra.departureDates?.length || 0) > 1 && (
+                    <div className="space-y-1 sm:col-span-2">
+                      <select className={inputCls(errors.departureDate)} value={form.departureDate} onChange={set("departureDate")}>
+                        <option value="">{t("booking.selectDepartureDate")}</option>
+                        {yatra.departureDates.map((d) => {
+                          const iso = new Date(d).toISOString();
+                          return (
+                            <option key={iso} value={iso}>
+                              {formatDate(d)}
+                            </option>
+                          );
+                        })}
+                      </select>
+                      {errors.departureDate && <p className="text-red-400 text-xs">{errors.departureDate}</p>}
+                    </div>
+                  )}
                   <div className="space-y-1">
                     <input className={inputCls(errors.phone)} placeholder={t("booking.mobileNumber")} inputMode="tel" value={form.phone} onChange={set("phone")} />
                     {errors.phone && <p className="text-red-400 text-xs">{errors.phone}</p>}
@@ -422,10 +447,6 @@ export default function YatraBookingPage() {
                     <span>{t("booking.totalFareLabel")}</span>
                     <span>{formatCurrency(totalAmount)}</span>
                   </div>
-                  <div className="flex items-center justify-between text-amber-100 border-t border-amber-200/12 pt-1.5">
-                    <span>{yatra.price?.advanceAmount ? t("booking.payNowReserveAdvance") : t("booking.payNowReserve")}</span>
-                    <span className="font-semibold">{formatCurrency(dueNow)}</span>
-                  </div>
                 </div>
 
                 <button onClick={goToPayment} disabled={submitting || Boolean(activeHold)} className={`${btnAccent} w-full`}>
@@ -452,8 +473,7 @@ export default function YatraBookingPage() {
               <div className="rounded-xl border border-amber-200/12 bg-amber-400/[0.04] p-4 space-y-2 text-sm">
                 <div className="flex justify-between text-amber-100/70"><span>{t("booking.traveller")}</span><span className="text-amber-50">{form.travelerName}</span></div>
                 <div className="flex justify-between text-amber-100/70"><span>{t("booking.seats")}</span><span className="text-amber-50">{selectedSeats.join(", ")}</span></div>
-                <div className="flex justify-between text-amber-100/70"><span>{t("booking.totalFareLabel")}</span><span className="text-amber-50">{formatCurrency(totalAmount)}</span></div>
-                <div className="flex justify-between border-t border-amber-200/12 pt-2 text-amber-100 font-semibold"><span>{t("booking.amountDueNow")}</span><span>{formatCurrency(dueNow)}</span></div>
+                <div className="flex justify-between border-t border-amber-200/12 pt-2 text-amber-100 font-semibold"><span>{t("booking.totalFareLabel")}</span><span>{formatCurrency(totalAmount)}</span></div>
               </div>
 
               {serverError && <p className="text-red-400 text-sm">{serverError}</p>}

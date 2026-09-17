@@ -21,6 +21,20 @@ const bookingSchema = new mongoose.Schema({
   numberOfSeats: { type: Number, required: true, min: 1 },
   seatIds: { type: [String], default: undefined },
 
+  // Snapshot of the journey details as they were when this booking was made
+  // (title/start/destination from the Yatra, plus the departure date the
+  // customer actually picked). Deliberately NOT re-read from the live Yatra
+  // document later — if an admin edits the route or the yatra gets new
+  // dates, past receipts must keep showing what was really booked. Legacy
+  // bookings made before this field existed will have it undefined; the
+  // receipt falls back to the live Yatra doc only for those.
+  journeySnapshot: {
+    yatraTitle: { type: String, trim: true },
+    startingPoint: { type: String, trim: true },
+    destination: { type: String, trim: true },
+    departureDate: { type: Date },
+  },
+
   // Legacy field from the old food/fare-variant pricing model — no longer
   // written by new bookings, kept only so any pre-existing record (if one
   // ever had it set) still reads back cleanly.
@@ -44,6 +58,11 @@ const bookingSchema = new mongoose.Schema({
   razorpayOrderId: { type: String, trim: true, index: true },
   razorpayPaymentId: { type: String, trim: true, index: true },
   razorpaySignature: { type: String, trim: true },
+  // When the payment actually completed — set once, inside completePayment(),
+  // preferring Razorpay's own payment.created_at over our server clock.
+  // Never the PDF-generation time; that's a completely different moment and
+  // must not be confused with this.
+  paidAt: { type: Date },
   holdToken: { type: String, trim: true, index: true, select: false },
   bookingStatus: { type: String, enum: ['pending', 'confirmed', 'cancelled'], default: 'pending' },
 

@@ -69,10 +69,7 @@ export default function YatraHero({ yatra }) {
             <div>
               <p className="text-[10px] uppercase tracking-widest text-amber-200/60">{t("yatraDetail.from")}</p>
               <p className="text-3xl font-bold text-amber-50">{formatCurrency(startingPrice(yatra.price), yatra.price?.currency)}</p>
-              <p className="text-[11px] text-amber-200/50">
-                {yatra.price?.unit || t("yatraDetail.perPerson")}
-                {yatra.price?.advanceAmount ? ` ${t("yatraDetail.reserveWithInline", { amount: formatCurrency(yatra.price.advanceAmount, yatra.price.currency) })}` : ""}
-              </p>
+              <p className="text-[11px] text-amber-200/50">{yatra.price?.unit || t("yatraDetail.perPerson")}</p>
             </div>
             <div className="text-base text-amber-100/80">
               <p>📍 {yatra.startingPoint}</p>

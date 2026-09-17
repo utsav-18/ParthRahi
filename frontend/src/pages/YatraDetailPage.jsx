@@ -116,9 +116,6 @@ export default function YatraDetailPage() {
   const seatsLeft = yatra.seatsLeft ?? Math.max(0, (yatra.totalSeats || 0) - (yatra.seatsBooked || 0));
   const soldOut = seatsLeft <= 0 || yatra.status !== "published";
   const relatedYatras = related.filter((y) => y.slug !== yatra.slug).slice(0, 6);
-  const advanceHint = yatra.price?.advanceAmount
-    ? t("yatraDetail.advanceHintWithAmount", { amount: formatCurrency(yatra.price.advanceAmount, yatra.price.currency) })
-    : t("yatraDetail.advanceHintNoAmount");
   const galleryImages = (yatra.heroImages || []).filter(Boolean);
 
   return (
@@ -153,7 +150,7 @@ export default function YatraDetailPage() {
               </div>
             )}
 
-            <HowItWorks variant="compact" advanceHint={advanceHint} />
+            <HowItWorks variant="compact" />
 
             <SacredDivider />
           </div>
@@ -186,7 +183,7 @@ export default function YatraDetailPage() {
               <FareBox price={yatra.price} />
               <div className="mt-4 rounded-xl border border-amber-200/12 bg-amber-400/[0.04] p-4 text-sm text-amber-100/75">
                 <p className="text-amber-50 font-medium mb-1">{t("yatraDetail.reservingTitle")}</p>
-                <p>{advanceHint} {t("yatraDetail.reservingHint")}</p>
+                <p>{t("yatraDetail.reservingHint")}</p>
               </div>
             </Section>
 
