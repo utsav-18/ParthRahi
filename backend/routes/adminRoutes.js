@@ -12,6 +12,11 @@ const router = express.Router();
 
 router.use(requireAdmin);
 
+// Admin must not be able to save a negative, NaN, zero, or non-numeric seat
+// price — Number(...) turns invalid input (e.g. "" or "abc") into NaN, which
+// fails the isFinite check below.
+const isValidPrice = (value) => Number.isFinite(Number(value)) && Number(value) > 0;
+
 const slugify = (str) =>
   String(str || '')
     .toLowerCase()
@@ -101,8 +106,8 @@ router.post('/yatras', async (req, res) => {
     const body = { ...req.body };
     body.slug = slugify(body.slug || body.title);
     if (!body.slug) return res.status(400).json({ error: 'Title or slug is required' });
-    if (!body.title || !body.startingPoint || !body.totalSeats || !body.price || body.price.amount == null) {
-      return res.status(400).json({ error: 'title, startingPoint, totalSeats and price.amount are required' });
+    if (!body.title || !body.startingPoint || !body.totalSeats || !body.price || !isValidPrice(body.price.normalSeat) || !isValidPrice(body.price.sleeperSeat)) {
+      return res.status(400).json({ error: 'title, startingPoint, totalSeats, and positive Normal Seat / Sleeper Seat prices are required' });
     }
 
     const exists = await Yatra.findOne({ slug: body.slug });
@@ -122,6 +127,10 @@ router.put('/yatras/:id', async (req, res) => {
     const body = { ...req.body };
     delete body.seatsBooked; // never overwrite the live counter from the form
     if (body.slug) body.slug = slugify(body.slug);
+
+    if (body.price && (!isValidPrice(body.price.normalSeat) || !isValidPrice(body.price.sleeperSeat))) {
+      return res.status(400).json({ error: 'Normal Seat and Sleeper Seat prices must be positive numbers' });
+    }
 
     if (Array.isArray(body.seatLayout)) {
       const seatIds = body.seatLayout.map((seat) => String(seat.seatId || '').trim());

@@ -89,7 +89,18 @@ export default function AdminBookingsPage() {
                     <p className="text-white/40 text-xs">{b.phone}{b.city ? ` · ${b.city}` : ""}</p>
                     <p className="text-white/30 text-xs">{b.email || "No email"}</p>
                   </td>
-                  <td className="px-3 py-3 text-white/70">{b.seatIds?.length ? b.seatIds.join(", ") : "Legacy booking — seat information unavailable"}{b.fareVariant ? ` · ${b.fareVariant}` : ""}</td>
+                  <td className="px-3 py-3 text-white/70">
+                    {b.seatIds?.length ? b.seatIds.join(", ") : "Legacy booking — seat information unavailable"}
+                    {b.fareBreakdown && (b.fareBreakdown.normalSeats || b.fareBreakdown.sleeperSeats) ? (
+                      <span className="text-white/40">
+                        {" · "}
+                        {[
+                          b.fareBreakdown.normalSeats ? `${b.fareBreakdown.normalSeats} Normal` : null,
+                          b.fareBreakdown.sleeperSeats ? `${b.fareBreakdown.sleeperSeats} Sleeper` : null,
+                        ].filter(Boolean).join(", ")}
+                      </span>
+                    ) : null}
+                  </td>
                   <td className="px-3 py-3 text-white/70">
                     {formatCurrency(b.totalAmount)}
                     <span className="block text-white/40 text-xs">adv {formatCurrency(b.advanceAmount)}</span>

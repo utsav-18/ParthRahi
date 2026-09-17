@@ -8,7 +8,6 @@ import { localizeYatra } from "../lib/localizeYatra";
 import { btnAccent, btnSecondary, inputCls } from "../lib/theme";
 import { formatCurrency, formatDate, nextDeparture } from "../lib/format";
 import BookingStepper from "../components/yatra/BookingStepper";
-import FareBox from "../components/yatra/FareBox";
 import SeatMap from "../components/yatra/SeatMap";
 
 const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER || "918252224027";
@@ -36,7 +35,7 @@ export default function YatraBookingPage() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [step, setStep] = useState(1);
-  const [form, setForm] = useState({ travelerName: "", phone: "", email: "", city: "", pickupPoint: "", fareVariant: "" });
+  const [form, setForm] = useState({ travelerName: "", phone: "", email: "", city: "", pickupPoint: "" });
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
@@ -63,11 +62,8 @@ export default function YatraBookingPage() {
         rawYatraRef.current = loaded;
         setYatra(localizeYatra(loaded, lang));
         setAvailability(seatsRes.data);
-        const variants = loaded.price?.variants || [];
         setForm((current) => ({
           ...current,
-          // With 2+ fares the customer must actively pick one before anything else opens.
-          fareVariant: variants.length > 1 ? "" : variants[0]?.label || "",
           pickupPoint: loaded.startingPoint || "",
         }));
       })
@@ -160,13 +156,22 @@ export default function YatraBookingPage() {
   }, [reservationExpiresAt, serverClockOffset, slug, holdStorageKey]);
 
   const set = (key) => (event) => setForm((current) => ({ ...current, [key]: event.target.value }));
-  const hasFareChoice = (yatra?.price?.variants?.length || 0) > 1;
-  const fareChosen = !hasFareChoice || Boolean(form.fareVariant);
-  const unitPrice = useMemo(
-    () => yatra?.price?.variants?.find((item) => item.label === form.fareVariant)?.amount ?? yatra?.price?.amount ?? 0,
-    [yatra, form.fareVariant]
-  );
-  const totalAmount = unitPrice * selectedSeats.length;
+  // Indicative only — purely for display while picking seats. The backend
+  // independently recomputes this from the database at /lock time and is
+  // the only amount that ever reaches Razorpay.
+  const fareBreakdown = useMemo(() => {
+    const berthById = new Map((availability?.layout || []).map((seat) => [seat.seatId, seat.berthType === "sleeper" ? "sleeper" : "normal"]));
+    let normalSeats = 0;
+    let sleeperSeats = 0;
+    for (const seatId of selectedSeats) {
+      if (berthById.get(seatId) === "sleeper") sleeperSeats += 1;
+      else normalSeats += 1;
+    }
+    const normalSeatPrice = yatra?.price?.normalSeat || 0;
+    const sleeperSeatPrice = yatra?.price?.sleeperSeat || 0;
+    return { normalSeats, normalSeatPrice, sleeperSeats, sleeperSeatPrice };
+  }, [availability, selectedSeats, yatra]);
+  const totalAmount = fareBreakdown.normalSeats * fareBreakdown.normalSeatPrice + fareBreakdown.sleeperSeats * fareBreakdown.sleeperSeatPrice;
   const dueNow = (yatra?.price?.advanceAmount || 0) * selectedSeats.length || totalAmount;
   const seatStates = Object.fromEntries((availability?.seats || []).map((seat) => [seat.seatId, seat.state]));
   const countdownLabel =
@@ -341,94 +346,92 @@ export default function YatraBookingPage() {
           {/* STEP 1 */}
           {step === 1 && (
             <div className="space-y-4">
-              {/* Fare choice always comes first — the rest of the form only
-                  appears once a fare is picked (or immediately, if there's
-                  only one fare and nothing to choose). */}
-              {hasFareChoice && (
-                <div className="max-w-2xl mx-auto w-full space-y-2">
-                  <p className="text-amber-200/70 text-xs uppercase tracking-[0.18em]">{t("booking.chooseFareHeading")}</p>
-                  <FareBox price={yatra.price} selectedVariant={form.fareVariant} onSelectVariant={(label) => setForm((current) => ({ ...current, fareVariant: label }))} />
-                  {!fareChosen && <p className="text-amber-100/50 text-xs">{t("booking.selectFarePrompt")}</p>}
-                </div>
-              )}
+              <div className="max-w-2xl mx-auto w-full space-y-4">
+                <p className="text-amber-200/70 text-xs uppercase tracking-[0.18em]">{t("booking.travellerDetailsLabel")}</p>
 
-              {fareChosen && (
-                <>
-                  <div className="max-w-2xl mx-auto w-full space-y-4">
-                    <p className="text-amber-200/70 text-xs uppercase tracking-[0.18em]">{t("booking.travellerDetailsLabel")}</p>
-
-                    {reservationExpired && (
-                      <div className="rounded-xl border border-red-300/25 bg-red-400/[0.06] p-4 text-sm text-red-100">
-                        <p className="font-semibold">{t("booking.reservationExpiredTitle")}</p>
-                        <p className="mt-1 text-red-100/75">{t("booking.reservationExpiredBody")}</p>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setReservationExpired(false);
-                            setServerError("");
-                            refreshSeats().catch(() => {});
-                          }}
-                          className="mt-3 text-red-100 underline underline-offset-2"
-                        >
-                          {t("booking.chooseSeatsAgain")}
-                        </button>
-                      </div>
-                    )}
-
-                    <div className="grid sm:grid-cols-2 gap-3">
-                      <div className="space-y-1 sm:col-span-2">
-                        <input className={inputCls(errors.travelerName)} placeholder={t("booking.leadTravellerName")} value={form.travelerName} onChange={set("travelerName")} />
-                        {errors.travelerName && <p className="text-red-400 text-xs">{errors.travelerName}</p>}
-                      </div>
-                      <div className="space-y-1">
-                        <input className={inputCls(errors.phone)} placeholder={t("booking.mobileNumber")} inputMode="tel" value={form.phone} onChange={set("phone")} />
-                        {errors.phone && <p className="text-red-400 text-xs">{errors.phone}</p>}
-                      </div>
-                      <div className="space-y-1">
-                        <input className={inputCls(errors.email)} placeholder={t("booking.emailOptional")} type="email" value={form.email} onChange={set("email")} />
-                        {errors.email && <p className="text-red-400 text-xs">{errors.email}</p>}
-                      </div>
-                      <input className={inputCls(false)} placeholder={t("booking.cityOptional")} value={form.city} onChange={set("city")} />
-                      <input className={inputCls(false)} placeholder={t("booking.pickupPoint")} value={form.pickupPoint} onChange={set("pickupPoint")} />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <p className="text-amber-200/70 text-xs uppercase tracking-[0.18em]">{t("booking.chooseYourSeats")}</p>
-                    <SeatMap
-                      layout={availability?.layout}
-                      states={seatStates}
-                      selected={selectedSeats}
-                      onChange={(nextSeats) => {
-                        if (activeHold) return;
-                        setSelectedSeats(nextSeats);
+                {reservationExpired && (
+                  <div className="rounded-xl border border-red-300/25 bg-red-400/[0.06] p-4 text-sm text-red-100">
+                    <p className="font-semibold">{t("booking.reservationExpiredTitle")}</p>
+                    <p className="mt-1 text-red-100/75">{t("booking.reservationExpiredBody")}</p>
+                    <button
+                      type="button"
+                      onClick={() => {
                         setReservationExpired(false);
                         setServerError("");
+                        refreshSeats().catch(() => {});
                       }}
-                    />
-                    {errors.seats && <p className="text-red-400 text-xs">{errors.seats}</p>}
-                  </div>
-
-                  <div className="max-w-2xl mx-auto w-full space-y-4">
-                    {serverError && <p className="text-red-400 text-sm">{serverError}</p>}
-
-                    <div className="rounded-xl bg-amber-400/[0.04] border border-amber-200/12 p-4 text-sm space-y-1.5">
-                      <div className="flex items-center justify-between text-amber-100/70">
-                        <span>{t("booking.totalFare", { seats: selectedSeats.length, unit: formatCurrency(unitPrice) })}</span>
-                        <span className="text-amber-50 font-semibold">{formatCurrency(totalAmount)}</span>
-                      </div>
-                      <div className="flex items-center justify-between text-amber-100 border-t border-amber-200/12 pt-1.5">
-                        <span>{yatra.price?.advanceAmount ? t("booking.payNowReserveAdvance") : t("booking.payNowReserve")}</span>
-                        <span className="font-semibold">{formatCurrency(dueNow)}</span>
-                      </div>
-                    </div>
-
-                    <button onClick={goToPayment} disabled={submitting || Boolean(activeHold)} className={`${btnAccent} w-full`}>
-                      {submitting ? t("booking.reservingSeatsBtn") : t("booking.continueToPayment")}
+                      className="mt-3 text-red-100 underline underline-offset-2"
+                    >
+                      {t("booking.chooseSeatsAgain")}
                     </button>
                   </div>
-                </>
-              )}
+                )}
+
+                <div className="grid sm:grid-cols-2 gap-3">
+                  <div className="space-y-1 sm:col-span-2">
+                    <input className={inputCls(errors.travelerName)} placeholder={t("booking.leadTravellerName")} value={form.travelerName} onChange={set("travelerName")} />
+                    {errors.travelerName && <p className="text-red-400 text-xs">{errors.travelerName}</p>}
+                  </div>
+                  <div className="space-y-1">
+                    <input className={inputCls(errors.phone)} placeholder={t("booking.mobileNumber")} inputMode="tel" value={form.phone} onChange={set("phone")} />
+                    {errors.phone && <p className="text-red-400 text-xs">{errors.phone}</p>}
+                  </div>
+                  <div className="space-y-1">
+                    <input className={inputCls(errors.email)} placeholder={t("booking.emailOptional")} type="email" value={form.email} onChange={set("email")} />
+                    {errors.email && <p className="text-red-400 text-xs">{errors.email}</p>}
+                  </div>
+                  <input className={inputCls(false)} placeholder={t("booking.cityOptional")} value={form.city} onChange={set("city")} />
+                  <input className={inputCls(false)} placeholder={t("booking.pickupPoint")} value={form.pickupPoint} onChange={set("pickupPoint")} />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-amber-200/70 text-xs uppercase tracking-[0.18em]">{t("booking.chooseYourSeats")}</p>
+                <SeatMap
+                  layout={availability?.layout}
+                  states={seatStates}
+                  selected={selectedSeats}
+                  prices={{ normal: yatra.price?.normalSeat, sleeper: yatra.price?.sleeperSeat }}
+                  onChange={(nextSeats) => {
+                    if (activeHold) return;
+                    setSelectedSeats(nextSeats);
+                    setReservationExpired(false);
+                    setServerError("");
+                  }}
+                />
+                {errors.seats && <p className="text-red-400 text-xs">{errors.seats}</p>}
+              </div>
+
+              <div className="max-w-2xl mx-auto w-full space-y-4">
+                {serverError && <p className="text-red-400 text-sm">{serverError}</p>}
+
+                <div className="rounded-xl bg-amber-400/[0.04] border border-amber-200/12 p-4 text-sm space-y-1.5">
+                  {fareBreakdown.normalSeats > 0 && (
+                    <div className="flex items-center justify-between text-amber-100/70">
+                      <span>{t("booking.normalSeatsLine", { n: fareBreakdown.normalSeats, price: formatCurrency(fareBreakdown.normalSeatPrice) })}</span>
+                      <span className="text-amber-50">{formatCurrency(fareBreakdown.normalSeats * fareBreakdown.normalSeatPrice)}</span>
+                    </div>
+                  )}
+                  {fareBreakdown.sleeperSeats > 0 && (
+                    <div className="flex items-center justify-between text-amber-100/70">
+                      <span>{t("booking.sleeperSeatsLine", { n: fareBreakdown.sleeperSeats, price: formatCurrency(fareBreakdown.sleeperSeatPrice) })}</span>
+                      <span className="text-amber-50">{formatCurrency(fareBreakdown.sleeperSeats * fareBreakdown.sleeperSeatPrice)}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between text-amber-50 font-semibold border-t border-amber-200/12 pt-1.5">
+                    <span>{t("booking.totalFareLabel")}</span>
+                    <span>{formatCurrency(totalAmount)}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-amber-100 border-t border-amber-200/12 pt-1.5">
+                    <span>{yatra.price?.advanceAmount ? t("booking.payNowReserveAdvance") : t("booking.payNowReserve")}</span>
+                    <span className="font-semibold">{formatCurrency(dueNow)}</span>
+                  </div>
+                </div>
+
+                <button onClick={goToPayment} disabled={submitting || Boolean(activeHold)} className={`${btnAccent} w-full`}>
+                  {submitting ? t("booking.reservingSeatsBtn") : t("booking.continueToPayment")}
+                </button>
+              </div>
             </div>
           )}
 

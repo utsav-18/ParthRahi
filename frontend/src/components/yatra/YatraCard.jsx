@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import SeatsLeftBadge from "./SeatsLeftBadge";
-import { formatCurrency, durationLabel, nextDeparture, formatDate } from "../../lib/format";
+import { formatCurrency, durationLabel, nextDeparture, formatDate, startingPrice } from "../../lib/format";
 import { useLanguage } from "../../lib/i18n/LanguageContext";
 
 export default function YatraCard({ yatra }) {
@@ -45,7 +45,7 @@ export default function YatraCard({ yatra }) {
           <SeatsLeftBadge seatsLeft={seatsLeft} totalSeats={yatra.totalSeats} />
           <div className="text-right">
             <p className="text-xs uppercase tracking-wider text-amber-100/70">{t("yatraCard.from")}</p>
-            <p className="text-2xl font-bold text-white leading-none drop-shadow">{formatCurrency(yatra.price?.amount, yatra.price?.currency)}</p>
+            <p className="text-2xl font-bold text-white leading-none drop-shadow">{formatCurrency(startingPrice(yatra.price), yatra.price?.currency)}</p>
           </div>
         </div>
       </div>

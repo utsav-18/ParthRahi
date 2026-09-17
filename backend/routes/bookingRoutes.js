@@ -58,7 +58,7 @@ const logRazorpayError = (context, error, keyId) => {
 
 const publicBooking = (booking, yatra) => ({
   bookingReference: booking.bookingReference, travelerName: booking.travelerName, phone: booking.phone, email: booking.email,
-  numberOfSeats: booking.numberOfSeats, seatIds: booking.seatIds, fareVariant: booking.fareVariant, totalAmount: booking.totalAmount,
+  numberOfSeats: booking.numberOfSeats, seatIds: booking.seatIds, fareBreakdown: booking.fareBreakdown, totalAmount: booking.totalAmount,
   advanceAmount: booking.advanceAmount, paymentStatus: booking.paymentStatus, bookingStatus: booking.bookingStatus,
   razorpayOrderId: booking.razorpayOrderId, razorpayPaymentId: booking.razorpayPaymentId,
   yatra: yatra ? { title: yatra.title, slug: yatra.slug } : undefined,
@@ -69,6 +69,7 @@ const profileBooking = (booking) => ({
   travelerName: booking.travelerName,
   seatIds: booking.seatIds || [],
   numberOfSeats: booking.numberOfSeats,
+  fareBreakdown: booking.fareBreakdown,
   totalAmount: booking.totalAmount,
   advanceAmount: booking.advanceAmount,
   amountPaid: booking.paymentStatus === 'paid' ? (booking.advanceAmount || booking.totalAmount || 0) : 0,
@@ -95,14 +96,26 @@ const getLayout = (yatra) => {
 
 const resolveYatra = (body) => Yatra.findOne(body.yatraSlug ? { slug: String(body.yatraSlug).toLowerCase() } : { _id: body.yatraId });
 
-const resolvePrice = (yatra, fareVariant, count) => {
-  let unitPrice = yatra.price.amount;
-  if (fareVariant) {
-    const variant = (yatra.price.variants || []).find((item) => item.label === fareVariant);
-    if (!variant) return null;
-    unitPrice = variant.amount;
+// Single source of truth for what a set of seats costs: each seat's own
+// berthType (set on the Yatra's seatLayout — 'sleeper' or the default
+// 'normal'/'seater') picks which of the admin-configured per-seat prices
+// applies. The frontend only ever displays this; it's recomputed here from
+// the database on every booking, never trusted from the request.
+const resolveSeatPricing = (yatra, seatIds) => {
+  const berthById = new Map(getLayout(yatra).map((seat) => [seat.seatId, seat.berthType === 'sleeper' ? 'sleeper' : 'normal']));
+  let normalSeats = 0;
+  let sleeperSeats = 0;
+  for (const seatId of seatIds) {
+    if (berthById.get(seatId) === 'sleeper') sleeperSeats += 1;
+    else normalSeats += 1;
   }
-  return { totalAmount: unitPrice * count, advanceAmount: (yatra.price.advanceAmount || 0) * count };
+  const normalSeatPrice = yatra.price.normalSeat;
+  const sleeperSeatPrice = yatra.price.sleeperSeat;
+  return {
+    totalAmount: normalSeats * normalSeatPrice + sleeperSeats * sleeperSeatPrice,
+    advanceAmount: (yatra.price.advanceAmount || 0) * seatIds.length,
+    fareBreakdown: { normalSeats, normalSeatPrice, sleeperSeats, sleeperSeatPrice },
+  };
 };
 
 const ownerMatches = (booking, req, holdToken) => Boolean(holdToken && booking.holdToken === holdToken && (!booking.userId || (req.user && String(booking.userId) === String(req.user._id))));
@@ -147,8 +160,10 @@ const completePayment = async ({ booking, paymentId, orderId, signature }) => {
 };
 
 // Legacy capacity booking remains available for historical callers. New UI uses /lock.
+// It has no seatIds (just a headcount), so it can't know each seat's type —
+// every seat is priced as Normal Seat, the base tier.
 router.post('/', bookingLimiter, requireAuth, async (req, res) => {
-  const { travelerName, phone, email, city, pickupPoint, numberOfSeats, fareVariant } = req.body;
+  const { travelerName, phone, email, city, pickupPoint, numberOfSeats } = req.body;
   const seats = parseInt(numberOfSeats, 10);
   if (!travelerName || !String(travelerName).trim()) return res.status(400).json({ error: 'Traveler name is required' });
   if (!phone || !phoneRegex.test(String(phone).trim().replace(/[\s-]/g, ''))) return res.status(400).json({ error: 'A valid mobile number is required' });
@@ -157,12 +172,15 @@ router.post('/', bookingLimiter, requireAuth, async (req, res) => {
     const yatra = await resolveYatra(req.body);
     if (!yatra) return res.status(404).json({ error: 'Yatra not found' });
     if (yatra.status !== 'published') return res.status(409).json({ error: 'Bookings are closed for this yatra' });
-    const price = resolvePrice(yatra, fareVariant, seats);
-    if (!price) return res.status(400).json({ error: 'Selected fare is not available' });
+    const price = {
+      totalAmount: seats * yatra.price.normalSeat,
+      advanceAmount: (yatra.price.advanceAmount || 0) * seats,
+      fareBreakdown: { normalSeats: seats, normalSeatPrice: yatra.price.normalSeat, sleeperSeats: 0, sleeperSeatPrice: yatra.price.sleeperSeat },
+    };
     const reserved = await Yatra.findOneAndUpdate({ _id: yatra._id, status: 'published', $expr: { $lte: [{ $add: ['$seatsBooked', seats] }, '$totalSeats'] } }, { $inc: { seatsBooked: seats } }, { returnDocument: 'after' });
     if (!reserved) return res.status(409).json({ error: 'Not enough seats available for this yatra' });
     try {
-      const booking = await Booking.create({ yatraId: yatra._id, userId: req.user._id, travelerName: String(travelerName).trim(), phone: String(phone).trim(), email: email ? String(email).trim() : undefined, city, pickupPoint, numberOfSeats: seats, fareVariant, ...price, paymentStatus: 'pending', bookingStatus: 'pending' });
+      const booking = await Booking.create({ yatraId: yatra._id, userId: req.user._id, travelerName: String(travelerName).trim(), phone: String(phone).trim(), email: email ? String(email).trim() : undefined, city, pickupPoint, numberOfSeats: seats, ...price, paymentStatus: 'pending', bookingStatus: 'pending' });
       return res.status(201).json({ message: 'Seats reserved. Complete payment to confirm your booking.', booking: publicBooking(booking, yatra) });
     } catch (error) { await Yatra.updateOne({ _id: yatra._id }, { $inc: { seatsBooked: -seats } }); throw error; }
   } catch (error) { console.error('Create legacy booking error:', error.message); return res.status(500).json({ error: 'Failed to create booking' }); }
@@ -200,7 +218,7 @@ router.get('/my', requireAuth, async (req, res) => {
 });
 
 router.post('/lock', bookingLimiter, requireAuth, async (req, res) => {
-  const { seatIds, travelerName, phone, email, city, pickupPoint, fareVariant } = req.body;
+  const { seatIds, travelerName, phone, email, city, pickupPoint } = req.body;
   if (!Array.isArray(seatIds) || seatIds.length < 1 || seatIds.length > 20) return res.status(400).json({ error: 'Select between 1 and 20 seats' });
   const normalizedSeats = seatIds.map((seat) => String(seat).trim());
   if (new Set(normalizedSeats).size !== normalizedSeats.length) return res.status(400).json({ error: 'Duplicate seats are not allowed' });
@@ -212,11 +230,10 @@ router.post('/lock', bookingLimiter, requireAuth, async (req, res) => {
     if (yatra.status !== 'published') return res.status(409).json({ error: 'Bookings are closed for this yatra' });
     const validSeats = new Set(getLayout(yatra).filter((seat) => seat.type !== 'blocked').map((seat) => seat.seatId));
     if (normalizedSeats.some((seat) => !validSeats.has(seat))) return res.status(400).json({ error: 'One or more selected seats are invalid for this yatra' });
-    const price = resolvePrice(yatra, fareVariant, normalizedSeats.length);
-    if (!price) return res.status(400).json({ error: 'Selected fare is not available' });
+    const price = resolveSeatPricing(yatra, normalizedSeats);
     const holdToken = crypto.randomBytes(32).toString('hex');
     const expiresAt = new Date(Date.now() + HOLD_MINUTES * 60 * 1000);
-    const booking = new Booking({ yatraId: yatra._id, userId: req.user._id, travelerName: String(travelerName).trim(), phone: String(phone).trim(), email: email ? String(email).trim() : undefined, city, pickupPoint, numberOfSeats: normalizedSeats.length, seatIds: normalizedSeats, fareVariant, ...price, holdToken, paymentStatus: 'pending', bookingStatus: 'pending' });
+    const booking = new Booking({ yatraId: yatra._id, userId: req.user._id, travelerName: String(travelerName).trim(), phone: String(phone).trim(), email: email ? String(email).trim() : undefined, city, pickupPoint, numberOfSeats: normalizedSeats.length, seatIds: normalizedSeats, ...price, holdToken, paymentStatus: 'pending', bookingStatus: 'pending' });
     const session = await mongoose.startSession();
     try {
       await session.withTransaction(async () => {

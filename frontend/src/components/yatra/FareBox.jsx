@@ -1,52 +1,33 @@
 import { formatCurrency } from "../../lib/format";
 import { useLanguage } from "../../lib/i18n/LanguageContext";
 
-export default function FareBox({ price = {}, selectedVariant, onSelectVariant }) {
+// Purely informational — there's no fare "choice" to make anymore. A seat's
+// price is fixed by its type (Normal vs Sleeper), decided when the customer
+// clicks a seat on the seat map, not upfront. This just shows the two
+// admin-configured prices so a visitor knows what to expect before booking.
+export default function FareBox({ price = {} }) {
   const { t } = useLanguage();
-  const variants = Array.isArray(price.variants) && price.variants.length
-    ? price.variants
-    : [{ label: price.unit || t("fareBox.perPerson"), amount: price.amount }];
-
   const advance = price.advanceAmount;
-  const selectable = Boolean(onSelectVariant);
-  const cheapest = Math.min(...variants.map((v) => Number(v.amount) || Infinity));
+  const tiers = [
+    { label: t("fareBox.normalSeat"), amount: price.normalSeat },
+    { label: t("fareBox.sleeperSeat"), amount: price.sleeperSeat },
+  ];
 
   return (
     <div className="space-y-4">
       <div className="grid sm:grid-cols-2 gap-3">
-        {variants.map((v, i) => {
-          const active = selectable ? selectedVariant === v.label : i === 0;
-          const isValue = Number(v.amount) === cheapest && variants.length > 1;
-          return (
-            <button
-              key={v.label + i}
-              type="button"
-              onClick={() => onSelectVariant?.(v.label)}
-              disabled={!selectable}
-              className={`relative rounded-2xl p-5 text-left overflow-hidden border transition-all duration-200 ${
-                selectable ? "cursor-pointer hover:-translate-y-0.5" : "cursor-default"
-              } ${
-                active
-                  ? "border-amber-300/55 bg-amber-300/[0.10] shadow-[0_8px_28px_rgba(251,191,36,0.16)]"
-                  : "border-amber-200/12 bg-[#160f06]/45 hover:border-amber-200/25"
-              }`}
-            >
-              {isValue && (
-                <span className="absolute top-0 right-0 text-[9px] font-bold uppercase tracking-wider bg-green-400/20 text-green-200 px-2 py-0.5 rounded-bl-lg">
-                  {t("fareBox.bestValue")}
-                </span>
-              )}
-              <p className="text-xs text-amber-100/60 mb-1.5 font-medium pr-16">{v.label}</p>
-              <p className="text-2xl font-bold text-amber-50 tracking-tight">
-                {formatCurrency(v.amount, price.currency)}
-              </p>
-              <p className="text-[11px] text-amber-200/40 mt-0.5">{price.unit || t("fareBox.perPerson")}</p>
-              {active && selectable && (
-                <span className="absolute bottom-2 right-2 w-5 h-5 rounded-full bg-amber-300 text-[#3a1c02] text-xs flex items-center justify-center">✓</span>
-              )}
-            </button>
-          );
-        })}
+        {tiers.map((tier) => (
+          <div
+            key={tier.label}
+            className="rounded-2xl p-5 text-left border border-amber-200/12 bg-[#160f06]/45"
+          >
+            <p className="text-xs text-amber-100/60 mb-1.5 font-medium">{tier.label}</p>
+            <p className="text-2xl font-bold text-amber-50 tracking-tight">
+              {formatCurrency(tier.amount, price.currency)}
+            </p>
+            <p className="text-[11px] text-amber-200/40 mt-0.5">{price.unit || t("fareBox.perPerson")}</p>
+          </div>
+        ))}
       </div>
 
       {advance ? (

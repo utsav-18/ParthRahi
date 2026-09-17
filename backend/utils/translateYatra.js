@@ -54,7 +54,6 @@ async function buildHindiTranslation(doc) {
     rulesAndFacilities: [],
     termsAndConditions: [], freebies: [],
     faqs: [],
-    priceVariantLabels: [],
     priceUnit: '',
     metaTitle: '', metaDescription: '',
   };
@@ -102,10 +101,6 @@ async function buildHindiTranslation(doc) {
   (doc.freebies || []).forEach((val, i) => {
     out.freebies[i] = '';
     add(val, (v) => { out.freebies[i] = v; });
-  });
-  (doc.price?.variants || []).forEach((variant, i) => {
-    out.priceVariantLabels[i] = '';
-    add(variant?.label, (v) => { out.priceVariantLabels[i] = v; });
   });
   (doc.quickInclusions || []).forEach((item, i) => {
     out.quickInclusions[i] = { label: '' };

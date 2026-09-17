@@ -20,11 +20,6 @@ const faqSchema = new mongoose.Schema({
   a: { type: String, trim: true },
 }, { _id: false });
 
-const fareVariantSchema = new mongoose.Schema({
-  label: { type: String, trim: true },
-  amount: { type: Number },
-}, { _id: false });
-
 const quickInclusionSchema = new mongoose.Schema({
   icon: { type: String, trim: true },
   label: { type: String, trim: true },
@@ -78,7 +73,6 @@ const yatraTranslationSchema = new mongoose.Schema({
   termsAndConditions: { type: [String], default: [] },
   freebies: { type: [String], default: [] },
   faqs: { type: [hiFaqSchema], default: [] },
-  priceVariantLabels: { type: [String], default: [] },
   priceUnit: { type: String, trim: true },
   metaTitle: { type: String, trim: true },
   metaDescription: { type: String, trim: true },
@@ -109,12 +103,16 @@ const yatraSchema = new mongoose.Schema({
   reportingTime: { type: String, trim: true },
   departureTime: { type: String, trim: true },
 
+  // Seat-based pricing — the two per-seat prices are the single source of
+  // truth for what a booking costs (see backend/routes/bookingRoutes.js
+  // resolveSeatPricing). Set from the Admin Panel only; never hard-code a
+  // price in frontend or backend code.
   price: {
-    amount: { type: Number, required: true },
+    normalSeat: { type: Number, required: true, min: [1, 'Normal seat price must be a positive number'] },
+    sleeperSeat: { type: Number, required: true, min: [1, 'Sleeper seat price must be a positive number'] },
     currency: { type: String, default: 'INR' },
     unit: { type: String, default: 'per person' },
     advanceAmount: { type: Number },
-    variants: { type: [fareVariantSchema], default: [] },
   },
 
   quickInclusions: { type: [quickInclusionSchema], default: [] },

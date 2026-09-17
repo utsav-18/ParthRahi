@@ -159,18 +159,22 @@ function SeatCell({ seat, state, onToggle, berthType }) {
   );
 }
 
-function PanelHeader({ berthType, count, t }) {
+const formatSeatPrice = (amount) => (Number.isFinite(Number(amount)) ? `₹${Number(amount).toLocaleString("en-IN")}` : null);
+
+function PanelHeader({ berthType, count, price, t }) {
   const isSleeper = berthType === "sleeper";
+  const priceLabel = formatSeatPrice(price);
   return (
     <div
-      className={`inline-flex items-center justify-center text-center gap-1.5 rounded-lg border px-2 py-1 text-[11px] sm:text-sm font-bold ${
+      className={`inline-flex flex-col items-center text-center gap-0.5 rounded-lg border px-2 py-1 text-[11px] sm:text-sm font-bold ${
         isSleeper ? "border-sky-200 bg-sky-50 text-sky-700" : "border-amber-200 bg-amber-50 text-amber-800"
       }`}
     >
-      {isSleeper ? <BedIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" /> : <SeatGlyph className="w-3 h-3.5 sm:w-3.5 sm:h-4 shrink-0" />}
-      <span>
+      <span className="inline-flex items-center gap-1.5">
+        {isSleeper ? <BedIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" /> : <SeatGlyph className="w-3 h-3.5 sm:w-3.5 sm:h-4 shrink-0" />}
         {isSleeper ? t("seatMap.sleeper") : t("seatMap.seater")} ({count})
       </span>
+      {priceLabel && <span className="text-[10px] sm:text-xs font-semibold opacity-80">{priceLabel} / seat</span>}
     </div>
   );
 }
@@ -202,7 +206,7 @@ function panelMinWidth(columnCount, berthType) {
   return columnCount * minWidth + (columnCount - 1) * SEAT_GAP + PANEL_PAD_X * 2;
 }
 
-function Panel({ seats, berthType, states, selectedSet, onToggle, t, columnCount }) {
+function Panel({ seats, berthType, states, selectedSet, onToggle, t, columnCount, price }) {
   const rows = [...new Set(seats.map((seat) => seat.row))].sort((a, b) => a - b);
   const rowGroups = rows.map((row) => seats.filter((seat) => seat.row === row).sort((a, b) => a.column - b.column));
   const count = seats.filter((seat) => seat.type !== "blocked").length;
@@ -212,7 +216,7 @@ function Panel({ seats, berthType, states, selectedSet, onToggle, t, columnCount
       style={{ flex: `${columnCount} 1 0%`, minWidth: panelMinWidth(columnCount, berthType), paddingLeft: PANEL_PAD_X, paddingRight: PANEL_PAD_X, paddingTop: PANEL_PAD_Y, paddingBottom: PANEL_PAD_Y }}
       className="flex flex-col items-center gap-3"
     >
-      <PanelHeader berthType={berthType} count={count} t={t} />
+      <PanelHeader berthType={berthType} count={count} price={price} t={t} />
       <div style={{ display: "flex", flexDirection: "column", gap: ROW_GAP, width: "100%" }}>
         {rowGroups.map((group, i) => (
           <Row key={rows[i]} seats={group} berthType={berthType} states={states} selectedSet={selectedSet} onToggle={onToggle} />
@@ -227,7 +231,7 @@ function panelColumnCount(panelSeats) {
   return mostCommon(rows.map((row) => panelSeats.filter((seat) => seat.row === row).length));
 }
 
-function Deck({ deckName, panels, states, selectedSet, onToggle, t }) {
+function Deck({ deckName, panels, states, selectedSet, onToggle, t, prices }) {
   const isLower = deckName === "lower";
   const columnCounts = panels.map((panel) => panelColumnCount(panel.seats));
   const totalColumns = columnCounts.reduce((a, b) => a + b, 0);
@@ -251,7 +255,17 @@ function Deck({ deckName, panels, states, selectedSet, onToggle, t }) {
         </div>
         <div className="flex items-start divide-x divide-slate-100 rounded-xl border border-slate-100">
           {panels.map((panel, i) => (
-            <Panel key={i} seats={panel.seats} berthType={panel.berthType} states={states} selectedSet={selectedSet} onToggle={onToggle} t={t} columnCount={columnCounts[i]} />
+            <Panel
+              key={i}
+              seats={panel.seats}
+              berthType={panel.berthType}
+              states={states}
+              selectedSet={selectedSet}
+              onToggle={onToggle}
+              t={t}
+              columnCount={columnCounts[i]}
+              price={panel.berthType === "sleeper" ? prices?.sleeper : prices?.normal}
+            />
           ))}
         </div>
       </div>
@@ -271,7 +285,7 @@ function panelCaption(deck, panel, panelIndex, t) {
   return { title: `${deckLabel} ${qualifier}`, value: `${count} ${unit}` };
 }
 
-function SectionedSeatMap({ layout, states, selectedSet, onToggle, t }) {
+function SectionedSeatMap({ layout, states, selectedSet, onToggle, t, prices }) {
   const deckNames = [...new Set(layout.map((seat) => seat.deck).filter(Boolean))].sort((a, b) => {
     const ai = DECK_ORDER.indexOf(a);
     const bi = DECK_ORDER.indexOf(b);
@@ -308,7 +322,7 @@ function SectionedSeatMap({ layout, states, selectedSet, onToggle, t }) {
     <div className="rounded-3xl border border-slate-200 bg-slate-50 p-3 sm:p-5 space-y-4">
       <div className="flex flex-col md:flex-row" style={{ gap: DECK_GAP }}>
         {decks.map((deck) => (
-          <Deck key={deck.deckName} deckName={deck.deckName} panels={deck.panels} states={states} selectedSet={selectedSet} onToggle={onToggle} t={t} />
+          <Deck key={deck.deckName} deckName={deck.deckName} panels={deck.panels} states={states} selectedSet={selectedSet} onToggle={onToggle} t={t} prices={prices} />
         ))}
       </div>
 
@@ -349,7 +363,7 @@ const legendSwatchClasses = {
   booked: "bg-slate-100 border-2 border-slate-200",
 };
 
-export default function SeatMap({ layout = [], states = {}, selected = [], onChange }) {
+export default function SeatMap({ layout = [], states = {}, selected = [], onChange, prices }) {
   const { t } = useLanguage();
   const selectedSet = new Set(selected);
 
@@ -391,7 +405,7 @@ export default function SeatMap({ layout = [], states = {}, selected = [], onCha
       </div>
 
       {isSectioned ? (
-        <SectionedSeatMap layout={layout} states={states} selectedSet={selectedSet} onToggle={toggle} t={t} />
+        <SectionedSeatMap layout={layout} states={states} selectedSet={selectedSet} onToggle={toggle} t={t} prices={prices} />
       ) : (
         <FlatSeatMap layout={layout} states={states} selectedSet={selectedSet} onToggle={toggle} t={t} />
       )}

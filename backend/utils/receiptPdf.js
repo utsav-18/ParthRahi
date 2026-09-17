@@ -132,13 +132,22 @@ function streamReceiptPdf(res, { booking, yatra }) {
   doc.font('Helvetica-Bold').fontSize(11).fillColor(INK).text('Fare Breakdown', left, y);
   y += 22;
 
-  const fareRows = [
-    ['Fare option', booking.fareVariant || 'Standard'],
-    ['Total fare', formatCurrency(booking.totalAmount)],
-  ];
+  // Seat-type breakdown is a snapshot taken at booking time (Booking.fareBreakdown)
+  // — it always reflects what was actually charged, even if the admin has
+  // since changed the Yatra's Normal/Sleeper prices. Older bookings made
+  // before this field existed fall back to a plain total.
+  const breakdown = booking.fareBreakdown;
+  const fareRows = [];
+  if (breakdown?.normalSeats) {
+    fareRows.push(['Normal Seat', `${breakdown.normalSeats} × ${formatCurrency(breakdown.normalSeatPrice)} = ${formatCurrency(breakdown.normalSeats * breakdown.normalSeatPrice)}`]);
+  }
+  if (breakdown?.sleeperSeats) {
+    fareRows.push(['Sleeper Seat', `${breakdown.sleeperSeats} × ${formatCurrency(breakdown.sleeperSeatPrice)} = ${formatCurrency(breakdown.sleeperSeats * breakdown.sleeperSeatPrice)}`]);
+  }
+  fareRows.push(['Total Fare', formatCurrency(booking.totalAmount)]);
   if (booking.advanceAmount) fareRows.push(['Advance required', formatCurrency(booking.advanceAmount)]);
   const amountPaid = paid ? (booking.advanceAmount || booking.totalAmount) : booking.advancePaid || 0;
-  fareRows.push(['Amount paid', formatCurrency(amountPaid)]);
+  fareRows.push(['Amount Paid', formatCurrency(amountPaid)]);
 
   for (const [label, value] of fareRows) {
     doc.font('Helvetica').fontSize(10).fillColor(MUTED).text(label, left, y, { width: pageWidth * 0.6 });

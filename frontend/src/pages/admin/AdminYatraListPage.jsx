@@ -81,7 +81,9 @@ export default function AdminYatraListPage() {
                   <td className="px-4 py-3 text-white/70">
                     {y.seatsBooked} / {y.totalSeats}
                   </td>
-                  <td className="px-4 py-3 text-white/70">{formatCurrency(y.price?.amount, y.price?.currency)}</td>
+                  <td className="px-4 py-3 text-white/70 whitespace-nowrap">
+                    N: {formatCurrency(y.price?.normalSeat, y.price?.currency)} · S: {formatCurrency(y.price?.sleeperSeat, y.price?.currency)}
+                  </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-1.5 justify-end flex-wrap">
                       <button onClick={() => navigate(`${ADMIN_BASE}/events/${y._id}`)} className="text-xs px-2.5 py-1 rounded-md border border-white/15 text-white/70 hover:bg-white/10 cursor-pointer">Edit</button>

@@ -11,7 +11,7 @@ const EMPTY = {
   seatLayout: [],
   departureDates: [], durationDays: "", durationNights: "",
   vehicleType: "", totalSeats: "", reportingTime: "", departureTime: "",
-  price: { amount: "", currency: "INR", unit: "per person", advanceAmount: "", variants: [] },
+  price: { normalSeat: "", sleeperSeat: "", currency: "INR", unit: "per person", advanceAmount: "" },
   quickInclusions: [], itinerary: [],
   highlights: [], mapImageUrl: "",
   inclusions: [], exclusions: [], importantNotes: [],
@@ -104,10 +104,16 @@ export default function AdminYatraEditPage() {
   const set = (patch) => setForm((f) => ({ ...f, ...patch }));
   const setPrice = (patch) => setForm((f) => ({ ...f, price: { ...f.price, ...patch } }));
 
+  const isValidPrice = (value) => Number.isFinite(Number(value)) && Number(value) > 0;
+
   const save = async (e) => {
     e.preventDefault();
-    setSaving(true);
     setError("");
+    if (!isValidPrice(form.price.normalSeat) || !isValidPrice(form.price.sleeperSeat)) {
+      setError("Normal Seat and Sleeper Seat prices must be positive numbers.");
+      return;
+    }
+    setSaving(true);
     const payload = {
       ...form,
       durationDays: form.durationDays === "" ? undefined : Number(form.durationDays),
@@ -118,9 +124,9 @@ export default function AdminYatraEditPage() {
       faqs: (form.faqs || []).filter((f) => f && f.q && f.q.trim() && f.a && f.a.trim()),
       price: {
         ...form.price,
-        amount: Number(form.price.amount),
+        normalSeat: Number(form.price.normalSeat),
+        sleeperSeat: Number(form.price.sleeperSeat),
         advanceAmount: form.price.advanceAmount === "" ? undefined : Number(form.price.advanceAmount),
-        variants: (form.price.variants || []).map((v) => ({ label: v.label, amount: Number(v.amount) })),
       },
       seatLayout: (form.seatLayout || []).filter((seat) => seat.seatId && seat.label).map((seat) => ({ ...seat, row: Number(seat.row), column: Number(seat.column), type: seat.type || "seat" })),
     };
@@ -210,22 +216,23 @@ export default function AdminYatraEditPage() {
 
         {/* Pricing */}
         <section className="rounded-xl border border-white/10 bg-white/[0.02] p-5 space-y-4">
-          <div className="grid sm:grid-cols-4 gap-4">
-            <Field label="Base price"><input type="number" className={adminInput} value={form.price.amount} onChange={(e) => setPrice({ amount: e.target.value })} required /></Field>
-            <Field label="Currency"><input className={adminInput} value={form.price.currency} onChange={(e) => setPrice({ currency: e.target.value })} /></Field>
-            <Field label="Unit"><input className={adminInput} value={form.price.unit} onChange={(e) => setPrice({ unit: e.target.value })} /></Field>
-            <Field label="Advance / seat"><input type="number" className={adminInput} value={form.price.advanceAmount} onChange={(e) => setPrice({ advanceAmount: e.target.value })} /></Field>
+          <div>
+            <p className="text-xs uppercase tracking-wide text-white/50">Pricing</p>
+            <p className="text-[11px] text-white/30 mt-1">
+              These two seat prices are the only source of pricing for this yatra — the seat map, booking summary, Razorpay
+              order, and receipt all use whatever is saved here. Changing a price only affects new bookings; existing
+              confirmed bookings keep the amount they actually paid.
+            </p>
           </div>
-          <div className="space-y-2">
-            <span className="text-xs uppercase tracking-wide text-white/50">Fare variants</span>
-            {(form.price.variants || []).map((v, i) => (
-              <div key={i} className="flex gap-2">
-                <input className={adminInput} placeholder="Label (e.g. AC Room)" value={v.label} onChange={(e) => setPrice({ variants: form.price.variants.map((x, j) => j === i ? { ...x, label: e.target.value } : x) })} />
-                <input className={adminInput} type="number" placeholder="Amount" value={v.amount} onChange={(e) => setPrice({ variants: form.price.variants.map((x, j) => j === i ? { ...x, amount: e.target.value } : x) })} />
-                <button type="button" onClick={() => setPrice({ variants: form.price.variants.filter((_, j) => j !== i) })} className="px-2 rounded-md border border-red-500/30 text-red-300 text-sm cursor-pointer hover:bg-red-500/10">✕</button>
-              </div>
-            ))}
-            <button type="button" onClick={() => setPrice({ variants: [...(form.price.variants || []), { label: "", amount: "" }] })} className="text-xs text-cyan-300 hover:underline cursor-pointer">+ Add variant</button>
+          <div className="grid sm:grid-cols-4 gap-4">
+            <Field label="Normal Seat Price (₹)">
+              <input type="number" min="1" step="1" className={adminInput} value={form.price.normalSeat} onChange={(e) => setPrice({ normalSeat: e.target.value })} required />
+            </Field>
+            <Field label="Sleeper Seat Price (₹)">
+              <input type="number" min="1" step="1" className={adminInput} value={form.price.sleeperSeat} onChange={(e) => setPrice({ sleeperSeat: e.target.value })} required />
+            </Field>
+            <Field label="Currency"><input className={adminInput} value={form.price.currency} onChange={(e) => setPrice({ currency: e.target.value })} /></Field>
+            <Field label="Advance / seat"><input type="number" className={adminInput} value={form.price.advanceAmount} onChange={(e) => setPrice({ advanceAmount: e.target.value })} /></Field>
           </div>
         </section>
 

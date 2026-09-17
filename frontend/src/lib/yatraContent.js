@@ -1,3 +1,5 @@
+import { startingPrice } from "./format";
+
 // Fallback copy used when a yatra has no page-specific version in the database.
 // Built from the active-language dictionary, so it switches with the site language.
 export function getDefaultFaqs(t) {
@@ -31,7 +33,7 @@ export function yatraJsonLd(yatra, url) {
     })),
     offers: {
       "@type": "Offer",
-      price: yatra.price?.amount,
+      price: startingPrice(yatra.price),
       priceCurrency: yatra.price?.currency || "INR",
       availability:
         (yatra.seatsLeft ?? 1) > 0 && yatra.status === "published"

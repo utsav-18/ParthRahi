@@ -32,10 +32,6 @@ export function localizeYatra(yatra, lang) {
     price: yatra.price && {
       ...yatra.price,
       unit: pick(yatra.price.unit, hi.priceUnit),
-      variants: (yatra.price.variants || []).map((variant, i) => ({
-        ...variant,
-        label: pick(variant.label, hi.priceVariantLabels?.[i]),
-      })),
     },
 
     quickInclusions: (yatra.quickInclusions || []).map((item, i) => ({

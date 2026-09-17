@@ -64,14 +64,11 @@ const tirthYatra2026 = {
   reportingTime: '7:00 PM',
   departureTime: '8:00 PM',
   price: {
-    amount: 5500,
+    normalSeat: 5500,
+    sleeperSeat: 6500,
     currency: 'INR',
     unit: 'per person',
     advanceAmount: 1000,
-    variants: [
-      { label: 'Non-AC hotel room (twin/triple sharing)', amount: 5500 },
-      { label: 'AC hotel room (twin/triple sharing)', amount: 6500 },
-    ],
   },
   quickInclusions: [
     { icon: '🛏️', label: 'AC Sleeper Bus' },
@@ -228,14 +225,11 @@ const kamakhyaSikkim = {
   reportingTime: '3:00 PM (Patna boarding point)',
   departureTime: '4:00 PM — overnight sleeper to Siliguri',
   price: {
-    amount: 21500,
+    normalSeat: 18500,
+    sleeperSeat: 21500,
     currency: 'INR',
     unit: 'per person',
     advanceAmount: 3000,
-    variants: [
-      { label: 'Sleeper berth — shared (2 per cabin)', amount: 21500 },
-      { label: 'Sleeper berth — single occupancy (sole use)', amount: 27500 },
-    ],
   },
   quickInclusions: [
     { icon: '🛏️', label: 'AC Sleeper Bus' },

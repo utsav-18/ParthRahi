@@ -36,6 +36,14 @@ export const nextDeparture = (dates = []) => {
   return future.find((d) => d >= now) || future[future.length - 1] || null;
 };
 
+// "Starting from" headline price for a yatra card/hero — the cheaper of its
+// two seat-type prices. Never a separate frontend constant: always derived
+// from whatever the admin has saved for this yatra.
+export const startingPrice = (price = {}) => {
+  const candidates = [price.normalSeat, price.sleeperSeat].map(Number).filter((n) => Number.isFinite(n) && n > 0);
+  return candidates.length ? Math.min(...candidates) : undefined;
+};
+
 export const durationLabel = (days, nights) => {
   if (!days && !nights) return '';
   const parts = [];

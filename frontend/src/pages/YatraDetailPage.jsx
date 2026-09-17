@@ -7,7 +7,7 @@ import { yatraJsonLd } from "../lib/yatraContent";
 import { localizeYatra } from "../lib/localizeYatra";
 import { useLanguage } from "../lib/i18n/LanguageContext";
 import { btnPrimary, btnSecondary } from "../lib/theme";
-import { formatCurrency } from "../lib/format";
+import { formatCurrency, startingPrice } from "../lib/format";
 
 import YatraHero from "../components/yatra/YatraHero";
 import YatraGallery from "../components/yatra/YatraGallery";
@@ -229,7 +229,7 @@ export default function YatraDetailPage() {
       <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-[#140c03]/92 backdrop-blur-md border-t border-amber-200/15 px-4 py-3 flex items-center justify-between gap-3">
         <div className="min-w-0">
           <p className="text-[10px] uppercase tracking-wider text-amber-200/40">{t("yatraDetail.from")}</p>
-          <p className="text-lg font-bold text-amber-50 leading-none">{formatCurrency(yatra.price?.amount, yatra.price?.currency)}</p>
+          <p className="text-lg font-bold text-amber-50 leading-none">{formatCurrency(startingPrice(yatra.price), yatra.price?.currency)}</p>
         </div>
         {soldOut ? (
           <span className={`${btnPrimary} opacity-50`}>{t("yatraDetail.soldOut")}</span>

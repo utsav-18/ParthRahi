@@ -21,7 +21,20 @@ const bookingSchema = new mongoose.Schema({
   numberOfSeats: { type: Number, required: true, min: 1 },
   seatIds: { type: [String], default: undefined },
 
+  // Legacy field from the old food/fare-variant pricing model — no longer
+  // written by new bookings, kept only so any pre-existing record (if one
+  // ever had it set) still reads back cleanly.
   fareVariant: { type: String, trim: true },
+  // Snapshot of the per-seat-type prices actually charged at booking time.
+  // Deliberately NOT derived from the live Yatra.price on read — if the
+  // admin changes prices later, this booking's receipt/summary must keep
+  // showing what was actually paid.
+  fareBreakdown: {
+    normalSeats: { type: Number, default: 0 },
+    normalSeatPrice: { type: Number, default: 0 },
+    sleeperSeats: { type: Number, default: 0 },
+    sleeperSeatPrice: { type: Number, default: 0 },
+  },
   totalAmount: { type: Number },
   advanceAmount: { type: Number },
   advancePaid: { type: Number, default: 0 },
