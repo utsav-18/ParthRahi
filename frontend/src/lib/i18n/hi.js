@@ -318,6 +318,7 @@ export default {
     relatedKicker: "और देखें",
     relatedTitle: "अन्य यात्राएं",
     from: "से शुरू",
+    discountOff: "30% छूट",
     soldOut: "सीटें फुल",
     bookingClosed: "बुकिंग बंद",
     reserveSeat: "अपनी सीट रिज़र्व करें",
@@ -334,10 +335,12 @@ export default {
     nextLabel: "अगला:",
     datesSoon: "तारीखें जल्द",
     viewDetails: "विवरण व यात्रा योजना देखें →",
+    discountOff: "30% छूट",
   },
   tripSummary: {
     tripSummary: "यात्रा सारांश",
     startingFrom: "शुरुआती कीमत",
+    discountOff: "30% छूट",
     departureFrom: "प्रस्थान स्थान",
     departureDates: "प्रस्थान तिथियां",
     duration: "अवधि",
@@ -511,6 +514,7 @@ export default {
     normalSeat: "सामान्य सीट",
     sleeperSeat: "स्लीपर सीट",
     perPerson: "प्रति व्यक्ति",
+    discountOff: "30% छूट",
   },
   bookingStepper: {
     stepOf: "चरण {{n}} / {{total}} ·",

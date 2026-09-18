@@ -44,6 +44,16 @@ export const startingPrice = (price = {}) => {
   return candidates.length ? Math.min(...candidates) : undefined;
 };
 
+// UI-only promotional "30% off" price — the crossed-out amount is derived
+// from the real, current price (price ÷ 0.70) purely for display. It is
+// never stored, never sent to the backend, and never used for booking or
+// Razorpay math — those always use the actual price directly.
+export const discountOriginalPrice = (actualPrice) => {
+  const price = Number(actualPrice);
+  if (!Number.isFinite(price) || price <= 0) return undefined;
+  return Math.round(price / 0.7);
+};
+
 export const durationLabel = (days, nights) => {
   if (!days && !nights) return '';
   const parts = [];

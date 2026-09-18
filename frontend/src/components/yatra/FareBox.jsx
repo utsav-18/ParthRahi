@@ -1,4 +1,4 @@
-import { formatCurrency } from "../../lib/format";
+import { formatCurrency, discountOriginalPrice } from "../../lib/format";
 import { useLanguage } from "../../lib/i18n/LanguageContext";
 
 // Purely informational — there's no fare "choice" to make anymore. A seat's
@@ -14,18 +14,27 @@ export default function FareBox({ price = {} }) {
 
   return (
     <div className="grid sm:grid-cols-2 gap-3">
-      {tiers.map((tier) => (
-        <div
-          key={tier.label}
-          className="rounded-2xl p-5 text-left border border-amber-200/12 bg-[#160f06]/45"
-        >
-          <p className="text-xs text-amber-100/60 mb-1.5 font-medium">{tier.label}</p>
-          <p className="text-2xl font-bold text-amber-50 tracking-tight">
-            {formatCurrency(tier.amount, price.currency)}
-          </p>
-          <p className="text-[11px] text-amber-200/40 mt-0.5">{price.unit || t("fareBox.perPerson")}</p>
-        </div>
-      ))}
+      {tiers.map((tier) => {
+        const original = discountOriginalPrice(tier.amount);
+        return (
+          <div
+            key={tier.label}
+            className="rounded-2xl p-5 text-left border border-amber-200/12 bg-[#160f06]/45"
+          >
+            <p className="text-xs text-amber-100/60 mb-1.5 font-medium">{tier.label}</p>
+            {original && (
+              <p className="text-sm text-amber-200/40 line-through leading-none">{formatCurrency(original, price.currency)}</p>
+            )}
+            <p className="text-2xl font-bold text-amber-50 tracking-tight">
+              {formatCurrency(tier.amount, price.currency)}
+            </p>
+            <div className="flex items-center gap-2 mt-0.5">
+              <p className="text-[11px] text-amber-200/40">{price.unit || t("fareBox.perPerson")}</p>
+              {original && <span className="text-[10px] font-bold text-green-400">{t("fareBox.discountOff")}</span>}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

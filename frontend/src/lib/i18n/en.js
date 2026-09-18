@@ -318,6 +318,7 @@ export default {
     relatedKicker: "Keep exploring",
     relatedTitle: "Other journeys",
     from: "from",
+    discountOff: "30% OFF",
     soldOut: "Sold out",
     bookingClosed: "Booking closed",
     reserveSeat: "Reserve Your Seat",
@@ -334,10 +335,12 @@ export default {
     nextLabel: "Next:",
     datesSoon: "Dates soon",
     viewDetails: "View details & itinerary →",
+    discountOff: "30% OFF",
   },
   tripSummary: {
     tripSummary: "Trip summary",
     startingFrom: "Starting from",
+    discountOff: "30% OFF",
     departureFrom: "Departure from",
     departureDates: "Departure dates",
     duration: "Duration",
@@ -511,6 +514,7 @@ export default {
     normalSeat: "Normal Seat",
     sleeperSeat: "Sleeper Seat",
     perPerson: "per person",
+    discountOff: "30% OFF",
   },
   bookingStepper: {
     stepOf: "Step {{n}} of {{total}} ·",

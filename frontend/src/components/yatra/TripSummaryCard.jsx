@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import SeatsLeftBadge from "./SeatsLeftBadge";
 import { btnPrimary, btnSecondary } from "../../lib/theme";
-import { formatCurrency, durationLabel, formatDate, startingPrice } from "../../lib/format";
+import { formatCurrency, durationLabel, formatDate, startingPrice, discountOriginalPrice } from "../../lib/format";
 import { useLanguage } from "../../lib/i18n/LanguageContext";
 
 const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER || "918252224027";
@@ -21,6 +21,8 @@ export default function TripSummaryCard({ yatra }) {
   const { t } = useLanguage();
   const seatsLeft = yatra.seatsLeft ?? Math.max(0, (yatra.totalSeats || 0) - (yatra.seatsBooked || 0));
   const soldOut = seatsLeft <= 0 || yatra.status !== "published";
+  const actualPrice = startingPrice(yatra.price);
+  const originalPrice = discountOriginalPrice(actualPrice);
   const dates = (yatra.departureDates || []).map((d) => formatDate(d)).join(", ");
   const wa = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
     `Hi ParthRahi, I have a question about "${yatra.title}".`
@@ -37,8 +39,16 @@ export default function TripSummaryCard({ yatra }) {
 
         <div className="py-3 border-y border-amber-200/12 my-3">
           <p className="text-xs text-amber-200/40">{t("tripSummary.startingFrom")}</p>
-          <p className="text-4xl font-bold text-amber-50 leading-tight">{formatCurrency(startingPrice(yatra.price), yatra.price?.currency)}</p>
-          <p className="text-xs text-amber-200/40">{yatra.price?.unit || "per person"}</p>
+          <div className="flex items-baseline gap-2 flex-wrap">
+            {originalPrice && (
+              <span className="text-base text-amber-200/40 line-through">{formatCurrency(originalPrice, yatra.price?.currency)}</span>
+            )}
+            <p className="text-4xl font-bold text-amber-50 leading-tight">{formatCurrency(actualPrice, yatra.price?.currency)}</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <p className="text-xs text-amber-200/40">{yatra.price?.unit || "per person"}</p>
+            {originalPrice && <span className="text-[10px] font-bold text-green-400">{t("tripSummary.discountOff")}</span>}
+          </div>
         </div>
 
         <Row icon="📍" label={t("tripSummary.departureFrom")} value={yatra.startingPoint} />

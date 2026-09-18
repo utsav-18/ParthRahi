@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { btnPrimary } from "../../lib/theme";
 import SeatsLeftBadge from "./SeatsLeftBadge";
 import { SacredDivider } from "./SacredOrnaments";
-import { formatCurrency, durationLabel, formatDate, nextDeparture, startingPrice } from "../../lib/format";
+import { formatCurrency, durationLabel, formatDate, nextDeparture, startingPrice, discountOriginalPrice } from "../../lib/format";
 import { useLanguage } from "../../lib/i18n/LanguageContext";
 
 export default function YatraHero({ yatra }) {
@@ -12,6 +12,8 @@ export default function YatraHero({ yatra }) {
   const seatsLeft = yatra.seatsLeft ?? Math.max(0, (yatra.totalSeats || 0) - (yatra.seatsBooked || 0));
   const soldOut = seatsLeft <= 0 || yatra.status !== "published";
   const duration = durationLabel(yatra.durationDays, yatra.durationNights);
+  const actualPrice = startingPrice(yatra.price);
+  const originalPrice = discountOriginalPrice(actualPrice);
 
   return (
     <header className="relative overflow-hidden border-b border-amber-200/10">
@@ -68,7 +70,13 @@ export default function YatraHero({ yatra }) {
           <div className="mt-6 flex flex-wrap items-end gap-x-8 gap-y-4">
             <div>
               <p className="text-[10px] uppercase tracking-widest text-amber-200/60">{t("yatraDetail.from")}</p>
-              <p className="text-3xl font-bold text-amber-50">{formatCurrency(startingPrice(yatra.price), yatra.price?.currency)}</p>
+              <div className="flex items-baseline gap-2 flex-wrap">
+                {originalPrice && (
+                  <span className="text-base text-amber-200/40 line-through">{formatCurrency(originalPrice, yatra.price?.currency)}</span>
+                )}
+                <p className="text-3xl font-bold text-amber-50">{formatCurrency(actualPrice, yatra.price?.currency)}</p>
+                {originalPrice && <span className="text-xs font-bold text-green-400">{t("yatraDetail.discountOff")}</span>}
+              </div>
               <p className="text-[11px] text-amber-200/50">{yatra.price?.unit || t("yatraDetail.perPerson")}</p>
             </div>
             <div className="text-base text-amber-100/80">

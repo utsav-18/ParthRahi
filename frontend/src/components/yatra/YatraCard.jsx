@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import SeatsLeftBadge from "./SeatsLeftBadge";
-import { formatCurrency, durationLabel, nextDeparture, formatDate, startingPrice } from "../../lib/format";
+import { formatCurrency, durationLabel, nextDeparture, formatDate, startingPrice, discountOriginalPrice } from "../../lib/format";
 import { useLanguage } from "../../lib/i18n/LanguageContext";
 
 export default function YatraCard({ yatra }) {
@@ -9,6 +9,8 @@ export default function YatraCard({ yatra }) {
   const dep = nextDeparture(yatra.departureDates);
   const seatsLeft = yatra.seatsLeft ?? Math.max(0, (yatra.totalSeats || 0) - (yatra.seatsBooked || 0));
   const duration = durationLabel(yatra.durationDays, yatra.durationNights);
+  const actualPrice = startingPrice(yatra.price);
+  const originalPrice = discountOriginalPrice(actualPrice);
 
   return (
     <Link
@@ -45,7 +47,11 @@ export default function YatraCard({ yatra }) {
           <SeatsLeftBadge seatsLeft={seatsLeft} totalSeats={yatra.totalSeats} />
           <div className="text-right">
             <p className="text-xs uppercase tracking-wider text-amber-100/70">{t("yatraCard.from")}</p>
-            <p className="text-2xl font-bold text-white leading-none drop-shadow">{formatCurrency(startingPrice(yatra.price), yatra.price?.currency)}</p>
+            {originalPrice && (
+              <p className="text-xs text-amber-100/40 line-through leading-none">{formatCurrency(originalPrice, yatra.price?.currency)}</p>
+            )}
+            <p className="text-2xl font-bold text-white leading-none drop-shadow">{formatCurrency(actualPrice, yatra.price?.currency)}</p>
+            {originalPrice && <p className="text-[10px] font-bold text-green-400 mt-0.5">{t("yatraCard.discountOff")}</p>}
           </div>
         </div>
       </div>
