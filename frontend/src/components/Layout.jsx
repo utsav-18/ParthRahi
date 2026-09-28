@@ -36,7 +36,7 @@ export default function Layout() {
 
   const navItems = [
     { label: t("nav.home"), id: "home" },
-    { label: t("nav.bookRide"), id: "book" },
+    // { label: t("nav.bookRide"), id: "book" },
     { label: t("nav.yatra"), id: "events" },
     { label: t("nav.about"), id: "about" },
     { label: t("nav.features"), id: "features" },

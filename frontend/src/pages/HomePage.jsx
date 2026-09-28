@@ -107,7 +107,8 @@ export default function HomePage() {
       <div className="relative z-10 w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
 
       {/* BOOK A RIDE */}
-      <BookRideSection />
+      
+      {/* <BookRideSection /> */}
 
       <div className="relative z-10 w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
 
