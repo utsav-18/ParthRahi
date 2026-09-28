@@ -93,7 +93,7 @@ export default function AdminYatraEditPage() {
         setForm({
           ...EMPTY,
           ...y,
-          price: { ...EMPTY.price, ...(y.price || {}) },
+          price: { ...EMPTY.price, ...(y.price || {}), sleeperSeat: y.price?.sleeperSeat ?? "" },
           departureDates: (y.departureDates || []).map((d) => new Date(d).toISOString().slice(0, 10)),
         });
       })
@@ -109,8 +109,13 @@ export default function AdminYatraEditPage() {
   const save = async (e) => {
     e.preventDefault();
     setError("");
-    if (!isValidPrice(form.price.normalSeat) || !isValidPrice(form.price.sleeperSeat)) {
-      setError("Normal Seat and Sleeper Seat prices must be positive numbers.");
+    const sleeperBlank = String(form.price.sleeperSeat ?? "").trim() === "";
+    if (!isValidPrice(form.price.normalSeat)) {
+      setError("Normal Seat price must be a positive number.");
+      return;
+    }
+    if (!sleeperBlank && !isValidPrice(form.price.sleeperSeat)) {
+      setError("Sleeper Seat price must be a positive number, or left empty.");
       return;
     }
     // totalSeats is bookable capacity — a 'blocked' layout entry (e.g. the
@@ -133,7 +138,7 @@ export default function AdminYatraEditPage() {
       price: {
         ...form.price,
         normalSeat: Number(form.price.normalSeat),
-        sleeperSeat: Number(form.price.sleeperSeat),
+        sleeperSeat: sleeperBlank ? null : Number(form.price.sleeperSeat),
       },
       seatLayout: (form.seatLayout || []).filter((seat) => seat.seatId && seat.label).map((seat) => ({ ...seat, row: Number(seat.row), column: Number(seat.column), type: seat.type || "seat" })),
     };
@@ -226,17 +231,18 @@ export default function AdminYatraEditPage() {
           <div>
             <p className="text-xs uppercase tracking-wide text-white/50">Pricing</p>
             <p className="text-[11px] text-white/30 mt-1">
-              These two seat prices are the only source of pricing for this yatra — the seat map, booking summary, Razorpay
-              order, and receipt all use whatever is saved here. Changing a price only affects new bookings; existing
-              confirmed bookings keep the amount they actually paid.
+              These seat prices are the only source of pricing for this yatra — the seat map, booking summary, Razorpay
+              order, and receipt all use whatever is saved here. Sleeper Seat price is optional: leave it empty if the bus
+              has no sleeper berths (any sleeper berth is then charged at the Normal Seat price). Changing a price only
+              affects new bookings; existing confirmed bookings keep the amount they actually paid.
             </p>
           </div>
           <div className="grid sm:grid-cols-3 gap-4">
             <Field label="Normal Seat Price (₹)">
               <input type="number" min="1" step="1" className={adminInput} value={form.price.normalSeat} onChange={(e) => setPrice({ normalSeat: e.target.value })} required />
             </Field>
-            <Field label="Sleeper Seat Price (₹)">
-              <input type="number" min="1" step="1" className={adminInput} value={form.price.sleeperSeat} onChange={(e) => setPrice({ sleeperSeat: e.target.value })} required />
+            <Field label="Sleeper Seat Price (₹) — optional">
+              <input type="number" min="1" step="1" className={adminInput} placeholder="Same as Normal Seat" value={form.price.sleeperSeat ?? ""} onChange={(e) => setPrice({ sleeperSeat: e.target.value })} />
             </Field>
             <Field label="Currency"><input className={adminInput} value={form.price.currency} onChange={(e) => setPrice({ currency: e.target.value })} /></Field>
           </div>

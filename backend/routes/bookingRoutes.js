@@ -96,6 +96,10 @@ const getLayout = (yatra) => {
   return Array.from({ length: yatra.totalSeats }, (_, i) => ({ seatId: `S${i + 1}`, label: `S${i + 1}`, row: Math.floor(i / 4) + 1, column: (i % 4) + 1, type: 'seat' }));
 };
 
+// Sleeper price is optional on a Yatra — when the admin leaves it empty,
+// sleeper berths are charged at the normal seat price.
+const effectiveSleeperPrice = (price) => (Number(price.sleeperSeat) > 0 ? Number(price.sleeperSeat) : price.normalSeat);
+
 const resolveYatra = (body) => Yatra.findOne(body.yatraSlug ? { slug: String(body.yatraSlug).toLowerCase() } : { _id: body.yatraId });
 
 // Single source of truth for what a set of seats costs: each seat's own
@@ -113,7 +117,7 @@ const resolveSeatPricing = (yatra, seatIds) => {
     else normalSeats += 1;
   }
   const normalSeatPrice = yatra.price.normalSeat;
-  const sleeperSeatPrice = yatra.price.sleeperSeat;
+  const sleeperSeatPrice = effectiveSleeperPrice(yatra.price);
   return {
     totalAmount: normalSeats * normalSeatPrice + sleeperSeats * sleeperSeatPrice,
     fareBreakdown: { normalSeats, normalSeatPrice, sleeperSeats, sleeperSeatPrice },
@@ -214,7 +218,7 @@ router.post('/', bookingLimiter, requireAuth, async (req, res) => {
     if (resolvedDate === null) return res.status(400).json({ error: 'Please select a valid departure date for this yatra' });
     const price = {
       totalAmount: seats * yatra.price.normalSeat,
-      fareBreakdown: { normalSeats: seats, normalSeatPrice: yatra.price.normalSeat, sleeperSeats: 0, sleeperSeatPrice: yatra.price.sleeperSeat },
+      fareBreakdown: { normalSeats: seats, normalSeatPrice: yatra.price.normalSeat, sleeperSeats: 0, sleeperSeatPrice: effectiveSleeperPrice(yatra.price) },
     };
     const reserved = await Yatra.findOneAndUpdate({ _id: yatra._id, status: 'published', $expr: { $lte: [{ $add: ['$seatsBooked', seats] }, '$totalSeats'] } }, { $inc: { seatsBooked: seats } }, { returnDocument: 'after' });
     if (!reserved) return res.status(409).json({ error: 'Not enough seats available for this yatra' });

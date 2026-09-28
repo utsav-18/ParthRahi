@@ -17,6 +17,15 @@ router.use(requireAdmin);
 // fails the isFinite check below.
 const isValidPrice = (value) => Number.isFinite(Number(value)) && Number(value) > 0;
 
+// Sleeper price is optional: empty/null means "not set" (sleeper berths then
+// fall back to the normal seat price). Normalises the empty case to null so
+// clearing the field in the admin form actually removes the old value.
+const isBlankPrice = (value) => value == null || String(value).trim() === '';
+const normalizeSleeperPrice = (price) => {
+  if (price && isBlankPrice(price.sleeperSeat)) price.sleeperSeat = null;
+};
+const isValidSleeperPrice = (value) => isBlankPrice(value) || isValidPrice(value);
+
 const slugify = (str) =>
   String(str || '')
     .toLowerCase()
@@ -106,9 +115,13 @@ router.post('/yatras', async (req, res) => {
     const body = { ...req.body };
     body.slug = slugify(body.slug || body.title);
     if (!body.slug) return res.status(400).json({ error: 'Title or slug is required' });
-    if (!body.title || !body.startingPoint || !body.totalSeats || !body.price || !isValidPrice(body.price.normalSeat) || !isValidPrice(body.price.sleeperSeat)) {
-      return res.status(400).json({ error: 'title, startingPoint, totalSeats, and positive Normal Seat / Sleeper Seat prices are required' });
+    if (!body.title || !body.startingPoint || !body.totalSeats || !body.price || !isValidPrice(body.price.normalSeat)) {
+      return res.status(400).json({ error: 'title, startingPoint, totalSeats, and a positive Normal Seat price are required' });
     }
+    if (!isValidSleeperPrice(body.price.sleeperSeat)) {
+      return res.status(400).json({ error: 'Sleeper Seat price must be a positive number, or left empty' });
+    }
+    normalizeSleeperPrice(body.price);
 
     const exists = await Yatra.findOne({ slug: body.slug });
     if (exists) return res.status(409).json({ error: 'A yatra with this slug already exists' });
@@ -128,8 +141,14 @@ router.put('/yatras/:id', async (req, res) => {
     delete body.seatsBooked; // never overwrite the live counter from the form
     if (body.slug) body.slug = slugify(body.slug);
 
-    if (body.price && (!isValidPrice(body.price.normalSeat) || !isValidPrice(body.price.sleeperSeat))) {
-      return res.status(400).json({ error: 'Normal Seat and Sleeper Seat prices must be positive numbers' });
+    if (body.price) {
+      if (!isValidPrice(body.price.normalSeat)) {
+        return res.status(400).json({ error: 'Normal Seat price must be a positive number' });
+      }
+      if (!isValidSleeperPrice(body.price.sleeperSeat)) {
+        return res.status(400).json({ error: 'Sleeper Seat price must be a positive number, or left empty' });
+      }
+      normalizeSleeperPrice(body.price);
     }
 
     if (Array.isArray(body.seatLayout)) {

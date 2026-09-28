@@ -6,7 +6,7 @@ import useDocumentMeta from "../lib/useDocumentMeta";
 import { useLanguage } from "../lib/i18n/LanguageContext";
 import { localizeYatra } from "../lib/localizeYatra";
 import { btnAccent, btnSecondary, inputCls } from "../lib/theme";
-import { formatCurrency, formatDate, nextDeparture } from "../lib/format";
+import { formatCurrency, formatDate, nextDeparture, effectiveSleeperPrice } from "../lib/format";
 import BookingStepper from "../components/yatra/BookingStepper";
 import SeatMap from "../components/yatra/SeatMap";
 
@@ -172,7 +172,7 @@ export default function YatraBookingPage() {
       else normalSeats += 1;
     }
     const normalSeatPrice = yatra?.price?.normalSeat || 0;
-    const sleeperSeatPrice = yatra?.price?.sleeperSeat || 0;
+    const sleeperSeatPrice = effectiveSleeperPrice(yatra?.price) || 0;
     return { normalSeats, normalSeatPrice, sleeperSeats, sleeperSeatPrice };
   }, [availability, selectedSeats, yatra]);
   // Razorpay always charges the full total — there's no advance/partial-
@@ -416,7 +416,7 @@ export default function YatraBookingPage() {
                   layout={availability?.layout}
                   states={seatStates}
                   selected={selectedSeats}
-                  prices={{ normal: yatra.price?.normalSeat, sleeper: yatra.price?.sleeperSeat }}
+                  prices={{ normal: yatra.price?.normalSeat, sleeper: effectiveSleeperPrice(yatra.price) }}
                   onChange={(nextSeats) => {
                     if (activeHold) return;
                     setSelectedSeats(nextSeats);

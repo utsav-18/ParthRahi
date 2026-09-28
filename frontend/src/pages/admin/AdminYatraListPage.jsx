@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../../lib/api";
 import useDocumentMeta from "../../lib/useDocumentMeta";
-import { formatCurrency } from "../../lib/format";
+import { formatCurrency, sleeperPrice } from "../../lib/format";
 import AdminShell, { adminBtnPrimary } from "./AdminShell";
 import { ADMIN_BASE } from "../../lib/adminPath";
 
@@ -82,7 +82,8 @@ export default function AdminYatraListPage() {
                     {y.seatsBooked} / {y.totalSeats}
                   </td>
                   <td className="px-4 py-3 text-white/70 whitespace-nowrap">
-                    N: {formatCurrency(y.price?.normalSeat, y.price?.currency)} · S: {formatCurrency(y.price?.sleeperSeat, y.price?.currency)}
+                    N: {formatCurrency(y.price?.normalSeat, y.price?.currency)}
+                    {sleeperPrice(y.price) != null && <> · S: {formatCurrency(sleeperPrice(y.price), y.price?.currency)}</>}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-1.5 justify-end flex-wrap">

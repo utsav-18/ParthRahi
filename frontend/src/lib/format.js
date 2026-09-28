@@ -44,6 +44,16 @@ export const startingPrice = (price = {}) => {
   return candidates.length ? Math.min(...candidates) : undefined;
 };
 
+// Sleeper price is optional on a yatra. Returns the admin-set sleeper price,
+// or undefined when it isn't set (sleeper berths then cost the normal price).
+export const sleeperPrice = (price = {}) => {
+  const n = Number(price.sleeperSeat);
+  return price.sleeperSeat != null && price.sleeperSeat !== "" && Number.isFinite(n) && n > 0 ? n : undefined;
+};
+
+// What a sleeper berth actually costs — mirrors backend effectiveSleeperPrice.
+export const effectiveSleeperPrice = (price = {}) => sleeperPrice(price) ?? price.normalSeat;
+
 // UI-only promotional "30% off" price — the crossed-out amount is derived
 // from the real, current price (price ÷ 0.70) purely for display. It is
 // never stored, never sent to the backend, and never used for booking or

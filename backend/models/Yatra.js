@@ -109,7 +109,9 @@ const yatraSchema = new mongoose.Schema({
   // price in frontend or backend code.
   price: {
     normalSeat: { type: Number, required: true, min: [1, 'Normal seat price must be a positive number'] },
-    sleeperSeat: { type: Number, required: true, min: [1, 'Sleeper seat price must be a positive number'] },
+    // Optional — leave empty for buses without sleeper berths. When unset,
+    // any sleeper berth in the layout is charged at the normal seat price.
+    sleeperSeat: { type: Number, default: null, min: [1, 'Sleeper seat price must be a positive number'] },
     currency: { type: String, default: 'INR' },
     unit: { type: String, default: 'per person' },
   },

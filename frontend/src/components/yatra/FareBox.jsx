@@ -1,4 +1,4 @@
-import { formatCurrency, discountOriginalPrice } from "../../lib/format";
+import { formatCurrency, discountOriginalPrice, sleeperPrice } from "../../lib/format";
 import { useLanguage } from "../../lib/i18n/LanguageContext";
 
 // Purely informational — there's no fare "choice" to make anymore. A seat's
@@ -7,13 +7,15 @@ import { useLanguage } from "../../lib/i18n/LanguageContext";
 // admin-configured prices so a visitor knows what to expect before booking.
 export default function FareBox({ price = {} }) {
   const { t } = useLanguage();
+  // Sleeper price is optional — only show its card when the admin set one.
+  const sleeper = sleeperPrice(price);
   const tiers = [
     { label: t("fareBox.normalSeat"), amount: price.normalSeat },
-    { label: t("fareBox.sleeperSeat"), amount: price.sleeperSeat },
+    ...(sleeper != null ? [{ label: t("fareBox.sleeperSeat"), amount: sleeper }] : []),
   ];
 
   return (
-    <div className="grid sm:grid-cols-2 gap-3">
+    <div className={`grid gap-3 ${tiers.length > 1 ? "sm:grid-cols-2" : ""}`}>
       {tiers.map((tier) => {
         const original = discountOriginalPrice(tier.amount);
         return (
