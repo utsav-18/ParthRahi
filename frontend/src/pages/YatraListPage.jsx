@@ -34,7 +34,7 @@ export default function YatraListPage() {
   useDocumentMeta({
     title: t("yatraList.kicker"),
     description:
-      "Book guided pilgrimage yatras and group tours with ParthRahi — comfortable travel, hotel stays, sattvic meals and day-wise itineraries. Reserve your seat online with a small advance.",
+      "Book guided pilgrimages and leisure group tours with ParthRahi — comfortable travel, hotel stays, planned meals and day-wise itineraries. Reserve your seat online with a small advance.",
     image: HERO_IMG,
   });
 
@@ -86,7 +86,7 @@ export default function YatraListPage() {
         <MandalaBackdrop className="left-1/2 -translate-x-1/2 top-6 w-[520px] h-[520px] max-w-[120vw]" />
 
         <div className="relative max-w-5xl mx-auto text-center">
-          <SacredKicker hindi="पवित्र तीर्थ यात्राएँ">{t("yatraList.kicker")}</SacredKicker>
+          <SacredKicker hindi="तीर्थ और एडवेंचर टूर">{t("yatraList.kicker")}</SacredKicker>
           <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold text-amber-50 mt-4 leading-[1.05] tracking-tight">
             {t("yatraList.title1")}<br className="hidden sm:block" /> {t("yatraList.title2")}
           </h1>
