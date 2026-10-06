@@ -108,7 +108,7 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
       onClick={onClose}
     >
       <div
-        className="relative bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl p-6 sm:p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto text-center transform transition-all duration-300"
+        className="relative bg-navy-900 border border-gold-300/20 rounded-2xl shadow-2xl p-6 sm:p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto text-center transform transition-all duration-300"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close Button */}
@@ -122,7 +122,7 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
 
         {/* Header Tag */}
         <div className="mb-6">
-          <p className="text-[11px] tracking-[0.38em] uppercase text-cyan-400/90 font-medium">{t('auth.appName')}</p>
+          <p className="text-[11px] tracking-[0.38em] uppercase text-gold-300 font-medium">{t('auth.appName')}</p>
           <h2 className="text-xl font-semibold text-white mt-1">{t('profile.title')}</h2>
         </div>
 
@@ -132,11 +132,11 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
             <img
               src={user.profilePicture}
               alt={user.name || 'User profile'}
-              className="w-24 h-24 rounded-full border-2 border-cyan-400/50 object-cover shadow-lg shadow-cyan-950/40"
+              className="w-24 h-24 rounded-full border-2 border-gold-300/50 object-cover shadow-lg shadow-black/40"
               referrerPolicy="no-referrer"
             />
           ) : (
-            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 border-2 border-cyan-300/40 text-white font-bold text-2xl flex items-center justify-center shadow-lg shadow-cyan-950/40 tracking-wider">
+            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-gold-200 to-gold-500 border-2 border-gold-300/40 text-white font-bold text-2xl flex items-center justify-center shadow-lg shadow-black/40 tracking-wider">
               {initials}
             </div>
           )}
@@ -159,7 +159,7 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
                 <button
                   type="button"
                   onClick={handleStartEdit}
-                  className="text-xs font-semibold text-cyan-400 hover:text-cyan-300 transition-colors cursor-pointer"
+                  className="text-xs font-semibold text-gold-300 hover:text-gold-200 transition-colors cursor-pointer"
                 >
                   {t('profile.edit')}
                 </button>
@@ -177,7 +177,7 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
                     setPhoneInput(e.target.value);
                     if (phoneError) setPhoneError('');
                   }}
-                  className="w-full bg-slate-900/80 border border-cyan-400/50 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-1 focus:ring-cyan-400 transition-all"
+                  className="w-full bg-navy-950/70 border border-gold-300/50 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-1 focus:ring-gold-300/60 transition-all"
                 />
 
                 {phoneError && (
@@ -196,7 +196,7 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
                   <button
                     type="submit"
                     disabled={isSaving}
-                    className="px-3.5 py-1.5 rounded-lg bg-cyan-300 text-slate-950 hover:bg-cyan-200 text-xs font-semibold transition-all shadow-sm cursor-pointer disabled:opacity-50"
+                    className="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-gold-200 to-gold-400 text-navy-950 hover:brightness-105 text-xs font-semibold transition-all shadow-sm cursor-pointer disabled:opacity-50"
                   >
                     {isSaving ? t('profile.saving') : t('profile.save')}
                   </button>
@@ -226,7 +226,7 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
 
         <section className="mt-8 pt-6 border-t border-slate-700/70 text-left">
           <div className="flex items-center justify-between gap-3 mb-3">
-            <h3 className="text-sm uppercase tracking-[0.16em] text-cyan-300/90 font-medium">My Yatra Bookings</h3>
+            <h3 className="text-sm uppercase tracking-[0.16em] text-gold-300 font-medium">My Yatra Bookings</h3>
             <span className="text-xs text-slate-500">{bookings.length} booking{bookings.length === 1 ? '' : 's'}</span>
           </div>
           {bookingsLoading ? (
@@ -254,7 +254,7 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
                       <div><p className="text-slate-500">Seats</p><p className="text-slate-200 mt-0.5">{booking.seatIds?.length ? booking.seatIds.join(', ') : 'Legacy booking'}</p></div>
                       <div><p className="text-slate-500">Amount paid</p><p className="text-slate-200 mt-0.5">{formatCurrency(booking.amountPaid)}</p></div>
                       <div><p className="text-slate-500">Payment</p><p className="text-slate-200 mt-0.5 capitalize">{booking.paymentStatus || 'pending'}</p></div>
-                      <div><p className="text-slate-500">Booking ID</p><p className="text-cyan-200 mt-0.5 font-mono select-all">{booking.bookingReference}</p></div>
+                      <div><p className="text-slate-500">Booking ID</p><p className="text-gold-200 mt-0.5 font-mono select-all">{booking.bookingReference}</p></div>
                       <div><p className="text-slate-500">Booked on</p><p className="text-slate-200 mt-0.5">{formatDate(booking.createdAt)}</p></div>
                     </div>
                     {booking.razorpayPaymentId && <p className="text-[11px] text-slate-500 mt-3 break-all">Payment reference: <span className="text-slate-300 font-mono">{booking.razorpayPaymentId}</span></p>}
@@ -263,7 +263,7 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
                         href={`${API_BASE_URL}/api/bookings/${booking.bookingReference}/receipt`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 mt-3 text-xs font-semibold text-cyan-300 hover:text-cyan-200 transition-colors"
+                        className="inline-flex items-center gap-1.5 mt-3 text-xs font-semibold text-gold-300 hover:text-gold-200 transition-colors"
                       >
                         🧾 Download Receipt
                       </a>

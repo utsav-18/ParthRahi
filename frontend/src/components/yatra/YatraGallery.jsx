@@ -48,7 +48,7 @@ function Lightbox({ images, index, onClose }) {
     <div className="fixed inset-0 z-[9999] flex items-end md:items-center justify-center" style={{ background: "rgba(0,0,0,0.8)" }} onClick={onClose}>
       <div
         ref={containerRef}
-        className="relative w-full md:w-auto md:max-w-2xl bg-[#0f1623] border border-white/10 rounded-t-3xl md:rounded-3xl overflow-hidden shadow-2xl"
+        className="relative w-full md:w-auto md:max-w-2xl bg-navy-900 border border-white/10 rounded-t-3xl md:rounded-3xl overflow-hidden shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-center pt-3 pb-1 md:hidden">

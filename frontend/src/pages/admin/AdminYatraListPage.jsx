@@ -55,9 +55,9 @@ export default function AdminYatraListPage() {
       ) : yatras.length === 0 ? (
         <p className="text-white/50 py-10">No yatras yet. Create the first one.</p>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-white/10">
+        <div className="overflow-x-auto rounded-xl border border-gold-300/12 bg-navy-900/70">
           <table className="w-full text-sm min-w-[720px]">
-            <thead className="bg-white/[0.04] text-white/50 text-xs uppercase tracking-wide">
+            <thead className="bg-navy-800/70 text-gold-200/70 text-xs uppercase tracking-wide">
               <tr>
                 <th className="text-left px-4 py-3">Title</th>
                 <th className="text-left px-4 py-3">Status</th>
@@ -68,7 +68,7 @@ export default function AdminYatraListPage() {
             </thead>
             <tbody className="divide-y divide-white/[0.06]">
               {yatras.map((y) => (
-                <tr key={y._id} className="hover:bg-white/[0.02]">
+                <tr key={y._id} className="hover:bg-navy-800/40">
                   <td className="px-4 py-3">
                     <p className="text-white font-medium">{y.title}</p>
                     <p className="text-white/40 text-xs">/{y.slug}</p>

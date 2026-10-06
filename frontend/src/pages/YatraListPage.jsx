@@ -8,13 +8,10 @@ import YatraCard from "../components/yatra/YatraCard";
 import HowItWorks from "../components/yatra/HowItWorks";
 import TrustBand from "../components/yatra/TrustBand";
 import { AccordionItem } from "../components/yatra/Accordion";
-import { SacredDivider, SacredKicker, MandalaBackdrop } from "../components/yatra/SacredOrnaments";
+import { SacredKicker, MandalaBackdrop, SectionHeader } from "../components/yatra/SacredOrnaments";
 import { getDefaultFaqs } from "../lib/yatraContent";
 
 const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER || "918252224027";
-
-const HERO_IMG =
-  "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=1900&q=70";
 
 export default function YatraListPage() {
   const { t, lang } = useLanguage();
@@ -34,8 +31,8 @@ export default function YatraListPage() {
   useDocumentMeta({
     title: t("yatraList.kicker"),
     description:
-      "Book guided pilgrimages and leisure group tours with ParthRahi — comfortable travel, hotel stays, planned meals and day-wise itineraries. Reserve your seat online with a small advance.",
-    image: HERO_IMG,
+      "Book guided pilgrimages and leisure group tours with ParthRahi — comfortable travel, hotel stays, planned meals and day-wise itineraries. Choose your seat online and pay securely.",
+    image: yatras[0]?.heroImages?.[0],
   });
 
   useEffect(() => {
@@ -76,25 +73,22 @@ export default function YatraListPage() {
   }, [yatras, destination]);
 
   return (
-    <div className="relative z-10 yatra-experience pb-24">
+    <div className="relative z-10 yatra-experience pb-20 md:pb-28">
       {/* ── Hero ─────────────────────────────────────────────── */}
-      <header className="relative overflow-hidden pt-44 md:pt-56 pb-16 md:pb-24 px-4 sm:px-6 md:px-16 border-b border-amber-200/10">
-        <div className="absolute inset-0 -z-10">
-          <img src={HERO_IMG} alt="" className="w-full h-full object-cover opacity-12" />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#071020]/80 via-[#071020]/95 to-[#070b16]" />
-        </div>
-        <MandalaBackdrop className="left-1/2 -translate-x-1/2 top-6 w-[520px] h-[520px] max-w-[120vw]" />
+      <header className="relative overflow-hidden pt-16 md:pt-20 pb-14 md:pb-20">
+        <MandalaBackdrop className="left-1/2 -translate-x-1/2 top-10 w-[560px] h-[560px] max-w-[120vw]" />
 
-        <div className="relative max-w-5xl mx-auto text-center">
-          <SacredKicker hindi="तीर्थ और एडवेंचर टूर">{t("yatraList.kicker")}</SacredKicker>
-          <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold text-amber-50 mt-4 leading-[1.05] tracking-tight">
-            {t("yatraList.title1")}<br className="hidden sm:block" /> {t("yatraList.title2")}
+        <div className="relative site-container max-w-4xl text-center">
+          <SacredKicker hindi="तीर्थ और एडवेंचर टूर" center>{t("yatraList.kicker")}</SacredKicker>
+          <h1 className="text-[2.1rem] leading-[1.12] sm:text-5xl md:text-6xl font-bold text-cream mt-5 tracking-tight">
+            {t("yatraList.title1")}{" "}
+            <span className="bg-gradient-to-r from-gold-100 via-gold-300 to-gold-400 bg-clip-text text-transparent">{t("yatraList.title2")}</span>
           </h1>
-          <p className="text-amber-100/70 mt-6 max-w-2xl mx-auto text-base md:text-lg leading-relaxed">
+          <p className="text-cream/70 mt-6 max-w-2xl mx-auto text-base md:text-lg leading-relaxed">
             {t("yatraList.subtitle")}
           </p>
-          <div className="flex flex-wrap gap-3 justify-center mt-8">
-            <a href="#journeys" className={btnPrimary}>{t("yatraList.browse")}</a>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center mt-8">
+            <a href="#journeys" className={btnPrimary}>{t("yatraList.browse")} ↓</a>
             <a
               href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hi ParthRahi, I'd like help choosing a yatra.")}`}
               target="_blank"
@@ -104,37 +98,35 @@ export default function YatraListPage() {
               💬 {t("yatraList.askWhatsapp")}
             </a>
           </div>
-          <SacredDivider mark="श्री" className="mt-10 max-w-md mx-auto" />
         </div>
       </header>
 
-      <div className="site-container space-y-16 md:space-y-20 pt-8 md:pt-12">
-        {/* ── Trust band ───────────────────────────────────── */}
-        <TrustBand />
-
+      <div className="site-container space-y-20 md:space-y-28">
         {/* ── Journeys ─────────────────────────────────────── */}
-        <section id="journeys" className="scroll-mt-28">
+        <section id="journeys" className="mt-6 sm:mt-8 md:mt-10 pr-panel rounded-[2rem] px-4 py-8 sm:px-6 md:px-10 md:py-12">
           <div className="flex flex-wrap items-end justify-between gap-4 mb-7">
             <div>
               <SacredKicker hindi="आगामी प्रस्थान">{t("yatraList.upcomingKicker")}</SacredKicker>
-              <h2 className="text-3xl md:text-4xl font-bold text-amber-50 mt-1">{t("yatraList.chooseTitle")}</h2>
+              <h2 className="text-3xl md:text-4xl font-bold text-cream mt-3">{t("yatraList.chooseTitle")}</h2>
             </div>
-            <p className="text-amber-200/45 text-sm">
+            <p className="text-gold-200/70 text-sm">
               {filtered.length === 1 ? t("yatraList.journeyAvailable") : t("yatraList.journeysAvailable", { n: filtered.length })}
             </p>
           </div>
 
           {/* Filters */}
-          <div className="yatra-panel rounded-2xl p-3 sm:p-4 flex flex-col lg:flex-row gap-3 mb-8 items-stretch lg:items-center">
+          <div className="rounded-2xl border border-gold-300/15 bg-navy-950/50 p-3 sm:p-4 flex flex-col lg:flex-row gap-3 mb-8 items-stretch lg:items-center">
             <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] lg:pb-0">
               {CATEGORIES.map((c) => (
                 <button
                   key={c.value}
+                  type="button"
                   onClick={() => setCategory(c.value)}
-                  className={`shrink-0 px-4 py-2 rounded-full text-sm border transition-colors ${
+                  aria-pressed={category === c.value}
+                  className={`shrink-0 px-4 py-2 rounded-full text-sm border transition-colors cursor-pointer ${
                     category === c.value
-                      ? "bg-amber-300 text-[#071020] border-amber-300 font-semibold"
-                        : "bg-white/[0.03] border-amber-200/20 text-amber-100/75 hover:border-amber-200/40"
+                      ? "bg-gold-300 text-navy-950 border-gold-300 font-semibold"
+                      : "bg-navy-900/50 border-gold-300/25 text-cream/75 hover:border-gold-300/50"
                   }`}
                 >
                   {c.label}
@@ -145,10 +137,11 @@ export default function YatraListPage() {
               value={destination}
               onChange={(e) => setDestination(e.target.value)}
               placeholder={t("yatraList.searchPlaceholder")}
-              className="flex-1 min-w-0 bg-[#071020] border border-amber-200/18 rounded-xl px-4 py-3 text-amber-50 text-base placeholder:text-amber-200/40 focus:outline-none focus:border-amber-300/70"
+              aria-label={t("yatraList.searchPlaceholder")}
+              className="flex-1 min-w-0 bg-navy-950/70 border border-gold-300/20 rounded-xl px-4 py-3 text-cream text-base placeholder:text-cream/40 focus:outline-none focus:border-gold-300/70 focus:ring-2 focus:ring-gold-300/20"
             />
-            <label className="flex items-center gap-2 text-sm text-amber-100/75 shrink-0 cursor-pointer px-1">
-              <input type="checkbox" checked={upcomingOnly} onChange={(e) => setUpcomingOnly(e.target.checked)} className="accent-amber-400" />
+            <label className="flex items-center gap-2 text-sm text-cream/75 shrink-0 cursor-pointer px-1">
+              <input type="checkbox" checked={upcomingOnly} onChange={(e) => setUpcomingOnly(e.target.checked)} className="accent-gold-400 w-4 h-4" />
               {t("yatraList.upcomingOnly")}
             </label>
           </div>
@@ -156,15 +149,15 @@ export default function YatraListPage() {
           {loading ? (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {[0, 1, 2].map((i) => (
-                <div key={i} className="rounded-2xl border border-amber-200/10 bg-amber-950/10 h-96 animate-pulse" />
+                <div key={i} className="rounded-2xl border border-gold-300/10 bg-navy-900/45 h-96 animate-pulse" />
               ))}
             </div>
           ) : error ? (
-            <p className="text-red-400 text-center py-16">{error}</p>
+            <p className="text-red-300 text-center py-16">{error}</p>
           ) : filtered.length === 0 ? (
-            <div className="text-center py-16 text-amber-100/50">
-              <p className="text-4xl mb-3">🪔</p>
-              <p>{t("yatraList.noMatch")}</p>
+            <div className="text-center py-16 text-cream/55">
+              <p className="text-4xl mb-3" aria-hidden="true">🧭</p>
+              <p className="text-cream/80">{t("yatraList.noMatch")}</p>
               <p className="text-sm mt-1">{t("yatraList.noMatchHint")}</p>
             </div>
           ) : (
@@ -176,38 +169,38 @@ export default function YatraListPage() {
           )}
         </section>
 
-        <SacredDivider />
-
         {/* ── How it works ─────────────────────────────────── */}
         <HowItWorks variant="full" />
 
-        <SacredDivider />
+        {/* ── Trust ────────────────────────────────────────── */}
+        <section>
+          <SectionHeader kicker={t("yatraDetail.whyKicker")} hindi="हम पर भरोसा क्यों" title={t("yatraDetail.whyTitle")} />
+          <div className="mt-10">
+            <TrustBand />
+          </div>
+        </section>
 
         {/* ── FAQ ──────────────────────────────────────────── */}
         <section className="max-w-3xl mx-auto w-full">
-          <div className="text-center mb-8">
-            <SacredKicker hindi="जानने योग्य">{t("yatraList.faqKicker")}</SacredKicker>
-            <h2 className="text-2xl md:text-3xl font-bold text-amber-50 mt-2">{t("yatraList.faqTitle")}</h2>
-          </div>
-          <div className="flex flex-col gap-2">
+          <SectionHeader kicker={t("yatraList.faqKicker")} hindi="जानने योग्य" title={t("yatraList.faqTitle")} />
+          <div className="mt-10 flex flex-col gap-2.5">
             {getDefaultFaqs(t).map((f) => (
               <AccordionItem key={f.q} title={f.q}>
-                <p className="text-amber-100/70 leading-relaxed">{f.a}</p>
+                <p className="text-cream/70 leading-relaxed">{f.a}</p>
               </AccordionItem>
             ))}
           </div>
         </section>
 
         {/* ── Bottom CTA ───────────────────────────────────── */}
-        <section className="relative overflow-hidden rounded-[2rem] border border-amber-200/15 bg-[#160f06]/70 backdrop-blur-sm px-6 py-10 md:px-12 md:py-12 text-center shadow-2xl shadow-amber-900/10">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(251,146,60,0.14),transparent_65%)]" />
+        <section className="relative overflow-hidden rounded-[2rem] border border-gold-300/30 bg-gradient-to-br from-navy-800/80 via-navy-900/75 to-navy-950/80 backdrop-blur-md px-6 py-12 md:px-12 md:py-14 text-center shadow-[0_30px_80px_rgba(2,6,20,0.5)]">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(234,199,107,0.16),transparent_60%)]" />
           <div className="relative">
-            <p className="text-2xl" aria-hidden="true">🙏</p>
-            <h2 className="text-2xl md:text-3xl font-bold text-amber-50 mt-2">{t("yatraList.ctaTitle")}</h2>
-            <p className="text-amber-100/65 mt-3 max-w-xl mx-auto text-sm md:text-base">
+            <h2 className="text-2xl md:text-3xl font-bold text-cream">{t("yatraList.ctaTitle")}</h2>
+            <p className="text-cream/70 mt-3 max-w-xl mx-auto text-sm md:text-base">
               {t("yatraList.ctaDesc")}
             </p>
-            <div className="flex flex-wrap gap-3 justify-center mt-6">
+            <div className="flex flex-col sm:flex-row gap-3 justify-center mt-7">
               <a
                 href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hi ParthRahi, please help me plan a yatra.")}`}
                 target="_blank"

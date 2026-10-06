@@ -21,17 +21,17 @@ export default function FareBox({ price = {} }) {
         return (
           <div
             key={tier.label}
-            className="rounded-2xl p-5 text-left border border-amber-200/12 bg-[#160f06]/45"
+            className="rounded-2xl p-5 text-left border border-gold-300/15 bg-navy-900/55"
           >
-            <p className="text-xs text-amber-100/60 mb-1.5 font-medium">{tier.label}</p>
+            <p className="text-xs text-cream/60 mb-1.5 font-medium">{tier.label}</p>
             {original && (
-              <p className="text-sm text-amber-200/40 line-through leading-none">{formatCurrency(original, price.currency)}</p>
+              <p className="text-sm text-gold-200/40 line-through leading-none">{formatCurrency(original, price.currency)}</p>
             )}
-            <p className="text-2xl font-bold text-amber-50 tracking-tight">
+            <p className="text-2xl font-bold text-cream tracking-tight">
               {formatCurrency(tier.amount, price.currency)}
             </p>
             <div className="flex items-center gap-2 mt-0.5">
-              <p className="text-[11px] text-amber-200/40">{price.unit || t("fareBox.perPerson")}</p>
+              <p className="text-[11px] text-gold-200/40">{price.unit || t("fareBox.perPerson")}</p>
               {original && <span className="text-[10px] font-bold text-green-400">{t("fareBox.discountOff")}</span>}
             </div>
           </div>

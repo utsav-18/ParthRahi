@@ -4,6 +4,8 @@ import api from "../../lib/api";
 import useDocumentMeta from "../../lib/useDocumentMeta";
 import AdminShell, { adminBtnPrimary, adminBtnGhost, adminInput } from "./AdminShell";
 import { ADMIN_BASE } from "../../lib/adminPath";
+import { countLayout } from "../../lib/seatLayout";
+import BusLayoutEditor from "./BusLayoutEditor";
 
 const EMPTY = {
   title: "", slug: "", tagline: "", category: "bus",
@@ -48,7 +50,7 @@ function StringList({ label, items, onChange, placeholder, withThumb }) {
           <button type="button" onClick={() => onChange(items.filter((_, j) => j !== i))} className="px-2 py-2 rounded-md border border-red-500/30 text-red-300 text-sm cursor-pointer hover:bg-red-500/10">✕</button>
         </div>
       ))}
-      <button type="button" onClick={() => onChange([...items, ""])} className="text-xs text-cyan-300 hover:underline cursor-pointer">+ Add</button>
+      <button type="button" onClick={() => onChange([...items, ""])} className="text-xs text-gold-300 hover:text-gold-200 hover:underline cursor-pointer">+ Add</button>
     </div>
   );
 }
@@ -68,7 +70,7 @@ function FaqList({ items, onChange }) {
           <textarea className={`${adminInput} min-h-[64px]`} placeholder="Answer" value={f.a || ""} onChange={(e) => upd(i, { a: e.target.value })} />
         </div>
       ))}
-      <button type="button" onClick={() => onChange([...items, { q: "", a: "" }])} className="text-xs text-cyan-300 hover:underline cursor-pointer">+ Add FAQ</button>
+      <button type="button" onClick={() => onChange([...items, { q: "", a: "" }])} className="text-xs text-gold-300 hover:text-gold-200 hover:underline cursor-pointer">+ Add FAQ</button>
     </div>
   );
 }
@@ -81,6 +83,11 @@ export default function AdminYatraEditPage() {
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  // Seat IDs of the layout as saved, to warn when a draft drops any of them.
+  const [savedSeatIds, setSavedSeatIds] = useState([]);
+  // Set when a saved yatra's totalSeats disagreed with its layout and the
+  // form corrected it on load (the field is read-only while a layout exists).
+  const [seatCountFix, setSeatCountFix] = useState(null);
 
   useDocumentMeta({ title: isNew ? "Admin — New Yatra" : "Admin — Edit Yatra" });
 
@@ -90,12 +97,16 @@ export default function AdminYatraEditPage() {
       .get(`/api/admin/yatras/${id}`)
       .then((res) => {
         const y = res.data.yatra;
+        const layoutSeats = (y.seatLayout || []).length ? countLayout(y.seatLayout).bookable : null;
+        if (layoutSeats != null && Number(y.totalSeats) !== layoutSeats) setSeatCountFix({ from: y.totalSeats, to: layoutSeats });
         setForm({
           ...EMPTY,
           ...y,
+          ...(layoutSeats != null ? { totalSeats: String(layoutSeats) } : {}),
           price: { ...EMPTY.price, ...(y.price || {}), sleeperSeat: y.price?.sleeperSeat ?? "" },
           departureDates: (y.departureDates || []).map((d) => new Date(d).toISOString().slice(0, 10)),
         });
+        setSavedSeatIds((y.seatLayout || []).map((seat) => seat.seatId));
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
@@ -103,6 +114,11 @@ export default function AdminYatraEditPage() {
 
   const set = (patch) => setForm((f) => ({ ...f, ...patch }));
   const setPrice = (patch) => setForm((f) => ({ ...f, price: { ...f.price, ...patch } }));
+  // With a layout, total seats is always the number of bookable seats in it.
+  const setLayout = (seatLayout) =>
+    setForm((f) => ({ ...f, seatLayout, totalSeats: seatLayout.length ? String(countLayout(seatLayout).bookable) : f.totalSeats }));
+  const layoutSeats = countLayout(form.seatLayout || []).bookable;
+  const hasLayout = (form.seatLayout || []).length > 0;
 
   const isValidPrice = (value) => Number.isFinite(Number(value)) && Number(value) > 0;
 
@@ -121,9 +137,18 @@ export default function AdminYatraEditPage() {
     // totalSeats is bookable capacity — a 'blocked' layout entry (e.g. the
     // driver-side gap on a sleeper coach) is a placeholder, not a seat, so
     // it must not count against this check. Mirrors the backend check.
-    const bookableCount = (form.seatLayout || []).filter((seat) => seat.type !== "blocked").length;
-    if (bookableCount > 0 && Number(form.totalSeats) < bookableCount) {
-      setError(`Total seats (${form.totalSeats || 0}) cannot be less than the number of bookable seats in the layout (${bookableCount}).`);
+    const bookableCount = layoutSeats;
+    if (hasLayout && bookableCount < 1) {
+      setError("The bus layout has no bookable seats. Add a section, or remove the layout to use automatic seats.");
+      return;
+    }
+    if (hasLayout && Number(form.totalSeats) !== bookableCount) {
+      setError(`Total seats (${form.totalSeats || 0}) must equal the number of bookable seats in the layout (${bookableCount}).`);
+      return;
+    }
+    const badSeat = (form.seatLayout || []).find((seat) => !String(seat.seatId || "").trim() || !String(seat.label || "").trim());
+    if (badSeat) {
+      setError("Every seat in the layout needs a Seat ID and a label.");
       return;
     }
     setSaving(true);
@@ -140,7 +165,19 @@ export default function AdminYatraEditPage() {
         normalSeat: Number(form.price.normalSeat),
         sleeperSeat: sleeperBlank ? null : Number(form.price.sleeperSeat),
       },
-      seatLayout: (form.seatLayout || []).filter((seat) => seat.seatId && seat.label).map((seat) => ({ ...seat, row: Number(seat.row), column: Number(seat.column), type: seat.type || "seat" })),
+      // Optional fields are omitted rather than sent empty, so a plain seat
+      // stays a plain seat and the schema enums never see "".
+      seatLayout: (form.seatLayout || []).map(({ deck, panel, berthType, ...seat }) => ({
+        ...seat,
+        seatId: String(seat.seatId).trim(),
+        label: String(seat.label).trim(),
+        row: Number(seat.row),
+        column: Number(seat.column),
+        type: seat.type === "blocked" ? "blocked" : "seat",
+        ...(deck ? { deck } : {}),
+        ...(panel !== undefined && panel !== null && panel !== "" ? { panel: Number(panel) } : {}),
+        ...(berthType ? { berthType: berthType === "sleeper" ? "sleeper" : "seater" } : {}),
+      })),
     };
     try {
       if (isNew) {
@@ -167,10 +204,16 @@ export default function AdminYatraEditPage() {
       actions={<button type="submit" form="yatra-form" disabled={saving} className={adminBtnPrimary}>{saving ? "Saving…" : "Save"}</button>}
     >
       {error && <p className="text-red-400 mb-4 text-sm">{error}</p>}
+      {seatCountFix && (
+        <p className="mb-4 rounded-lg border border-amber-400/25 bg-amber-400/[0.06] px-3 py-2 text-sm text-amber-100">
+          Total seats was saved as {seatCountFix.from}, but the bus layout has {seatCountFix.to} bookable seats. It has been
+          corrected to {seatCountFix.to} — press Save to store it.
+        </p>
+      )}
 
       <form id="yatra-form" onSubmit={save} className="space-y-8">
         {/* Basics */}
-        <section className="rounded-xl border border-white/10 bg-white/[0.02] p-5 grid sm:grid-cols-2 gap-4">
+        <section className="rounded-xl border border-gold-300/12 bg-navy-900/70 p-5 grid sm:grid-cols-2 gap-4">
           <Field label="Title"><input className={adminInput} value={form.title} onChange={(e) => set({ title: e.target.value })} required /></Field>
           <Field label="Slug" hint="Leave blank to auto-generate from title"><input className={adminInput} value={form.slug} onChange={(e) => set({ slug: e.target.value })} placeholder="tirth-yatra-2026" /></Field>
           <Field label="Tagline"><input className={adminInput} value={form.tagline} onChange={(e) => set({ tagline: e.target.value })} /></Field>
@@ -185,7 +228,9 @@ export default function AdminYatraEditPage() {
             </select>
           </Field>
           <Field label="Starting point"><input className={adminInput} value={form.startingPoint} onChange={(e) => set({ startingPoint: e.target.value })} required /></Field>
-          <Field label="Total seats"><input type="number" className={adminInput} value={form.totalSeats} onChange={(e) => set({ totalSeats: e.target.value })} required /></Field>
+          <Field label="Total seats" hint={hasLayout ? "Set from the bus layout below (bookable seats only)." : "Used for the automatic S1, S2… layout until a bus layout is added."}>
+            <input type="number" min="1" className={`${adminInput} ${hasLayout ? "opacity-70" : ""}`} value={form.totalSeats} readOnly={hasLayout} onChange={(e) => set({ totalSeats: e.target.value })} required />
+          </Field>
           <Field label="Vehicle type"><input className={adminInput} value={form.vehicleType} onChange={(e) => set({ vehicleType: e.target.value })} /></Field>
           <Field label="Duration — days"><input type="number" className={adminInput} value={form.durationDays} onChange={(e) => set({ durationDays: e.target.value })} /></Field>
           <Field label="Duration — nights"><input type="number" className={adminInput} value={form.durationNights} onChange={(e) => set({ durationNights: e.target.value })} /></Field>
@@ -196,7 +241,7 @@ export default function AdminYatraEditPage() {
         </section>
 
         {/* Media + lists */}
-        <section className="rounded-xl border border-white/10 bg-white/[0.02] p-5 grid sm:grid-cols-2 gap-6">
+        <section className="rounded-xl border border-gold-300/12 bg-navy-900/70 p-5 grid sm:grid-cols-2 gap-6">
           <StringList label="Hero image URLs" items={form.heroImages} onChange={(v) => set({ heroImages: v })} placeholder="/yatra/kamakhya-hero.jpg or https://…" withThumb />
           <StringList label="Highlights (why this yatra)" items={form.highlights} onChange={(v) => set({ highlights: v })} placeholder="Kamakhya darshan on Nilachal Hill" />
           <StringList label="Route (stops)" items={form.route} onChange={(v) => set({ route: v })} placeholder="Varanasi" />
@@ -208,26 +253,17 @@ export default function AdminYatraEditPage() {
           <StringList label="Terms & conditions" items={form.termsAndConditions} onChange={(v) => set({ termsAndConditions: v })} />
         </section>
 
-        {/* Pricing */}
-        <section className="rounded-xl border border-white/10 bg-white/[0.02] p-5 space-y-3">
-          <div>
-            <p className="text-xs uppercase tracking-wide text-white/50">Seat layout</p>
-            <p className="text-[11px] text-white/30 mt-1">Leave empty to use automatic S1, S2… seats. Confirmed seats cannot be removed.</p>
-          </div>
-          {(form.seatLayout || []).map((seat, i) => (
-            <div key={i} className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-              <input className={adminInput} placeholder="Seat ID" value={seat.seatId || ""} onChange={(e) => set({ seatLayout: form.seatLayout.map((x, j) => j === i ? { ...x, seatId: e.target.value } : x) })} />
-              <input className={adminInput} placeholder="Label" value={seat.label || ""} onChange={(e) => set({ seatLayout: form.seatLayout.map((x, j) => j === i ? { ...x, label: e.target.value } : x) })} />
-              <input className={adminInput} type="number" min="1" placeholder="Row" value={seat.row ?? ""} onChange={(e) => set({ seatLayout: form.seatLayout.map((x, j) => j === i ? { ...x, row: e.target.value } : x) })} />
-              <input className={adminInput} type="number" min="1" placeholder="Column" value={seat.column ?? ""} onChange={(e) => set({ seatLayout: form.seatLayout.map((x, j) => j === i ? { ...x, column: e.target.value } : x) })} />
-              <button type="button" onClick={() => set({ seatLayout: form.seatLayout.filter((_, j) => j !== i) })} className="px-2 rounded-md border border-red-500/30 text-red-300 text-sm cursor-pointer hover:bg-red-500/10">Remove</button>
-            </div>
-          ))}
-          <button type="button" onClick={() => set({ seatLayout: [...(form.seatLayout || []), { seatId: "", label: "", row: 1, column: 1, type: "seat" }] })} className="text-xs text-cyan-300 hover:underline cursor-pointer">+ Add seat</button>
-        </section>
+        {/* Bus layout — seater/sleeper sections, decks, blocked positions */}
+        <BusLayoutEditor
+          layout={form.seatLayout || []}
+          onChange={setLayout}
+          totalSeats={form.totalSeats}
+          prices={form.price}
+          savedSeatIds={savedSeatIds}
+        />
 
         {/* Pricing */}
-        <section className="rounded-xl border border-white/10 bg-white/[0.02] p-5 space-y-4">
+        <section className="rounded-xl border border-gold-300/12 bg-navy-900/70 p-5 space-y-4">
           <div>
             <p className="text-xs uppercase tracking-wide text-white/50">Pricing</p>
             <p className="text-[11px] text-white/30 mt-1">
@@ -249,7 +285,7 @@ export default function AdminYatraEditPage() {
         </section>
 
         {/* Quick inclusions */}
-        <section className="rounded-xl border border-white/10 bg-white/[0.02] p-5 space-y-2">
+        <section className="rounded-xl border border-gold-300/12 bg-navy-900/70 p-5 space-y-2">
           <span className="text-xs uppercase tracking-wide text-white/50">Quick inclusions (icon + label)</span>
           {form.quickInclusions.map((qi, i) => (
             <div key={i} className="flex gap-2">
@@ -258,11 +294,11 @@ export default function AdminYatraEditPage() {
               <button type="button" onClick={() => set({ quickInclusions: form.quickInclusions.filter((_, j) => j !== i) })} className="px-2 rounded-md border border-red-500/30 text-red-300 text-sm cursor-pointer hover:bg-red-500/10">✕</button>
             </div>
           ))}
-          <button type="button" onClick={() => set({ quickInclusions: [...form.quickInclusions, { icon: "", label: "" }] })} className="text-xs text-cyan-300 hover:underline cursor-pointer">+ Add</button>
+          <button type="button" onClick={() => set({ quickInclusions: [...form.quickInclusions, { icon: "", label: "" }] })} className="text-xs text-gold-300 hover:text-gold-200 hover:underline cursor-pointer">+ Add</button>
         </section>
 
         {/* Itinerary */}
-        <section className="rounded-xl border border-white/10 bg-white/[0.02] p-5 space-y-4">
+        <section className="rounded-xl border border-gold-300/12 bg-navy-900/70 p-5 space-y-4">
           <span className="text-xs uppercase tracking-wide text-white/50">Itinerary</span>
           {form.itinerary.map((day, di) => (
             <div key={di} className="rounded-lg border border-white/10 p-3 space-y-2">
@@ -284,14 +320,14 @@ export default function AdminYatraEditPage() {
                   <button type="button" onClick={() => set({ itinerary: form.itinerary.map((x, j) => j === di ? { ...x, activities: x.activities.filter((_, k) => k !== ai) } : x) })} className="px-2 rounded-md border border-red-500/30 text-red-300 text-sm cursor-pointer hover:bg-red-500/10">✕</button>
                 </div>
               ))}
-              <button type="button" onClick={() => set({ itinerary: form.itinerary.map((x, j) => j === di ? { ...x, activities: [...(x.activities || []), { icon: "", time: "", description: "" }] } : x) })} className="text-xs text-cyan-300 hover:underline cursor-pointer pl-4">+ Add activity</button>
+              <button type="button" onClick={() => set({ itinerary: form.itinerary.map((x, j) => j === di ? { ...x, activities: [...(x.activities || []), { icon: "", time: "", description: "" }] } : x) })} className="text-xs text-gold-300 hover:text-gold-200 hover:underline cursor-pointer pl-4">+ Add activity</button>
             </div>
           ))}
-          <button type="button" onClick={() => set({ itinerary: [...form.itinerary, { dayNumber: form.itinerary.length + 1, title: "", activities: [] }] })} className="text-xs text-cyan-300 hover:underline cursor-pointer">+ Add day</button>
+          <button type="button" onClick={() => set({ itinerary: [...form.itinerary, { dayNumber: form.itinerary.length + 1, title: "", activities: [] }] })} className="text-xs text-gold-300 hover:text-gold-200 hover:underline cursor-pointer">+ Add day</button>
         </section>
 
         {/* Rules & facilities */}
-        <section className="rounded-xl border border-white/10 bg-white/[0.02] p-5 space-y-2">
+        <section className="rounded-xl border border-gold-300/12 bg-navy-900/70 p-5 space-y-2">
           <span className="text-xs uppercase tracking-wide text-white/50">Rules & facilities (title + description)</span>
           {form.rulesAndFacilities.map((r, i) => (
             <div key={i} className="flex gap-2">
@@ -300,16 +336,16 @@ export default function AdminYatraEditPage() {
               <button type="button" onClick={() => set({ rulesAndFacilities: form.rulesAndFacilities.filter((_, j) => j !== i) })} className="px-2 rounded-md border border-red-500/30 text-red-300 text-sm cursor-pointer hover:bg-red-500/10">✕</button>
             </div>
           ))}
-          <button type="button" onClick={() => set({ rulesAndFacilities: [...form.rulesAndFacilities, { title: "", description: "" }] })} className="text-xs text-cyan-300 hover:underline cursor-pointer">+ Add</button>
+          <button type="button" onClick={() => set({ rulesAndFacilities: [...form.rulesAndFacilities, { title: "", description: "" }] })} className="text-xs text-gold-300 hover:text-gold-200 hover:underline cursor-pointer">+ Add</button>
         </section>
 
         {/* FAQs */}
-        <section className="rounded-xl border border-white/10 bg-white/[0.02] p-5">
+        <section className="rounded-xl border border-gold-300/12 bg-navy-900/70 p-5">
           <FaqList items={form.faqs || []} onChange={(v) => set({ faqs: v })} />
         </section>
 
         {/* SEO */}
-        <section className="rounded-xl border border-white/10 bg-white/[0.02] p-5 grid sm:grid-cols-2 gap-4">
+        <section className="rounded-xl border border-gold-300/12 bg-navy-900/70 p-5 grid sm:grid-cols-2 gap-4">
           <Field label="Meta title"><input className={adminInput} value={form.metaTitle} onChange={(e) => set({ metaTitle: e.target.value })} /></Field>
           <Field label="Meta description"><input className={adminInput} value={form.metaDescription} onChange={(e) => set({ metaDescription: e.target.value })} /></Field>
         </section>

@@ -303,48 +303,48 @@ export default function YatraBookingPage() {
 
   if (loading) {
     return (
-      <div className="yatra-experience min-h-screen flex items-center justify-center pt-24">
-        <div className="w-10 h-10 rounded-full border-2 border-amber-200/20 border-t-amber-300 animate-spin" />
+      <div className="yatra-experience min-h-[60vh] flex items-center justify-center">
+        <div className="w-10 h-10 rounded-full border-2 border-gold-300/25 border-t-gold-300 animate-spin" />
       </div>
     );
   }
   if (loadError || !yatra) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-3 pt-24 px-6 text-center">
-        <p className="text-2xl font-semibold text-amber-50">{t("booking.unableToLoad")}</p>
+      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3 px-6 text-center">
+        <p className="text-2xl font-semibold text-cream">{t("booking.unableToLoad")}</p>
         <Link to="/events" className={btnSecondary}>{t("booking.backToAll")}</Link>
       </div>
     );
   }
 
   return (
-    <div className="relative z-10 yatra-experience pt-48 md:pt-56 pb-20 px-4 sm:px-6 md:px-16">
+    <div className="relative z-10 yatra-experience pt-16 md:pt-20 pb-20 px-4 sm:px-6 md:px-16">
       <div className="max-w-5xl mx-auto">
-        <nav className="text-xs text-amber-200/40 mb-4">
-          <Link to="/events" className="hover:text-amber-200/70">{t("booking.yatras")}</Link>
+        <nav className="text-xs text-gold-200/40 mb-4">
+          <Link to="/events" className="hover:text-gold-200/70">{t("booking.yatras")}</Link>
           <span className="mx-1.5">/</span>
-          <Link to={`/events/${yatra.slug}`} className="hover:text-amber-200/70">{yatra.title}</Link>
+          <Link to={`/events/${yatra.slug}`} className="hover:text-gold-200/70">{yatra.title}</Link>
           <span className="mx-1.5">/</span>
-          <span className="text-amber-100/60">{t("booking.book")}</span>
+          <span className="text-cream/60">{t("booking.book")}</span>
         </nav>
 
-        <h1 className="text-2xl md:text-3xl font-bold text-amber-50 mb-4">🪔 {t("booking.reserveSeat")}</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-cream mb-5">{t("booking.reserveSeat")}</h1>
 
-        <div className="flex items-center gap-4 rounded-2xl border border-amber-200/12 bg-[#160f06]/70 p-3 sm:p-4 mb-5 overflow-hidden">
+        <div className="flex items-center gap-4 rounded-2xl pr-panel p-3 sm:p-4 mb-5 overflow-hidden">
           {yatra.heroImages?.[0] && <img src={yatra.heroImages[0]} alt="" className="w-20 h-16 sm:w-24 sm:h-20 rounded-xl object-cover shrink-0" />}
           <div className="min-w-0">
-            <p className="text-sm sm:text-base font-semibold text-amber-50 leading-tight truncate">{yatra.title}</p>
-            <p className="text-xs text-amber-100/50 mt-1">
+            <p className="text-sm sm:text-base font-semibold text-cream leading-tight truncate">{yatra.title}</p>
+            <p className="text-xs text-cream/50 mt-1">
               {nextDeparture(yatra.departureDates) ? `🗓 ${formatDate(nextDeparture(yatra.departureDates))}` : t("booking.tbaDates")}
               {yatra.startingPoint ? ` · 📍 ${yatra.startingPoint}` : ""}
             </p>
-            <p className="text-xs text-amber-300/80 mt-0.5">
+            <p className="text-xs text-gold-300/80 mt-0.5">
               {availability?.seats?.filter((seat) => seat.state === "available").length ?? yatra.seatsLeft} {t("booking.seatsLeft")}
             </p>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-amber-200/15 bg-[#160f06]/85 p-5 sm:p-7 space-y-6">
+        <div className="rounded-2xl pr-panel p-5 sm:p-7 space-y-6">
           <div className="max-w-2xl mx-auto w-full">
             <BookingStepper step={step} steps={STEPS} />
           </div>
@@ -353,7 +353,7 @@ export default function YatraBookingPage() {
           {step === 1 && (
             <div className="space-y-4">
               <div className="max-w-2xl mx-auto w-full space-y-4">
-                <p className="text-amber-200/70 text-xs uppercase tracking-[0.18em]">{t("booking.travellerDetailsLabel")}</p>
+                <p className="text-gold-200/70 text-xs uppercase tracking-[0.18em]">{t("booking.travellerDetailsLabel")}</p>
 
                 {reservationExpired && (
                   <div className="rounded-xl border border-red-300/25 bg-red-400/[0.06] p-4 text-sm text-red-100">
@@ -411,7 +411,7 @@ export default function YatraBookingPage() {
               </div>
 
               <div className="space-y-2">
-                <p className="text-amber-200/70 text-xs uppercase tracking-[0.18em]">{t("booking.chooseYourSeats")}</p>
+                <p className="text-gold-200/70 text-xs uppercase tracking-[0.18em]">{t("booking.chooseYourSeats")}</p>
                 <SeatMap
                   layout={availability?.layout}
                   states={seatStates}
@@ -430,20 +430,20 @@ export default function YatraBookingPage() {
               <div className="max-w-2xl mx-auto w-full space-y-4">
                 {serverError && <p className="text-red-400 text-sm">{serverError}</p>}
 
-                <div className="rounded-xl bg-amber-400/[0.04] border border-amber-200/12 p-4 text-sm space-y-1.5">
+                <div className="rounded-xl bg-gold-300/[0.04] border border-gold-300/15 p-4 text-sm space-y-1.5">
                   {fareBreakdown.normalSeats > 0 && (
-                    <div className="flex items-center justify-between text-amber-100/70">
+                    <div className="flex items-center justify-between text-cream/70">
                       <span>{t("booking.normalSeatsLine", { n: fareBreakdown.normalSeats, price: formatCurrency(fareBreakdown.normalSeatPrice) })}</span>
-                      <span className="text-amber-50">{formatCurrency(fareBreakdown.normalSeats * fareBreakdown.normalSeatPrice)}</span>
+                      <span className="text-cream">{formatCurrency(fareBreakdown.normalSeats * fareBreakdown.normalSeatPrice)}</span>
                     </div>
                   )}
                   {fareBreakdown.sleeperSeats > 0 && (
-                    <div className="flex items-center justify-between text-amber-100/70">
+                    <div className="flex items-center justify-between text-cream/70">
                       <span>{t("booking.sleeperSeatsLine", { n: fareBreakdown.sleeperSeats, price: formatCurrency(fareBreakdown.sleeperSeatPrice) })}</span>
-                      <span className="text-amber-50">{formatCurrency(fareBreakdown.sleeperSeats * fareBreakdown.sleeperSeatPrice)}</span>
+                      <span className="text-cream">{formatCurrency(fareBreakdown.sleeperSeats * fareBreakdown.sleeperSeatPrice)}</span>
                     </div>
                   )}
-                  <div className="flex items-center justify-between text-amber-50 font-semibold border-t border-amber-200/12 pt-1.5">
+                  <div className="flex items-center justify-between text-cream font-semibold border-t border-gold-300/15 pt-1.5">
                     <span>{t("booking.totalFareLabel")}</span>
                     <span>{formatCurrency(totalAmount)}</span>
                   </div>
@@ -459,21 +459,21 @@ export default function YatraBookingPage() {
           {/* STEP 2 */}
           {step === 2 && (
             <div className="max-w-2xl mx-auto w-full space-y-4">
-              <p className="text-amber-200/70 text-xs uppercase tracking-[0.18em]">{t("booking.paymentLabel")}</p>
+              <p className="text-gold-200/70 text-xs uppercase tracking-[0.18em]">{t("booking.paymentLabel")}</p>
 
               {remainingSeconds != null && (
-                <div className="rounded-xl border border-amber-300/25 bg-amber-300/[0.06] p-4 text-center">
-                  <p className="text-sm text-amber-100">{t("booking.tempReservedNotice")}</p>
-                  <p className="mt-3 text-xs uppercase tracking-[0.18em] text-amber-200/60">{t("booking.reservationExpiresIn")}</p>
-                  <p className="mt-1 text-4xl font-semibold tabular-nums text-amber-200">{countdownLabel}</p>
-                  <p className="mt-2 text-xs text-amber-100/55">{t("booking.expiryWarning")}</p>
+                <div className="rounded-xl border border-gold-300/35 bg-gold-300/[0.06] p-4 text-center">
+                  <p className="text-sm text-cream">{t("booking.tempReservedNotice")}</p>
+                  <p className="mt-3 text-xs uppercase tracking-[0.18em] text-gold-200/60">{t("booking.reservationExpiresIn")}</p>
+                  <p className="mt-1 text-4xl font-semibold tabular-nums text-gold-200">{countdownLabel}</p>
+                  <p className="mt-2 text-xs text-cream/55">{t("booking.expiryWarning")}</p>
                 </div>
               )}
 
-              <div className="rounded-xl border border-amber-200/12 bg-amber-400/[0.04] p-4 space-y-2 text-sm">
-                <div className="flex justify-between text-amber-100/70"><span>{t("booking.traveller")}</span><span className="text-amber-50">{form.travelerName}</span></div>
-                <div className="flex justify-between text-amber-100/70"><span>{t("booking.seats")}</span><span className="text-amber-50">{selectedSeats.join(", ")}</span></div>
-                <div className="flex justify-between border-t border-amber-200/12 pt-2 text-amber-100 font-semibold"><span>{t("booking.totalFareLabel")}</span><span>{formatCurrency(totalAmount)}</span></div>
+              <div className="rounded-xl border border-gold-300/15 bg-gold-300/[0.04] p-4 space-y-2 text-sm">
+                <div className="flex justify-between text-cream/70"><span>{t("booking.traveller")}</span><span className="text-cream">{form.travelerName}</span></div>
+                <div className="flex justify-between text-cream/70"><span>{t("booking.seats")}</span><span className="text-cream">{selectedSeats.join(", ")}</span></div>
+                <div className="flex justify-between border-t border-gold-300/15 pt-2 text-cream font-semibold"><span>{t("booking.totalFareLabel")}</span><span>{formatCurrency(totalAmount)}</span></div>
               </div>
 
               {serverError && <p className="text-red-400 text-sm">{serverError}</p>}
@@ -484,7 +484,7 @@ export default function YatraBookingPage() {
                   {submitting ? t("booking.openingCheckout") : t("booking.paySecurely")}
                 </button>
               </div>
-              <p className="text-center text-amber-200/40 text-[11px]">{t("booking.paymentVerifiedNote")}</p>
+              <p className="text-center text-gold-200/40 text-[11px]">{t("booking.paymentVerifiedNote")}</p>
             </div>
           )}
 
@@ -495,18 +495,18 @@ export default function YatraBookingPage() {
               <span className="inline-block text-[11px] font-semibold uppercase tracking-widest text-green-300 bg-green-400/10 border border-green-300/25 rounded-full px-3 py-1">
                 ✅ {t("booking.paymentSuccessful")}
               </span>
-              <h2 className="text-xl font-bold text-amber-50">{t("booking.bookingConfirmedTitle")}</h2>
-              <p className="text-amber-100/60 text-sm">{t("booking.bookingConfirmedDesc")}</p>
+              <h2 className="text-xl font-bold text-cream">{t("booking.bookingConfirmedTitle")}</h2>
+              <p className="text-cream/60 text-sm">{t("booking.bookingConfirmedDesc")}</p>
 
-              <div className="inline-block rounded-xl border border-amber-300/25 bg-amber-400/[0.06] px-6 py-3">
-                <p className="text-[10px] uppercase tracking-widest text-amber-200/40">{t("booking.bookingReference")}</p>
-                <p className="text-2xl font-bold text-amber-200 tracking-wider select-all">{confirmation.bookingReference}</p>
+              <div className="inline-block rounded-xl border border-gold-300/35 bg-gold-300/[0.06] px-6 py-3">
+                <p className="text-[10px] uppercase tracking-widest text-gold-200/40">{t("booking.bookingReference")}</p>
+                <p className="text-2xl font-bold text-gold-200 tracking-wider select-all">{confirmation.bookingReference}</p>
               </div>
 
-              <div className="text-sm text-amber-100/70 max-w-sm mx-auto space-y-1 text-left rounded-xl border border-amber-200/12 bg-amber-400/[0.03] p-4">
-                <div className="flex justify-between"><span>{t("booking.yatra")}</span><span className="text-amber-50">{confirmation.yatra?.title}</span></div>
-                <div className="flex justify-between"><span>{t("booking.seats")}</span><span className="text-amber-50">{confirmation.seatIds?.join(", ")}</span></div>
-                <div className="flex justify-between"><span>{t("booking.totalFareLabel")}</span><span className="text-amber-50">{formatCurrency(confirmation.totalAmount)}</span></div>
+              <div className="text-sm text-cream/70 max-w-sm mx-auto space-y-1 text-left rounded-xl border border-gold-300/15 bg-gold-300/[0.03] p-4">
+                <div className="flex justify-between"><span>{t("booking.yatra")}</span><span className="text-cream">{confirmation.yatra?.title}</span></div>
+                <div className="flex justify-between"><span>{t("booking.seats")}</span><span className="text-cream">{confirmation.seatIds?.join(", ")}</span></div>
+                <div className="flex justify-between"><span>{t("booking.totalFareLabel")}</span><span className="text-cream">{formatCurrency(confirmation.totalAmount)}</span></div>
                 <div className="flex justify-between"><span>{t("booking.status")}</span><span className="text-green-300 capitalize">{confirmation.bookingStatus}</span></div>
               </div>
 

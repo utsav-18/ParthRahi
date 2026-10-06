@@ -6,7 +6,7 @@ export default function InclusionExclusionList({ inclusions = [], exclusions = [
     <div className="space-y-6">
       <div className="grid md:grid-cols-2 gap-6">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-amber-200/50 mb-3">{t("inclusionList.included")}</p>
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-gold-200/50 mb-3">{t("inclusionList.included")}</p>
           <ul className="space-y-2">
             {inclusions.length ? inclusions.map((item, i) => (
               <li key={i} className="flex items-start gap-2.5 text-sm text-white/75">
@@ -17,7 +17,7 @@ export default function InclusionExclusionList({ inclusions = [], exclusions = [
           </ul>
         </div>
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-amber-200/50 mb-3">{t("inclusionList.notIncluded")}</p>
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-gold-200/50 mb-3">{t("inclusionList.notIncluded")}</p>
           <ul className="space-y-2">
             {exclusions.length ? exclusions.map((item, i) => (
               <li key={i} className="flex items-start gap-2.5 text-sm text-white/75">
@@ -30,11 +30,11 @@ export default function InclusionExclusionList({ inclusions = [], exclusions = [
       </div>
 
       {notes.length > 0 && (
-        <div className="rounded-xl border border-amber-400/20 bg-amber-400/[0.06] p-4">
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-amber-300/80 mb-2">{t("inclusionList.importantNotes")}</p>
+        <div className="rounded-xl border border-gold-300/25 bg-gold-300/[0.06] p-4">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-gold-300/80 mb-2">{t("inclusionList.importantNotes")}</p>
           <ul className="space-y-1.5 text-sm text-white/70">
             {notes.map((n, i) => (
-              <li key={i} className="flex gap-2"><span className="text-amber-300">•</span><span>{n}</span></li>
+              <li key={i} className="flex gap-2"><span className="text-gold-300">•</span><span>{n}</span></li>
             ))}
           </ul>
         </div>

@@ -35,6 +35,31 @@ const slugify = (str) =>
     .replace(/-+/g, '-')
     .replace(/^-|-$/g, '');
 
+// Validates an admin-submitted seatLayout (the physical bus for one yatra)
+// and returns an error message, or null when it is fine. Shared by create and
+// update so both apply the same rules:
+//  - every entry has a unique seatId and a label;
+//  - totalSeats is the number of BOOKABLE seats — a 'blocked' entry (driver
+//    gap, staircase) is a placeholder, not a seat. If the form omits
+//    totalSeats it is derived from the layout.
+// An empty layout keeps the automatic S1…Sn seats (see getLayout in
+// bookingRoutes), so totalSeats is free in that case.
+const validateSeatLayout = (body) => {
+  if (!Array.isArray(body.seatLayout) || !body.seatLayout.length) return null;
+  const seatIds = body.seatLayout.map((seat) => String(seat.seatId || '').trim());
+  if (seatIds.some((seatId) => !seatId) || new Set(seatIds).size !== seatIds.length) {
+    return 'Seat IDs must be present and unique';
+  }
+  if (body.seatLayout.some((seat) => !String(seat.label || '').trim())) return 'Every seat needs a label';
+  const bookableCount = body.seatLayout.filter((seat) => seat.type !== 'blocked').length;
+  if (!bookableCount) return 'The seat layout has no bookable seats';
+  if (body.totalSeats == null || body.totalSeats === '') body.totalSeats = bookableCount;
+  if (Number(body.totalSeats) !== bookableCount) {
+    return `Total seats (${body.totalSeats}) must equal the number of bookable seats in the layout (${bookableCount})`;
+  }
+  return null;
+};
+
 // Auto-translate the yatra's text to Hindi so the site can show it the
 // moment an admin saves — best-effort, never blocks the save on failure.
 const attachHindiTranslation = async (body) => {
@@ -123,6 +148,9 @@ router.post('/yatras', async (req, res) => {
     }
     normalizeSleeperPrice(body.price);
 
+    const layoutError = validateSeatLayout(body);
+    if (layoutError) return res.status(400).json({ error: layoutError });
+
     const exists = await Yatra.findOne({ slug: body.slug });
     if (exists) return res.status(409).json({ error: 'A yatra with this slug already exists' });
 
@@ -151,21 +179,22 @@ router.put('/yatras/:id', async (req, res) => {
       normalizeSleeperPrice(body.price);
     }
 
-    if (Array.isArray(body.seatLayout)) {
-      const seatIds = body.seatLayout.map((seat) => String(seat.seatId || '').trim());
-      if (seatIds.some((seatId) => !seatId) || new Set(seatIds).size !== seatIds.length) {
-        return res.status(400).json({ error: 'Seat IDs must be present and unique' });
-      }
+    if (Array.isArray(body.seatLayout) && (body.seatLayout.length || body.totalSeats != null)) {
+      const layoutError = validateSeatLayout(body);
+      if (layoutError) return res.status(400).json({ error: layoutError });
+      // A seat with a confirmed booking must stay a bookable seat with the
+      // same ID — it can be neither removed nor turned into a blocked position.
+      // (Applies to an emptied layout too: the automatic S1…Sn seats are
+      // only valid while totalSeats still covers them.)
       const confirmed = await Booking.find({ yatraId: req.params.id, bookingStatus: 'confirmed', seatIds: { $exists: true, $ne: [] } }).select('seatIds').lean();
       const confirmedSeats = new Set(confirmed.flatMap((booking) => booking.seatIds || []));
-      const nextSeats = new Set(seatIds);
+      const nextSeats = new Set(
+        body.seatLayout.length
+          ? body.seatLayout.filter((seat) => seat.type !== 'blocked').map((seat) => String(seat.seatId).trim())
+          : Array.from({ length: Number(body.totalSeats) || 0 }, (_, i) => `S${i + 1}`)
+      );
       const removed = [...confirmedSeats].filter((seatId) => !nextSeats.has(seatId));
-      if (removed.length) return res.status(409).json({ error: `Cannot remove confirmed seat(s): ${removed.join(', ')}` });
-      // totalSeats is bookable capacity — a 'blocked' entry (e.g. the
-      // driver-side gap on a sleeper coach) is a placeholder in the physical
-      // layout, not a seat anyone can book, so it must not count against it.
-      const bookableCount = body.seatLayout.filter((seat) => seat.type !== 'blocked').length;
-      if (body.totalSeats != null && Number(body.totalSeats) < bookableCount) return res.status(400).json({ error: 'Total seats cannot be less than the number of bookable seats in the layout' });
+      if (removed.length) return res.status(409).json({ error: `Cannot remove or block confirmed seat(s): ${removed.join(', ')}` });
     }
 
     if (body.slug) {

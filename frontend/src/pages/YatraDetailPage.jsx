@@ -24,14 +24,14 @@ import RelatedYatrasCarousel from "../components/yatra/RelatedYatrasCarousel";
 import HowItWorks from "../components/yatra/HowItWorks";
 import TrustBand from "../components/yatra/TrustBand";
 import YatraFaq from "../components/yatra/YatraFaq";
-import { SacredDivider, SacredKicker } from "../components/yatra/SacredOrnaments";
+import { SacredKicker, SectionHeader } from "../components/yatra/SacredOrnaments";
 
 const Section = ({ id, kicker: k, hindi, title, children, className = "" }) => (
-  <section id={id} className={`scroll-mt-28 ${className}`}>
+  <section id={id} className={`pr-panel rounded-2xl p-5 sm:p-6 md:p-8 ${className}`}>
     {(k || title) && (
-      <div className="mb-4">
+      <div className="mb-6">
         {k && <SacredKicker hindi={hindi}>{k}</SacredKicker>}
-        {title && <h2 className="text-2xl md:text-3xl font-bold text-amber-50 mt-1.5">{title}</h2>}
+        {title && <h2 className="text-2xl md:text-3xl font-bold text-cream mt-3 leading-tight">{title}</h2>}
       </div>
     )}
     {children}
@@ -97,17 +97,17 @@ export default function YatraDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center pt-24">
-        <div className="w-10 h-10 rounded-full border-2 border-amber-200/20 border-t-amber-300 animate-spin" />
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="w-10 h-10 rounded-full border-2 border-gold-300/25 border-t-gold-300 animate-spin" />
       </div>
     );
   }
 
   if (error || !yatra) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-3 pt-24 px-6 text-center">
-        <p className="text-2xl font-semibold text-amber-50">{t("yatraDetail.notFoundTitle")}</p>
-        <p className="text-amber-100/50 text-sm">{error || t("yatraDetail.notFoundDesc")}</p>
+      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3 px-6 text-center">
+        <p className="text-2xl font-semibold text-cream">{t("yatraDetail.notFoundTitle")}</p>
+        <p className="text-cream/50 text-sm">{error || t("yatraDetail.notFoundDesc")}</p>
         <Link to="/events" className={`${btnSecondary} mt-2`}>{t("yatraDetail.backToAll")}</Link>
       </div>
     );
@@ -119,24 +119,33 @@ export default function YatraDetailPage() {
   const galleryImages = (yatra.heroImages || []).filter(Boolean);
 
   return (
-    <div className="relative z-10 yatra-experience pb-28 lg:pb-20">
+    <div className="relative z-10 yatra-experience pb-28 lg:pb-24">
       <YatraHero yatra={yatra} />
 
-      <div className="site-container pt-10 md:pt-14">
-        <div className="max-w-5xl mx-auto w-full space-y-10">
-          <div className="max-w-xl mx-auto w-full">
+      <div className="site-container pt-8 md:pt-12">
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-10 items-start">
+          {/* Booking card — first on mobile, sticky sidebar on desktop */}
+          <aside className="lg:order-last lg:sticky lg:top-[calc(var(--site-header-h)+1rem)]">
             <TripSummaryCard yatra={yatra} />
-          </div>
+          </aside>
 
           {/* Main column */}
-          <div className="min-w-0 space-y-10">
+          <div className="min-w-0 space-y-6 md:space-y-8">
             {yatra.highlights?.length > 0 && (
               <Section id="highlights" kicker={t("yatraDetail.highlightsKicker")} hindi="यात्रा की विशेषताएँ" title={t("yatraDetail.highlightsTitle")}>
                 <HighlightsList highlights={yatra.highlights} />
+                {yatra.quickInclusions?.length > 0 && (
+                  <div className="mt-6">
+                    <QuickInclusionsStrip items={yatra.quickInclusions} />
+                  </div>
+                )}
+                {yatra.freebies?.length > 0 && (
+                  <div className="mt-6 rounded-xl border border-green-400/25 bg-green-500/[0.07] px-4 py-3 text-sm text-green-200">
+                    🎁 <span className="font-medium">{t("yatraDetail.includedFree")}</span> {yatra.freebies.join(" · ")}
+                  </div>
+                )}
               </Section>
             )}
-
-            <QuickInclusionsStrip items={yatra.quickInclusions} />
 
             {galleryImages.length > 1 && (
               <Section id="gallery" kicker={t("yatraDetail.galleryKicker")} hindi="झलक" title={t("yatraDetail.galleryTitle")}>
@@ -144,46 +153,27 @@ export default function YatraDetailPage() {
               </Section>
             )}
 
-            {yatra.freebies?.length > 0 && (
-              <div className="rounded-xl border border-green-400/20 bg-green-500/[0.06] px-4 py-3 text-sm text-green-200">
-                🎁 <span className="font-medium">{t("yatraDetail.includedFree")}</span> {yatra.freebies.join(" · ")}
-              </div>
-            )}
-
-            <HowItWorks variant="compact" />
-
-            <SacredDivider />
-          </div>
-
-          <Section id="itinerary" className="w-full" kicker={t("yatraDetail.itineraryKicker")} hindi="दिन-प्रतिदिन" title={t("yatraDetail.itineraryTitle")}>
-            <div className="w-full max-w-5xl mx-auto px-1 sm:px-3">
+            <Section id="itinerary" kicker={t("yatraDetail.itineraryKicker")} hindi="दिन-प्रतिदिन" title={t("yatraDetail.itineraryTitle")}>
               <ItineraryAccordion itinerary={yatra.itinerary} />
-            </div>
-            {yatra.mapImageUrl && (
-              <div className="max-w-5xl mx-auto mt-5 px-1 sm:px-3">
-                <div className="rounded-xl overflow-hidden border border-amber-200/12">
-                  <img src={yatra.mapImageUrl} alt={`Route map — ${yatra.title}`} loading="lazy" className="w-full object-cover" />
+              {yatra.mapImageUrl && (
+                <div className="mt-6 rounded-xl overflow-hidden border border-gold-300/15 bg-navy-950/40">
+                  <img src={yatra.mapImageUrl} alt={`Route map — ${yatra.title}`} loading="lazy" className="w-full h-auto object-contain" />
                 </div>
-              </div>
-            )}
-          </Section>
-
-          <div className="min-w-0 space-y-10">
-            <Section id="inclusions" kicker={t("yatraDetail.inclusionsKicker")} hindi="शुल्क में क्या है" title={t("yatraDetail.inclusionsTitle")}>
-              <InclusionExclusionList
-                inclusions={yatra.inclusions}
-                exclusions={yatra.exclusions}
-                notes={yatra.importantNotes}
-              />
+              )}
             </Section>
 
-            <SacredDivider />
+            <Section id="inclusions" kicker={t("yatraDetail.inclusionsKicker")} hindi="शुल्क में क्या है" title={t("yatraDetail.inclusionsTitle")}>
+              <InclusionExclusionList inclusions={yatra.inclusions} exclusions={yatra.exclusions} notes={yatra.importantNotes} />
+            </Section>
 
             <Section id="fare" kicker={t("yatraDetail.fareKicker")} hindi="पारदर्शी शुल्क" title={t("yatraDetail.fareTitle")}>
               <FareBox price={yatra.price} />
-              <div className="mt-4 rounded-xl border border-amber-200/12 bg-amber-400/[0.04] p-4 text-sm text-amber-100/75">
-                <p className="text-amber-50 font-medium mb-1">{t("yatraDetail.reservingTitle")}</p>
-                <p>{t("yatraDetail.reservingHint")}</p>
+              <div className="mt-4 rounded-xl border border-gold-300/15 bg-gold-300/[0.05] p-4 text-sm text-cream/75">
+                <p className="text-cream font-medium mb-1">{t("yatraDetail.reservingTitle")}</p>
+                <p className="leading-relaxed">{t("yatraDetail.reservingHint")}</p>
+              </div>
+              <div className="mt-6">
+                <HowItWorks variant="compact" />
               </div>
             </Section>
 
@@ -197,36 +187,43 @@ export default function YatraDetailPage() {
               <YatraFaq faqs={yatra.faqs} />
             </Section>
 
-            <Section id="why" kicker={t("yatraDetail.whyKicker")} hindi="हम पर भरोसा क्यों" title={t("yatraDetail.whyTitle")}>
-              <TrustBand compact />
-            </Section>
-
-            <SacredDivider />
-
-            <Section id="enquiry">
-              <EnquiryForm yatraSlug={yatra.slug} yatraTitle={yatra.title} />
-            </Section>
-
             {testimonials.length > 0 && (
               <Section id="testimonials" kicker={t("yatraDetail.testimonialsKicker")} hindi="यात्रियों के अनुभव" title={t("yatraDetail.testimonialsTitle")}>
                 <TestimonialCarousel testimonials={testimonials} />
               </Section>
             )}
 
-            {relatedYatras.length > 0 && (
-              <Section id="related" kicker={t("yatraDetail.relatedKicker")} hindi="और यात्राएँ" title={t("yatraDetail.relatedTitle")}>
-                <RelatedYatrasCarousel yatras={relatedYatras} />
-              </Section>
-            )}
+            <section id="enquiry">
+              <EnquiryForm yatraSlug={yatra.slug} yatraTitle={yatra.title} />
+            </section>
           </div>
+        </div>
+
+        {/* Full-width bands below the two-column area */}
+        <div className="mt-16 md:mt-20 space-y-16 md:space-y-20">
+          <section>
+            <SectionHeader kicker={t("yatraDetail.whyKicker")} hindi="हम पर भरोसा क्यों" title={t("yatraDetail.whyTitle")} />
+            <div className="mt-10">
+              <TrustBand />
+            </div>
+          </section>
+
+          {relatedYatras.length > 0 && (
+            <section id="related">
+              <SectionHeader align="left" kicker={t("yatraDetail.relatedKicker")} hindi="और यात्राएँ" title={t("yatraDetail.relatedTitle")} />
+              <div className="mt-8">
+                <RelatedYatrasCarousel yatras={relatedYatras} />
+              </div>
+            </section>
+          )}
         </div>
       </div>
 
       {/* Mobile sticky bottom CTA */}
-      <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-[#140c03]/92 backdrop-blur-md border-t border-amber-200/15 px-4 py-3 flex items-center justify-between gap-3">
+      <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-navy-950/90 backdrop-blur-md border-t border-gold-300/20 px-4 py-3 flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-[10px] uppercase tracking-wider text-amber-200/40">{t("yatraDetail.from")}</p>
-          <p className="text-lg font-bold text-amber-50 leading-none">{formatCurrency(startingPrice(yatra.price), yatra.price?.currency)}</p>
+          <p className="text-[10px] uppercase tracking-wider text-gold-200/60">{t("yatraDetail.from")}</p>
+          <p className="text-lg font-bold text-cream leading-none mt-0.5">{formatCurrency(startingPrice(yatra.price), yatra.price?.currency)}</p>
         </div>
         {soldOut ? (
           <span className={`${btnPrimary} opacity-50`}>{t("yatraDetail.soldOut")}</span>

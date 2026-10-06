@@ -1,6 +1,6 @@
 import { useLanguage } from "../../lib/i18n/LanguageContext";
 
-export default function TrustBand({ compact = false }) {
+export default function TrustBand() {
   const { t } = useLanguage();
   const items = [
     { icon: "🏢", title: t("trustBand.item1Title"), sub: t("trustBand.item1Sub") },
@@ -10,15 +10,16 @@ export default function TrustBand({ compact = false }) {
   ];
 
   return (
-    <div className={`grid gap-3 ${compact ? "sm:grid-cols-2 lg:grid-cols-4" : "sm:grid-cols-2 lg:grid-cols-4"}`}>
+    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
       {items.map((it) => (
-        <div
-          key={it.title}
-          className="rounded-2xl border border-amber-200/12 bg-amber-950/20 p-4 transition-all duration-300 hover:bg-amber-900/25 hover:-translate-y-1"
-        >
-          <div className="text-2xl mb-2" aria-hidden="true">{it.icon}</div>
-          <p className="text-sm font-semibold text-amber-50">{it.title}</p>
-          <p className="text-[12px] text-amber-100/60 mt-0.5 leading-snug">{it.sub}</p>
+        <div key={it.title} className="pr-card pr-card-hover rounded-2xl p-5 flex gap-4 items-start">
+          <span className="shrink-0 grid place-items-center w-11 h-11 rounded-xl bg-gold-300/10 border border-gold-300/25 text-xl" aria-hidden="true">
+            {it.icon}
+          </span>
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-cream">{it.title}</p>
+            <p className="text-[13px] text-cream/60 mt-1 leading-snug">{it.sub}</p>
+          </div>
         </div>
       ))}
     </div>

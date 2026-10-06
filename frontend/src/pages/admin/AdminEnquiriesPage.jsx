@@ -46,9 +46,9 @@ export default function AdminEnquiriesPage() {
       ) : enquiries.length === 0 ? (
         <p className="text-white/50 py-10">No enquiries yet.</p>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-white/10">
+        <div className="overflow-x-auto rounded-xl border border-gold-300/12 bg-navy-900/70">
           <table className="w-full text-sm min-w-[720px]">
-            <thead className="bg-white/[0.04] text-white/50 text-xs uppercase tracking-wide">
+            <thead className="bg-navy-800/70 text-gold-200/70 text-xs uppercase tracking-wide">
               <tr>
                 <th className="text-left px-3 py-3">Date</th>
                 <th className="text-left px-3 py-3">Name / Contact</th>
@@ -58,7 +58,7 @@ export default function AdminEnquiriesPage() {
             </thead>
             <tbody className="divide-y divide-white/[0.06]">
               {enquiries.map((e) => (
-                <tr key={e._id} className="hover:bg-white/[0.02] align-top">
+                <tr key={e._id} className="hover:bg-navy-800/40 align-top">
                   <td className="px-3 py-3 text-white/40 text-xs whitespace-nowrap">{formatDate(e.createdAt)}</td>
                   <td className="px-3 py-3">
                     <p className="text-white">{e.name || "—"}</p>

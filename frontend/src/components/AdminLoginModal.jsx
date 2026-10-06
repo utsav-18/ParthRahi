@@ -64,9 +64,9 @@ export default function AdminLoginModal({ isOpen, onClose }) {
   };
 
   const inputClass =
-    "w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all";
+    "w-full bg-navy-950/60 border border-gold-300/15 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-gold-300/70 focus:ring-1 focus:ring-gold-300/60 transition-all";
   const btnClass =
-    "w-full py-3 rounded-xl bg-cyan-300 text-slate-950 font-semibold text-sm shadow-lg shadow-cyan-300/20 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed";
+    "w-full py-3 rounded-xl bg-gradient-to-r from-gold-200 to-gold-400 text-navy-950 hover:brightness-105 font-semibold text-sm shadow-lg shadow-gold-400/20 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed";
 
   return (
     <div
@@ -74,7 +74,7 @@ export default function AdminLoginModal({ isOpen, onClose }) {
       onClick={onClose}
     >
       <div
-        className="relative bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl p-6 md:p-8 w-full max-w-sm"
+        className="relative bg-navy-900 border border-gold-300/20 rounded-2xl shadow-2xl p-6 md:p-8 w-full max-w-sm"
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -86,7 +86,7 @@ export default function AdminLoginModal({ isOpen, onClose }) {
         </button>
 
         <div className="text-center mb-6">
-          <p className="text-[11px] tracking-[0.38em] uppercase text-cyan-400/90 mb-2">{t("auth.appName")}</p>
+          <p className="text-[11px] tracking-[0.38em] uppercase text-gold-300 mb-2">{t("auth.appName")}</p>
           <h2 className="text-2xl font-semibold text-white">{t("adminLogin.title")}</h2>
         </div>
 

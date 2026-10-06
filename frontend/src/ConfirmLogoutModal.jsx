@@ -8,7 +8,7 @@ const ConfirmLogoutModal = ({ isOpen, onClose, onConfirm }) => {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm" onClick={onClose}>
       <div
-        className="relative bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center transform transition-all"
+        className="relative bg-navy-900 border border-gold-300/20 rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center transform transition-all"
         onClick={(e) => e.stopPropagation()}
       >
         <button

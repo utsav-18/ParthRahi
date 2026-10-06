@@ -1,25 +1,41 @@
-// Small devotional ornaments shared across the Yatra module.
+import { useLanguage } from "../../lib/i18n/LanguageContext";
+
+// Small ornaments shared across the customer site.
 
 /** Horizontal ornamental divider with a centred mark (default ॐ). */
 export function SacredDivider({ mark = "ॐ", className = "" }) {
   return (
-    <div className={`flex items-center gap-3 text-amber-300/70 ${className}`} aria-hidden="true">
-      <span className="h-px flex-1 bg-gradient-to-r from-transparent to-amber-300/40" />
+    <div className={`flex items-center gap-3 text-gold-300/70 ${className}`} aria-hidden="true">
+      <span className="h-px flex-1 bg-gradient-to-r from-transparent to-gold-300/40" />
       <span className="text-xs tracking-[0.3em]">❖</span>
       <span className="text-base font-medium">{`॥ ${mark} ॥`}</span>
       <span className="text-xs tracking-[0.3em]">❖</span>
-      <span className="h-px flex-1 bg-gradient-to-l from-transparent to-amber-300/40" />
+      <span className="h-px flex-1 bg-gradient-to-l from-transparent to-gold-300/40" />
     </div>
   );
 }
 
-/** Section eyebrow: a diya + gold uppercase label, optional Devanagari line. */
-export function SacredKicker({ children, hindi }) {
+/**
+ * Section eyebrow: gold rule + uppercase label. The optional Devanagari
+ * sub-label is only shown on the English site — in Hindi the label itself is
+ * already Hindi, so repeating it would just be noise.
+ */
+export function SacredKicker({ children, hindi, center = false }) {
+  const { lang } = useLanguage();
   return (
-    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-amber-300/80 flex items-center gap-2">
-      <span aria-hidden="true">🪔</span>
+    <p
+      className={`text-[11px] font-semibold uppercase tracking-[0.28em] text-gold-300 flex flex-wrap items-center gap-x-2.5 gap-y-1 ${
+        center ? "justify-center" : ""
+      }`}
+    >
+      <span aria-hidden="true" className="inline-flex items-center gap-1">
+        <span className="h-px w-5 bg-gold-300/70" />
+        <span className="w-1.5 h-1.5 rotate-45 bg-gold-300" />
+      </span>
       <span>{children}</span>
-      {hindi && <span className="normal-case tracking-normal text-amber-200/45 text-xs">· {hindi}</span>}
+      {hindi && lang === "en" && (
+        <span className="normal-case tracking-normal text-gold-200/50 text-xs font-medium">· {hindi}</span>
+      )}
     </p>
   );
 }
@@ -28,7 +44,7 @@ export function SacredKicker({ children, hindi }) {
 export function MandalaBackdrop({ className = "" }) {
   return (
     <svg
-      className={`pointer-events-none absolute text-amber-300/[0.07] ${className}`}
+      className={`pointer-events-none absolute text-gold-300/[0.08] ${className}`}
       viewBox="0 0 200 200"
       fill="none"
       stroke="currentColor"
@@ -64,5 +80,21 @@ export function MandalaBackdrop({ className = "" }) {
         );
       })}
     </svg>
+  );
+}
+
+/** Centred section header used on Home / list pages. */
+export function SectionHeader({ kicker, hindi, title, subtitle, align = "center", className = "" }) {
+  const centered = align === "center";
+  return (
+    <div className={`${centered ? "text-center mx-auto" : ""} max-w-2xl ${className}`}>
+      {kicker && (
+        <SacredKicker hindi={hindi} center={centered}>
+          {kicker}
+        </SacredKicker>
+      )}
+      {title && <h2 className="mt-3 text-3xl md:text-4xl font-bold text-cream leading-tight tracking-tight">{title}</h2>}
+      {subtitle && <p className="mt-4 text-cream/65 text-base leading-relaxed">{subtitle}</p>}
+    </div>
   );
 }

@@ -18,17 +18,18 @@ export default function AdminShell({ title, actions, children, back }) {
   };
 
   return (
-    <div className="relative min-h-screen z-10 flex flex-col">
+    <div className="relative min-h-screen z-10 flex flex-col bg-navy-950/80">
       {/* Dedicated Admin Header */}
-      <header className="w-full bg-slate-950/85 backdrop-blur-xl border-b border-white/10 sticky top-0 z-50">
+      <header className="w-full bg-navy-950/90 backdrop-blur-xl border-b border-gold-300/15 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           {/* Left: Brand + Badge + Desktop Navigation */}
           <div className="flex items-center gap-6">
             <Link to={`${ADMIN_BASE}/events`} className="flex items-center gap-2.5 group">
-              <span className="text-lg font-bold tracking-wide text-white group-hover:text-cyan-300 transition-colors">
+              <img src="/logo.svg" alt="" className="w-8 h-8 rounded-lg border border-gold-300/30" />
+              <span className="text-lg font-bold tracking-wide text-cream group-hover:text-gold-200 transition-colors">
                 ParthRahi
               </span>
-              <span className="px-2 py-0.5 rounded-md text-[11px] font-semibold uppercase tracking-wider bg-cyan-500/15 text-cyan-300 border border-cyan-400/30">
+              <span className="px-2 py-0.5 rounded-md text-[11px] font-semibold uppercase tracking-wider bg-gold-300/15 text-gold-200 border border-gold-300/30">
                 Admin
               </span>
             </Link>
@@ -38,7 +39,7 @@ export default function AdminShell({ title, actions, children, back }) {
                 to={`${ADMIN_BASE}/events`}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                   isYatrasActive
-                    ? "bg-white/10 text-white border border-white/15"
+                    ? "bg-gold-300/15 text-gold-100 border border-gold-300/30"
                     : "text-white/60 hover:text-white hover:bg-white/5"
                 }`}
               >
@@ -48,7 +49,7 @@ export default function AdminShell({ title, actions, children, back }) {
                 to={`${ADMIN_BASE}/events/new`}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                   isNewYatraActive
-                    ? "bg-white/10 text-white border border-white/15"
+                    ? "bg-gold-300/15 text-gold-100 border border-gold-300/30"
                     : "text-white/60 hover:text-white hover:bg-white/5"
                 }`}
               >
@@ -73,7 +74,7 @@ export default function AdminShell({ title, actions, children, back }) {
             <div className="h-4 w-px bg-white/10" />
 
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full bg-cyan-500/20 border border-cyan-400/40 text-cyan-300 flex items-center justify-center text-xs font-semibold">
+              <div className="w-7 h-7 rounded-full bg-gold-300/15 border border-gold-300/40 text-gold-200 flex items-center justify-center text-xs font-semibold">
                 {user?.name ? user.name.charAt(0).toUpperCase() : "A"}
               </div>
               <span className="text-xs text-white/80 max-w-[140px] truncate font-medium">
@@ -110,14 +111,14 @@ export default function AdminShell({ title, actions, children, back }) {
 
         {/* Mobile Navigation Drawer */}
         {mobileNavOpen && (
-          <div className="md:hidden border-t border-white/10 bg-slate-950/95 px-4 py-4 space-y-3">
+          <div className="md:hidden border-t border-gold-300/15 bg-navy-950/95 px-4 py-4 space-y-3">
             <nav className="flex flex-col gap-1">
               <Link
                 to={`${ADMIN_BASE}/events`}
                 onClick={() => setMobileNavOpen(false)}
                 className={`px-3 py-2 rounded-lg text-sm font-medium transition ${
                   isYatrasActive
-                    ? "bg-white/10 text-white"
+                    ? "bg-gold-300/15 text-gold-100"
                     : "text-white/60 hover:text-white"
                 }`}
               >
@@ -128,7 +129,7 @@ export default function AdminShell({ title, actions, children, back }) {
                 onClick={() => setMobileNavOpen(false)}
                 className={`px-3 py-2 rounded-lg text-sm font-medium transition ${
                   isNewYatraActive
-                    ? "bg-white/10 text-white"
+                    ? "bg-gold-300/15 text-gold-100"
                     : "text-white/60 hover:text-white"
                 }`}
               >
@@ -148,7 +149,7 @@ export default function AdminShell({ title, actions, children, back }) {
 
             <div className="border-t border-white/10 pt-3 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-full bg-cyan-500/20 border border-cyan-400/40 text-cyan-300 flex items-center justify-center text-xs font-semibold">
+                <div className="w-7 h-7 rounded-full bg-gold-300/15 border border-gold-300/40 text-gold-200 flex items-center justify-center text-xs font-semibold">
                   {user?.name ? user.name.charAt(0).toUpperCase() : "A"}
                 </div>
                 <span className="text-xs text-white/80 max-w-[150px] truncate">
@@ -195,7 +196,7 @@ export default function AdminShell({ title, actions, children, back }) {
 
 export const adminBtn =
   "inline-flex items-center justify-center px-4 py-2 rounded-lg text-sm font-medium cursor-pointer transition-colors";
-export const adminBtnPrimary = `${adminBtn} bg-cyan-300 text-slate-950 hover:bg-cyan-200`;
-export const adminBtnGhost = `${adminBtn} border border-white/15 text-white/80 hover:bg-white/10`;
+export const adminBtnPrimary = `${adminBtn} bg-gradient-to-r from-gold-200 to-gold-400 text-navy-950 font-semibold hover:brightness-105 disabled:opacity-50`;
+export const adminBtnGhost = `${adminBtn} border border-gold-300/20 text-cream/85 hover:bg-navy-800/70 hover:border-gold-300/40`;
 export const adminInput =
-  "w-full bg-slate-900/85 border border-white/15 rounded-lg px-3 py-2 text-white text-sm placeholder:text-slate-500 focus:outline-none focus:border-cyan-300/60";
+  "w-full bg-navy-950/80 border border-gold-300/15 rounded-lg px-3 py-2 text-cream text-sm placeholder:text-cream/30 focus:outline-none focus:border-gold-300/60 focus:ring-2 focus:ring-gold-300/15";

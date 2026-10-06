@@ -13,7 +13,7 @@ export default function TestimonialCarousel({ testimonials = [] }) {
         {t.photoUrl ? (
           <img src={t.photoUrl} alt={t.name} className="w-12 h-12 rounded-full object-cover border border-white/15 shrink-0" />
         ) : (
-          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-400 to-orange-600 text-white font-semibold flex items-center justify-center shrink-0">
+          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-gold-300 to-gold-500 text-white font-semibold flex items-center justify-center shrink-0">
             {(t.name || "?").charAt(0).toUpperCase()}
           </div>
         )}
@@ -22,7 +22,7 @@ export default function TestimonialCarousel({ testimonials = [] }) {
             <p className="text-white font-medium">{t.name}</p>
             {t.city && <span className="text-white/40 text-xs">· {t.city}</span>}
           </div>
-          <div className="text-amber-300 text-sm">{"★".repeat(Math.round(t.rating || 5))}</div>
+          <div className="text-gold-300 text-sm">{"★".repeat(Math.round(t.rating || 5))}</div>
           <p className="text-white/75 text-sm mt-2 leading-relaxed">"{t.message}"</p>
         </div>
       </div>
@@ -35,7 +35,7 @@ export default function TestimonialCarousel({ testimonials = [] }) {
                 key={idx}
                 onClick={() => setI(idx)}
                 aria-label={`Testimonial ${idx + 1}`}
-                className={`h-1.5 rounded-full transition-all ${idx === i ? "w-5 bg-amber-300" : "w-1.5 bg-white/20"}`}
+                className={`h-1.5 rounded-full transition-all ${idx === i ? "w-5 bg-gold-300" : "w-1.5 bg-white/20"}`}
               />
             ))}
           </div>

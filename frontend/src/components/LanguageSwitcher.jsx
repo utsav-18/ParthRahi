@@ -8,14 +8,14 @@ export default function LanguageSwitcher({ className = "" }) {
     <div
       role="group"
       aria-label="Choose language / भाषा चुनें"
-      className={`inline-flex items-center rounded-full border border-slate-600 bg-slate-900/60 p-0.5 text-xs font-semibold ${className}`}
+      className={`inline-flex items-center rounded-full border border-gold-300/25 bg-navy-900/60 p-0.5 text-xs font-semibold ${className}`}
     >
       <button
         type="button"
         onClick={() => setLang("en")}
         aria-pressed={lang === "en"}
         className={`px-2.5 py-1 rounded-full cursor-pointer transition-colors ${
-          lang === "en" ? "bg-white text-black" : "text-slate-300 hover:text-white"
+          lang === "en" ? "bg-gold-300 text-navy-950" : "text-cream/70 hover:text-cream"
         }`}
       >
         EN
@@ -25,7 +25,7 @@ export default function LanguageSwitcher({ className = "" }) {
         onClick={() => setLang("hi")}
         aria-pressed={lang === "hi"}
         className={`px-2.5 py-1 rounded-full cursor-pointer transition-colors ${
-          lang === "hi" ? "bg-white text-black" : "text-slate-300 hover:text-white"
+          lang === "hi" ? "bg-gold-300 text-navy-950" : "text-cream/70 hover:text-cream"
         }`}
       >
         हिं

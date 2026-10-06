@@ -64,9 +64,9 @@ export default function AdminBookingsPage() {
       ) : bookings.length === 0 ? (
         <p className="text-white/50 py-10">No bookings yet.</p>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-white/10">
+        <div className="overflow-x-auto rounded-xl border border-gold-300/12 bg-navy-900/70">
           <table className="w-full text-sm min-w-[1050px]">
-            <thead className="bg-white/[0.04] text-white/50 text-xs uppercase tracking-wide">
+            <thead className="bg-navy-800/70 text-gold-200/70 text-xs uppercase tracking-wide">
               <tr>
                 <th className="text-left px-3 py-3">Ref / Date</th>
                 <th className="text-left px-3 py-3">Traveller</th>
@@ -79,9 +79,9 @@ export default function AdminBookingsPage() {
             </thead>
             <tbody className="divide-y divide-white/[0.06]">
               {bookings.map((b) => (
-                <tr key={b._id} className={`hover:bg-white/[0.02] ${savingId === b._id ? "opacity-50" : ""}`}>
+                <tr key={b._id} className={`hover:bg-navy-800/40 ${savingId === b._id ? "opacity-50" : ""}`}>
                   <td className="px-3 py-3">
-                    <p className="text-cyan-200 font-mono text-xs">{b.bookingReference}</p>
+                    <p className="text-gold-200 font-mono text-xs">{b.bookingReference}</p>
                     <p className="text-white/40 text-xs">{formatDate(b.createdAt)}</p>
                   </td>
                   <td className="px-3 py-3">

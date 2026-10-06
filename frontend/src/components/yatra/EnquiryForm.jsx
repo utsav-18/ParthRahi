@@ -48,10 +48,10 @@ export default function EnquiryForm({ yatraSlug, yatraTitle }) {
   }
 
   return (
-    <form onSubmit={submit} className="rounded-2xl border border-amber-200/12 bg-amber-950/15 p-5 sm:p-6 space-y-4">
+    <form onSubmit={submit} className="pr-panel rounded-2xl p-5 sm:p-6 md:p-8 space-y-4">
       <div>
-        <h3 className="text-lg font-semibold text-amber-50">🙏 {t("enquiry.title")}</h3>
-        <p className="text-amber-100/50 text-sm">{t("enquiry.subtitle")}</p>
+        <h3 className="text-lg font-semibold text-cream">🙏 {t("enquiry.title")}</h3>
+        <p className="text-cream/50 text-sm">{t("enquiry.subtitle")}</p>
       </div>
 
       <div className="grid sm:grid-cols-2 gap-3">

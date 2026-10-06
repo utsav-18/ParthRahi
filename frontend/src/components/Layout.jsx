@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Outlet, useNavigate, useLocation } from "react-router-dom";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { Outlet, Link, useNavigate, useLocation } from "react-router-dom";
 import Silk from "../Silk";
 import { useAuth } from "../AuthContext";
 import { useLanguage } from "../lib/i18n/LanguageContext";
@@ -10,33 +10,53 @@ import AdminLoginModal from "./AdminLoginModal";
 import AnnouncementBar from "./AnnouncementBar";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { ADMIN_BASE } from "../lib/adminPath";
+import { btnSecondary } from "../lib/theme";
 
-const btnSecondary =
-  "inline-flex items-center justify-center px-6 md:px-8 py-2.5 md:py-3 rounded-full border border-slate-500 text-white whitespace-nowrap cursor-pointer bg-slate-900/40 shadow-md shadow-blue-900/30 transition-all duration-300 hover:bg-slate-700/60 hover:border-white/55 hover:-translate-y-0.5 hover:shadow-lg shadow-blue-500/20 active:translate-y-0";
+const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER || "918252224027";
 
-const btnPrimary =
-  "inline-flex items-center justify-center px-6 md:px-8 py-2.5 md:py-3 rounded-full bg-white text-black font-medium whitespace-nowrap cursor-pointer border border-white/70 shadow-lg shadow-white/10 transition-all duration-300 hover:bg-gray-200 hover:-translate-y-0.5 hover:shadow-xl shadow-white/20 active:translate-y-0";
+function Avatar({ user, size = "w-9 h-9" }) {
+  return user.profilePicture ? (
+    <img
+      src={user.profilePicture}
+      alt={user.name || "Profile"}
+      className={`${size} rounded-full border border-gold-300/40 object-cover`}
+      referrerPolicy="no-referrer"
+    />
+  ) : (
+    <div className={`${size} rounded-full bg-gradient-to-br from-gold-200 to-gold-500 text-navy-950 font-semibold text-sm flex items-center justify-center`}>
+      {user.name ? user.name.charAt(0).toUpperCase() : user.email ? user.email.charAt(0).toUpperCase() : "U"}
+    </div>
+  );
+}
+
+function Brand({ onClick }) {
+  return (
+    <button type="button" onClick={onClick} className="flex items-center gap-2.5 cursor-pointer shrink-0">
+      <img src="/logo.svg" alt="" className="w-8 h-8 md:w-9 md:h-9 rounded-lg border border-gold-300/30" />
+      <span className="text-lg md:text-xl font-semibold tracking-wide text-cream">ParthRahi</span>
+    </button>
+  );
+}
 
 export default function Layout() {
   const { t } = useLanguage();
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [introDone, setIntroDone] = useState(false);
-  const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const [isAdminLoginOpen, setIsAdminLoginOpen] = useState(false);
-  const [isLogoutOpen, setIsLogoutOpen] = useState(false);
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [announceOpen, setAnnounceOpen] = useState(false);
-  const { user, loading, logout } = useAuth();
-
   const navigate = useNavigate();
   const location = useLocation();
   const onHome = location.pathname === "/";
   const onEvents = location.pathname.startsWith("/events");
   const onAdmin = location.pathname.startsWith(ADMIN_BASE);
 
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [introDone, setIntroDone] = useState(onAdmin);
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isAdminLoginOpen, setIsAdminLoginOpen] = useState(false);
+  const [isLogoutOpen, setIsLogoutOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const headerRef = useRef(null);
+  const { user, loading, logout } = useAuth();
+
   const navItems = [
     { label: t("nav.home"), id: "home" },
-    // { label: t("nav.bookRide"), id: "book" },
     { label: t("nav.yatra"), id: "events" },
     { label: t("nav.about"), id: "about" },
     { label: t("nav.features"), id: "features" },
@@ -44,12 +64,27 @@ export default function Layout() {
   ];
 
   useEffect(() => {
-    if (onAdmin) {
-      setIntroDone(true);
-      return;
-    }
-    const timer = window.setTimeout(() => setIntroDone(true), 1800);
+    if (introDone) return undefined;
+    const timer = window.setTimeout(() => setIntroDone(true), 1200);
     return () => window.clearTimeout(timer);
+  }, [introDone]);
+
+  // Publish the fixed header's real height as --site-header-h (see index.css)
+  // so <main>, anchor scrolling, sticky elements and the mobile drawer all
+  // clear it exactly — whatever the breakpoint, language, or whether the
+  // announcement bar is shown. Layout effect: measured before first paint.
+  useLayoutEffect(() => {
+    const header = headerRef.current;
+    if (onAdmin || !header) return undefined;
+    const root = document.documentElement;
+    const publish = () => root.style.setProperty("--site-header-h", `${Math.round(header.getBoundingClientRect().height)}px`);
+    publish();
+    const observer = new ResizeObserver(publish);
+    observer.observe(header);
+    return () => {
+      observer.disconnect();
+      root.style.removeProperty("--site-header-h");
+    };
   }, [onAdmin]);
 
   useEffect(() => {
@@ -60,10 +95,15 @@ export default function Layout() {
   }, [menuOpen]);
 
   // Homepage sections are scroll targets; from another route we navigate home first.
+  // "contact" is the footer, which exists on every page, so it scrolls in place.
   const goToSection = (id) => {
     setMenuOpen(false);
     if (id === "events") {
       navigate("/events");
+      return;
+    }
+    if (id === "contact") {
+      document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
       return;
     }
     if (id === "home" && !onHome) {
@@ -75,338 +115,322 @@ export default function Layout() {
       navigate("/", { state: { scrollTo: id } });
       return;
     }
+    if (id === "home") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
   };
 
+  const isActive = (id) => (id === "events" && onEvents) || (id === "home" && onHome);
+
   return (
-    <div className="relative w-full min-h-screen bg-black text-white overflow-x-hidden">
+    <div className="relative w-full min-h-screen bg-navy-950 text-cream overflow-x-clip">
       {/* Intro splash */}
       {!onAdmin && (
         <div
           className={`fixed inset-0 z-80 pointer-events-none transition-opacity duration-700 ${introDone ? "opacity-0" : "opacity-100"}`}
           aria-hidden="true"
         >
-          <div className="absolute inset-0 bg-black" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(37,82,205,0.42),transparent_60%)]" />
+          <div className="absolute inset-0 bg-navy-950" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(234,199,107,0.16),transparent_55%)]" />
           <div className="relative h-full w-full flex items-center justify-center">
             <div className={`text-center transition-all duration-700 ${introDone ? "opacity-0 scale-95" : "opacity-100 scale-100"}`}>
-              <p className="text-[11px] tracking-[0.38em] uppercase text-slate-300/90">ParthRahi</p>
-              <h1 className="mt-3 text-3xl md:text-5xl font-semibold text-white">Mobility Platform</h1>
-              <p className="mt-4 text-sm text-slate-200">Reliable rides, professionally delivered</p>
+              <img src="/logo.svg" alt="" className="w-16 h-16 mx-auto rounded-2xl border border-gold-300/40" />
+              <p className="mt-5 text-[11px] tracking-[0.38em] uppercase text-gold-300">{t("intro.kicker")}</p>
+              <h1 className="mt-3 text-3xl md:text-5xl font-semibold text-cream">{t("intro.title")}</h1>
+              <p className="mt-4 text-sm text-cream/70">{t("intro.sub")}</p>
             </div>
           </div>
         </div>
       )}
 
-      {/* Single global Silk background */}
+      {/* Single global Silk background — the ParthRahi signature. Only a light
+          navy wash sits on top so the silk stays visible behind every page;
+          sections use translucent panels rather than opaque fills. */}
       <div className="fixed inset-0 z-0 pointer-events-none">
-        <Silk speed={12} scale={1.3} color="#2552cd" noiseIntensity={1} rotation={0} />
-        <div className="absolute inset-0 bg-black/60" />
+        <Silk speed={10} scale={1.3} color="#2b4fb5" noiseIntensity={1} rotation={0} />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(4,9,25,0.38)_0%,rgba(4,9,25,0.5)_55%,rgba(4,9,25,0.68)_100%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_0%,rgba(234,199,107,0.08),transparent_55%)]" />
       </div>
 
-      <div className="fixed inset-0 z-[1] pointer-events-none overflow-hidden">
-        <div className="aura-blob aura-blob-one" />
-        <div className="aura-blob aura-blob-two" />
-        <div className="aura-blob aura-blob-three" />
-        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(8,11,27,0.18),rgba(8,11,27,0.48)_60%,rgba(2,4,10,0.82))]" />
-      </div>
-
-      <div className={`relative z-10 transition-opacity duration-900 ease-out ${introDone ? "opacity-100" : "opacity-0"}`}>
+      <div className={`relative z-10 transition-opacity duration-700 ease-out ${introDone ? "opacity-100" : "opacity-0"}`}>
         {!onAdmin && (
           <>
             {/* Announcement bar + Navbar (stacked, fixed to top together) */}
-            <div className="fixed top-0 inset-x-0 z-50">
-        <AnnouncementBar onVisibilityChange={setAnnounceOpen} />
-        <nav className="w-full px-6 md:px-14 py-5 flex items-center justify-between bg-slate-950/80 backdrop-blur-xl border-b border-slate-700/60 shadow-[0_8px_30px_rgba(0,0,0,0.35)]">
-          <div
-            onClick={() => goToSection("home")}
-            className="text-lg md:text-xl font-semibold tracking-wide cursor-pointer"
-          >
-            ParthRahi
-          </div>
+            <div ref={headerRef} className="fixed top-0 inset-x-0 z-50">
+              <AnnouncementBar />
+              <nav className="w-full bg-navy-950/75 backdrop-blur-xl border-b border-gold-300/15 shadow-[0_8px_30px_rgba(2,6,20,0.35)]">
+                <div className="site-container h-16 md:h-[72px] flex items-center justify-between gap-4">
+                  <Brand onClick={() => goToSection("home")} />
 
-          <ul className="hidden md:flex gap-10 text-base">
-            {navItems.map((item) => (
-              <li
-                key={item.id}
-                onClick={() => goToSection(item.id)}
-                className={`relative cursor-pointer transition after:absolute after:left-0 after:-bottom-1 after:h-px after:bg-white after:transition-all after:duration-300 hover:after:w-full ${
-                  (item.id === "events" && onEvents) || (item.id === "home" && onHome)
-                    ? "opacity-100 after:w-full"
-                    : "opacity-80 hover:opacity-100 after:w-0"
-                }`}
-              >
-                {item.label}
-              </li>
-            ))}
-          </ul>
-
-          <div className="hidden md:flex items-center gap-4">
-            <LanguageSwitcher />
-            {!loading &&
-              (user ? (
-                <div className="flex items-center gap-3">
-                  <div
-                    onClick={() => setIsProfileOpen(true)}
-                    className="group relative flex items-center gap-3 py-1 px-2 -ml-2 rounded-full hover:bg-slate-800/60 border border-transparent hover:border-slate-700/60 transition-all duration-200 cursor-pointer"
-                    title="View Profile"
-                  >
-                    {user.profilePicture ? (
-                      <img
-                        src={user.profilePicture}
-                        alt={user.name || "Profile"}
-                        className="w-9 h-9 rounded-full border border-cyan-400/40 group-hover:border-cyan-400 object-cover shadow-sm transition-colors"
-                        referrerPolicy="no-referrer"
-                      />
-                    ) : (
-                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 border border-cyan-300/40 group-hover:border-cyan-300 text-white font-semibold text-sm flex items-center justify-center shadow-sm transition-colors">
-                        {user.name ? user.name.charAt(0).toUpperCase() : user.email ? user.email.charAt(0).toUpperCase() : "U"}
-                      </div>
-                    )}
-                    <div className="flex flex-col text-left">
-                      <span className="text-sm font-medium text-white max-w-[130px] truncate group-hover:text-cyan-300 transition-colors">
-                        {user.name || user.email?.split("@")[0]}
-                      </span>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => setIsLogoutOpen(true)}
-                    className="cursor-pointer ml-1 text-xs text-slate-400 hover:text-red-400 border border-slate-700 hover:border-red-500/50 rounded-lg px-2.5 py-1.5 transition-all"
-                  >
-                    {t("nav.logout")}
-                  </button>
-                </div>
-              ) : (
-                <button onClick={() => setIsLoginOpen(true)} className={btnSecondary}>
-                  {t("nav.login")}
-                </button>
-              ))}
-            <button
-              onClick={() => setIsAdminLoginOpen(true)}
-              className="cursor-pointer text-xs text-slate-500 hover:text-cyan-300 border border-slate-700/60 hover:border-cyan-500/40 rounded-lg px-2.5 py-1.5 transition-all"
-              title={t("adminLogin.title")}
-            >
-              {t("nav.admin")}
-            </button>
-          </div>
-
-          <div className="md:hidden flex items-center gap-3">
-            <LanguageSwitcher />
-            <button
-              onClick={() => setMenuOpen(!menuOpen)}
-              aria-label={menuOpen ? "Close menu" : "Open menu"}
-              className="flex flex-col gap-1.5 z-[70]"
-            >
-              <span className={`w-6 h-0.5 bg-white transition ${menuOpen ? "rotate-45 translate-y-2" : ""}`} />
-              <span className={`w-6 h-0.5 bg-white transition ${menuOpen ? "opacity-0" : ""}`} />
-              <span className={`w-6 h-0.5 bg-white transition ${menuOpen ? "-rotate-45 -translate-y-2" : ""}`} />
-            </button>
-          </div>
-        </nav>
-        </div>
-
-        {/* Mobile Menu Overlay */}
-        <div
-          className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-[40] md:hidden transition-opacity duration-300 ease-out will-change-opacity ${
-            menuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-          }`}
-          onClick={() => setMenuOpen(false)}
-          aria-hidden="true"
-        />
-
-        {/* Mobile Menu Drawer */}
-        <div
-          className={`fixed top-0 right-0 bottom-0 w-[75vw] max-w-[320px] bg-slate-900/95 border-l border-slate-700/50 shadow-2xl z-[45] flex flex-col ${announceOpen ? "pt-[116px]" : "pt-[84px]"} px-6 md:hidden transition-transform duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform ${
-            menuOpen ? "translate-x-0" : "translate-x-full"
-          }`}
-        >
-          <ul className="flex flex-col gap-2">
-            {navItems.map((item, i) => (
-              <li
-                key={item.id}
-                style={{ transitionDelay: menuOpen ? `${100 + i * 50}ms` : "0ms" }}
-                className={`transition-all duration-400 ease-out will-change-transform ${menuOpen ? "opacity-100 translate-x-0" : "opacity-0 translate-x-4"}`}
-              >
-                <button
-                  onClick={() => goToSection(item.id)}
-                  className="w-full text-left py-4 text-[17px] font-medium text-white border-b border-white/5 hover:text-cyan-300 hover:border-slate-600 active:scale-[0.98] transition-all"
-                >
-                  {item.label}
-                </button>
-              </li>
-            ))}
-          </ul>
-
-          <div className="mt-8 border-t border-white/10 pt-6">
-            {!loading &&
-              (user ? (
-                <div className="flex items-center justify-between">
-                  <div
-                    onClick={() => {
-                      setIsProfileOpen(true);
-                      setMenuOpen(false);
-                    }}
-                    className="flex items-center gap-3 cursor-pointer py-1.5 px-2 -ml-2 rounded-xl hover:bg-slate-800/60 active:scale-[0.98] transition-all"
-                    title="View Profile"
-                  >
-                    {user.profilePicture ? (
-                      <img src={user.profilePicture} alt="Profile" className="w-10 h-10 rounded-full border border-cyan-400/40 object-cover" referrerPolicy="no-referrer" />
-                    ) : (
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 border border-cyan-300/40 text-white font-semibold text-sm flex items-center justify-center shadow-sm">
-                        {user.name ? user.name.charAt(0).toUpperCase() : user.email ? user.email.charAt(0).toUpperCase() : "U"}
-                      </div>
-                    )}
-                    <div className="flex flex-col">
-                      <span className="text-sm font-medium text-white hover:text-cyan-300 transition-colors">{user.name || user.email?.split("@")[0]}</span>
-                      <span className="text-xs text-slate-400 truncate max-w-[140px]">{user.email}</span>
-                    </div>
-                  </div>
-                  <button onClick={() => { setIsLogoutOpen(true); setMenuOpen(false); }} className="cursor-pointer text-xs font-semibold text-slate-400 hover:text-white uppercase tracking-wider">
-                    {t("nav.logout")}
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={() => {
-                    setMenuOpen(false);
-                    setIsLoginOpen(true);
-                  }}
-                  className="cursor-pointer w-full py-3 rounded-xl border border-white/20 text-white font-medium text-sm hover:bg-white/5 active:scale-[0.98] transition-all"
-                >
-                  {t("nav.login")}
-                </button>
-              ))}
-            <button
-              onClick={() => {
-                setMenuOpen(false);
-                setIsAdminLoginOpen(true);
-              }}
-              className="cursor-pointer w-full mt-3 py-2.5 rounded-xl border border-slate-700/60 text-slate-500 hover:text-cyan-300 hover:border-cyan-500/40 font-medium text-xs uppercase tracking-wider active:scale-[0.98] transition-all"
-            >
-              {t("nav.admin")}
-            </button>
-          </div>
-
-          <div className="mt-auto mb-10 space-y-4">
-            <p className="text-[10px] uppercase tracking-widest text-slate-400 mb-3 text-center">{t("nav.readyToTravel")}</p>
-            <button
-              onClick={() => goToSection("book")}
-              className="w-full py-3.5 rounded-xl bg-cyan-300 text-slate-950 font-semibold text-sm shadow-lg shadow-cyan-300/20 active:scale-[0.98] transition-all"
-            >
-              {t("footer.bookARide")}
-            </button>
-          </div>
-        </div>
-          </>
-        )}
-
-        {/* Page content — nudged down when the announcement bar is visible */}
-        <div className={!onAdmin && announceOpen ? "pt-8" : ""}>
-          <Outlet context={{ openLogin: () => setIsLoginOpen(true) }} />
-        </div>
-
-        {/* Footer / Contact */}
-        {!onAdmin && (
-          <footer id="contact" className="relative overflow-x-hidden border-t border-slate-700/50">
-            <div className="pointer-events-none absolute top-14 left-1/2 -translate-x-1/2 w-[72%] h-48 bg-[radial-gradient(circle_at_center,rgba(62,120,255,0.2),transparent_72%)] blur-3xl" />
-            <div className="relative z-10 max-w-6xl mx-auto px-6 lg:px-10 py-16 md:py-20 rounded-t-[2rem] border-x border-t border-slate-700/50 bg-[linear-gradient(to_bottom,rgba(15,23,42,0.6),rgba(15,23,42,0.9))] backdrop-blur-sm shadow-[0_-22px_70px_rgba(25,60,160,0.16)]">
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-[1.15fr_0.85fr_0.85fr_1.15fr] gap-12 xl:gap-10">
-                <div className="min-w-0 space-y-5">
-                  <h3 className="text-xl font-semibold tracking-wide text-white">ParthRahi</h3>
-                  <p className="text-sm leading-6 text-slate-300 max-w-xs">
-                    {t("footer.description")}
-                  </p>
-                  <div className="pt-1">
-                    <p className="text-xs uppercase tracking-wider text-slate-400 mb-2">{t("footer.support")}</p>
-                    <div className="space-y-1">
-                      <a href="tel:8252224027" className="block text-sm text-slate-300 hover:text-white hover:underline transition">8252224027</a>
-                      <a href="tel:9296218764" className="block text-sm text-slate-300 hover:text-white hover:underline transition">9296218764</a>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="min-w-0">
-                  <h4 className="text-xs font-semibold mb-6 uppercase tracking-wider text-slate-400">{t("footer.company")}</h4>
-                  <ul className="space-y-4 text-sm text-slate-300">
-                    {[
-                      { label: t("footer.about"), id: "about" },
-                      { label: t("footer.yatraTours"), id: "events" },
-                      { label: t("footer.book"), id: "book" },
-                      { label: t("footer.contact"), id: "contact" },
-                    ].map((item) => (
-                      <li key={item.id} onClick={() => goToSection(item.id)} className="w-fit hover:text-white hover:translate-x-1 transition-all cursor-pointer">
-                        {item.label}
+                  <ul className="hidden lg:flex items-center gap-8 text-[15px]">
+                    {navItems.map((item) => (
+                      <li key={item.id}>
+                        <button
+                          type="button"
+                          onClick={() => goToSection(item.id)}
+                          className={`relative py-1 cursor-pointer transition-colors after:absolute after:left-0 after:-bottom-0.5 after:h-0.5 after:rounded-full after:bg-gold-300 after:transition-all after:duration-300 hover:after:w-full ${
+                            isActive(item.id) ? "text-cream after:w-full" : "text-cream/70 hover:text-cream after:w-0"
+                          }`}
+                        >
+                          {item.label}
+                        </button>
                       </li>
                     ))}
                   </ul>
+
+                  <div className="hidden lg:flex items-center gap-3">
+                    <LanguageSwitcher />
+                    {!loading &&
+                      (user ? (
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setIsProfileOpen(true)}
+                            className="group flex items-center gap-2.5 py-1 pl-1 pr-3 rounded-full border border-transparent hover:border-gold-300/25 hover:bg-navy-800/50 transition-all cursor-pointer"
+                            title={t("nav.viewProfile")}
+                          >
+                            <Avatar user={user} />
+                            <span className="text-sm font-medium text-cream max-w-[120px] truncate group-hover:text-gold-200 transition-colors">
+                              {user.name || user.email?.split("@")[0]}
+                            </span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setIsLogoutOpen(true)}
+                            className="cursor-pointer text-xs text-cream/50 hover:text-red-300 border border-cream/15 hover:border-red-400/40 rounded-lg px-2.5 py-1.5 transition-all"
+                          >
+                            {t("nav.logout")}
+                          </button>
+                        </div>
+                      ) : (
+                        <button type="button" onClick={() => setIsLoginOpen(true)} className={`${btnSecondary} !px-5 !py-2.5`}>
+                          {t("nav.login")}
+                        </button>
+                      ))}
+                    <button
+                      type="button"
+                      onClick={() => setIsAdminLoginOpen(true)}
+                      className="cursor-pointer text-[11px] text-cream/40 hover:text-gold-200 border border-cream/10 hover:border-gold-300/35 rounded-lg px-2 py-1.5 transition-all"
+                      title={t("adminLogin.title")}
+                    >
+                      {t("nav.admin")}
+                    </button>
+                  </div>
+
+                  <div className="lg:hidden flex items-center gap-3">
+                    <LanguageSwitcher />
+                    <button
+                      type="button"
+                      onClick={() => setMenuOpen(!menuOpen)}
+                      aria-label={menuOpen ? t("nav.closeMenu") : t("nav.openMenu")}
+                      aria-expanded={menuOpen}
+                      className="relative z-[70] w-10 h-10 grid place-items-center rounded-full border border-gold-300/25 bg-navy-900/60 cursor-pointer"
+                    >
+                      <span className="flex flex-col gap-1.5">
+                        <span className={`block w-5 h-0.5 bg-cream transition ${menuOpen ? "rotate-45 translate-y-2" : ""}`} />
+                        <span className={`block w-5 h-0.5 bg-cream transition ${menuOpen ? "opacity-0" : ""}`} />
+                        <span className={`block w-5 h-0.5 bg-cream transition ${menuOpen ? "-rotate-45 -translate-y-2" : ""}`} />
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </nav>
+            </div>
+
+            {/* Mobile Menu Overlay */}
+            <div
+              className={`fixed inset-0 bg-navy-950/70 backdrop-blur-sm z-[40] lg:hidden transition-opacity duration-300 ease-out ${
+                menuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+              }`}
+              onClick={() => setMenuOpen(false)}
+              aria-hidden="true"
+            />
+
+            {/* Mobile Menu Drawer */}
+            <div
+              className={`fixed top-0 right-0 bottom-0 w-[82vw] max-w-[340px] bg-navy-900/97 border-l border-gold-300/15 shadow-2xl z-[45] flex flex-col overflow-y-auto pt-[calc(var(--site-header-h)+0.75rem)] px-6 lg:hidden transition-transform duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                menuOpen ? "translate-x-0" : "translate-x-full"
+              }`}
+            >
+              <ul className="flex flex-col gap-1">
+                {navItems.map((item, i) => (
+                  <li
+                    key={item.id}
+                    style={{ transitionDelay: menuOpen ? `${100 + i * 50}ms` : "0ms" }}
+                    className={`transition-all duration-400 ease-out ${menuOpen ? "opacity-100 translate-x-0" : "opacity-0 translate-x-4"}`}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => goToSection(item.id)}
+                      className={`w-full text-left py-4 text-[17px] font-medium border-b border-cream/5 transition-colors cursor-pointer ${
+                        isActive(item.id) ? "text-gold-200" : "text-cream hover:text-gold-200"
+                      }`}
+                    >
+                      {item.label}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="mt-8 border-t border-cream/10 pt-6">
+                {!loading &&
+                  (user ? (
+                    <div className="flex items-center justify-between gap-3">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsProfileOpen(true);
+                          setMenuOpen(false);
+                        }}
+                        className="flex items-center gap-3 cursor-pointer py-1.5 px-2 -ml-2 rounded-xl hover:bg-navy-800/60 transition-all min-w-0 text-left"
+                        title={t("nav.viewProfile")}
+                      >
+                        <Avatar user={user} size="w-10 h-10" />
+                        <span className="flex flex-col min-w-0">
+                          <span className="text-sm font-medium text-cream truncate">{user.name || user.email?.split("@")[0]}</span>
+                          <span className="text-xs text-cream/50 truncate">{user.email}</span>
+                        </span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsLogoutOpen(true);
+                          setMenuOpen(false);
+                        }}
+                        className="cursor-pointer shrink-0 text-xs font-semibold text-cream/50 hover:text-cream uppercase tracking-wider"
+                      >
+                        {t("nav.logout")}
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMenuOpen(false);
+                        setIsLoginOpen(true);
+                      }}
+                      className={`${btnSecondary} w-full`}
+                    >
+                      {t("nav.login")}
+                    </button>
+                  ))}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    setIsAdminLoginOpen(true);
+                  }}
+                  className="cursor-pointer w-full mt-3 py-2.5 rounded-xl border border-cream/10 text-cream/40 hover:text-gold-200 hover:border-gold-300/35 font-medium text-xs uppercase tracking-wider transition-all"
+                >
+                  {t("nav.admin")}
+                </button>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Page content starts below the fixed header (.site-main pads by
+            --site-header-h). The admin area has its own sticky header in
+            AdminShell, so it gets no public-header offset. */}
+        {onAdmin ? (
+          <Outlet context={{ openLogin: () => setIsLoginOpen(true) }} />
+        ) : (
+          <main className="site-main">
+            <Outlet context={{ openLogin: () => setIsLoginOpen(true) }} />
+          </main>
+        )}
+
+        {/* Footer / Contact */}
+        {!onAdmin && (
+          <footer id="contact" className="relative border-t border-gold-300/20 bg-navy-950/70 backdrop-blur-md">
+            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gold-300/60 to-transparent" />
+            <div className="site-container py-14 md:py-16">
+              <div className="grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-[1.4fr_1fr_1fr_1.2fr] lg:gap-12">
+                {/* Brand */}
+                <div className="col-span-2 lg:col-span-1 min-w-0 space-y-5">
+                  <Brand onClick={() => goToSection("home")} />
+                  <p className="text-sm leading-6 text-cream/60 max-w-sm">{t("footer.description")}</p>
+                  <div className="flex gap-2.5">
+                    {[
+                      { name: t("footer.instagram"), logo: "/Insta-logo.png", url: "https://www.instagram.com/parthrahiofficial/" },
+                      { name: t("footer.youtube"), logo: "/youtube-logo.webp", url: "https://www.youtube.com/@parthrahimobility" },
+                      { name: t("footer.facebook"), logo: "/facebook-logo.png", url: "https://www.facebook.com/profile.php?id=61579536731846" },
+                    ].map((social) => (
+                      <a
+                        key={social.name}
+                        href={social.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`${t("footer.open")} ${social.name}`}
+                        title={social.name}
+                        className="w-10 h-10 grid place-items-center rounded-full border border-gold-300/20 bg-navy-900/70 transition-all hover:-translate-y-0.5 hover:border-gold-300/50"
+                      >
+                        <img src={social.logo} alt="" className="w-7 h-7 object-contain" />
+                      </a>
+                    ))}
+                  </div>
                 </div>
 
+                {/* Explore */}
                 <div className="min-w-0">
-                  <h4 className="text-xs font-semibold mb-6 uppercase tracking-wider text-slate-400">{t("footer.riders")}</h4>
-                  <ul className="space-y-4 text-sm text-slate-300">
-                    <li onClick={() => goToSection("book")} className="w-fit hover:text-white hover:translate-x-1 transition-all cursor-pointer">{t("footer.bookARide")}</li>
-                    <li onClick={() => goToSection("events")} className="w-fit hover:text-white hover:translate-x-1 transition-all cursor-pointer">{t("footer.yatraTours")}</li>
-                    <li onClick={() => goToSection("features")} className="w-fit hover:text-white hover:translate-x-1 transition-all cursor-pointer">{t("footer.safetyGuidelines")}</li>
-                    <li onClick={() => goToSection("contact")} className="w-fit hover:text-white hover:translate-x-1 transition-all cursor-pointer">{t("footer.helpSupport")}</li>
+                  <h4 className="text-xs font-semibold mb-5 uppercase tracking-[0.2em] text-gold-300">{t("footer.explore")}</h4>
+                  <ul className="space-y-3.5 text-sm text-cream/70">
+                    <li><Link to="/events" className="hover:text-gold-200 transition-colors">{t("footer.allTours")}</Link></li>
+                    <li><button type="button" onClick={() => goToSection("how")} className="hover:text-gold-200 transition-colors cursor-pointer text-left">{t("footer.howBooking")}</button></li>
+                    <li><button type="button" onClick={() => goToSection("faq")} className="hover:text-gold-200 transition-colors cursor-pointer text-left">{t("footer.faq")}</button></li>
                   </ul>
                 </div>
 
+                {/* Company */}
                 <div className="min-w-0">
-                  <h4 className="text-xs font-semibold mb-6 uppercase tracking-wider text-slate-400">{t("footer.getStarted")}</h4>
-                  <div className="flex flex-col gap-3 w-full max-w-xs">
-                    <button onClick={() => goToSection("book")} className={`${btnPrimary} w-full`}>{t("footer.bookRide")}</button>
-                    <a href="https://play.google.com/store/apps/details?id=com.parthrahi.parthrahi" target="_blank" rel="noopener noreferrer" className={`${btnSecondary} w-full text-center`}>{t("footer.downloadApp")}</a>
-                    <a href="https://play.google.com/store/apps/details?id=com.parthrahi.parth" target="_blank" rel="noopener noreferrer" className={`${btnSecondary} w-full text-center`}>{t("footer.driveWithUs")}</a>
-                  </div>
+                  <h4 className="text-xs font-semibold mb-5 uppercase tracking-[0.2em] text-gold-300">{t("footer.company")}</h4>
+                  <ul className="space-y-3.5 text-sm text-cream/70">
+                    <li><button type="button" onClick={() => goToSection("about")} className="hover:text-gold-200 transition-colors cursor-pointer text-left">{t("footer.about")}</button></li>
+                    <li><button type="button" onClick={() => goToSection("features")} className="hover:text-gold-200 transition-colors cursor-pointer text-left">{t("footer.whyUs")}</button></li>
+                    <li><a href="https://play.google.com/store/apps/details?id=com.parthrahi.parthrahi" target="_blank" rel="noopener noreferrer" className="hover:text-gold-200 transition-colors">{t("footer.downloadApp")} ↗</a></li>
+                    <li><a href="https://play.google.com/store/apps/details?id=com.parthrahi.parth" target="_blank" rel="noopener noreferrer" className="hover:text-gold-200 transition-colors">{t("footer.driveWithUs")} ↗</a></li>
+                  </ul>
                 </div>
-              </div>
 
-              <div className="mt-12 pt-8 border-t border-slate-700/50">
-                <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400 text-center mb-4">{t("footer.followUs")}</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-w-3xl mx-auto">
-                  {[
-                    { name: t("footer.instagram"), detail: t("footer.instagramDetail"), logo: "/Insta-logo.png", url: "https://www.instagram.com/parthrahiofficial/" },
-                    { name: t("footer.youtube"), detail: t("footer.youtubeDetail"), logo: "/youtube-logo.webp", url: "https://www.youtube.com/@parthrahimobility" },
-                    { name: t("footer.facebook"), detail: t("footer.facebookDetail"), logo: "/facebook-logo.png", url: "https://www.facebook.com/profile.php?id=61579536731846" },
-                  ].map((social) => (
+                {/* Contact */}
+                <div className="col-span-2 lg:col-span-1 min-w-0">
+                  <h4 className="text-xs font-semibold mb-5 uppercase tracking-[0.2em] text-gold-300">{t("footer.getInTouch")}</h4>
+                  <div className="space-y-3 text-sm">
+                    <div>
+                      <p className="text-[11px] uppercase tracking-wider text-cream/45 mb-1">{t("footer.support")}</p>
+                      <a href="tel:8252224027" className="block text-cream/80 hover:text-gold-200 transition-colors">8252224027</a>
+                      <a href="tel:9296218764" className="block text-cream/80 hover:text-gold-200 transition-colors">9296218764</a>
+                    </div>
+                    <a href="mailto:parthrahiofficial@gmail.com" className="block text-cream/80 hover:text-gold-200 transition-colors break-all">
+                      parthrahiofficial@gmail.com
+                    </a>
                     <a
-                      key={social.name}
-                      href={social.url}
+                      href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Hi ParthRahi, I have a question about your tours.")}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group w-full rounded-xl border border-slate-700/60 bg-slate-900/60 px-4 py-3.5 flex items-center justify-between gap-3 transition-all duration-300 hover:bg-white/[0.08] hover:border-slate-500 hover:-translate-y-0.5 hover:shadow-[0_12px_28px_rgba(31,74,190,0.24)]"
-                      aria-label={`${t("footer.open")} ${social.name}`}
+                      className={`${btnSecondary} !px-5 !py-2.5 mt-2`}
                     >
-                      <span className="min-w-0 flex items-center gap-3">
-                        <span aria-hidden="true" className="w-10 h-10 sm:w-11 sm:h-11 rounded-full overflow-hidden flex items-center justify-center transition-transform group-hover:scale-110">
-                          <img src={social.logo} alt={social.name} className="w-[120%] h-[120%] object-contain drop-shadow-md" />
-                        </span>
-                        <span className="min-w-0">
-                          <span className="block text-sm font-medium text-white group-hover:text-white">{social.name}</span>
-                          <span className="block text-[11px] text-slate-400 truncate group-hover:text-slate-200">{social.detail}</span>
-                        </span>
-                      </span>
-                      <span className="text-[11px] text-slate-400 group-hover:text-slate-100 transition">{t("footer.open")}</span>
+                      💬 {t("footer.whatsapp")}
                     </a>
-                  ))}
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div className="relative z-10 border-t border-slate-700/50">
-              <div className="max-w-6xl mx-auto px-6 lg:px-10 py-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
+            <div className="border-t border-gold-300/10">
+              <div className="site-container py-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-cream/45">
                 <p className="text-center sm:text-left">{t("footer.copyright", { year: new Date().getFullYear() })}</p>
                 <div className="flex items-center gap-6">
-                  <span onClick={() => window.open("https://parthrahi-backend.web.app/privacy", "_blank")} className="hover:text-white cursor-pointer transition">{t("footer.privacyPolicy")}</span>
-                  <span onClick={() => window.open("https://parthrahi-backend.web.app/privacy", "_blank")} className="hover:text-white cursor-pointer transition">{t("footer.termsOfService")}</span>
+                  <a href="https://parthrahi-backend.web.app/privacy" target="_blank" rel="noopener noreferrer" className="hover:text-cream transition-colors">{t("footer.privacyPolicy")}</a>
+                  <a href="https://parthrahi-backend.web.app/privacy" target="_blank" rel="noopener noreferrer" className="hover:text-cream transition-colors">{t("footer.termsOfService")}</a>
                 </div>
               </div>
             </div>
           </footer>
         )}
       </div>
-
 
       <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
       <AdminLoginModal isOpen={isAdminLoginOpen} onClose={() => setIsAdminLoginOpen(false)} />

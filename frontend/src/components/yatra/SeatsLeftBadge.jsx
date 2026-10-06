@@ -10,7 +10,7 @@ export default function SeatsLeftBadge({ seatsLeft, totalSeats, className = "" }
   const tone = soldOut
     ? "bg-red-500/15 border-red-400/30 text-red-300"
     : low
-    ? "bg-amber-500/15 border-amber-400/30 text-amber-300"
+    ? "bg-amber-500/15 border-amber-400/30 text-gold-300"
     : "bg-green-500/15 border-green-400/30 text-green-300";
 
   const label = soldOut

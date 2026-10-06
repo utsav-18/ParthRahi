@@ -11,8 +11,8 @@ const Row = ({ icon, label, value }) =>
     <div className="flex items-start gap-3 py-2">
       <span className="text-base shrink-0">{icon}</span>
       <div className="min-w-0">
-        <p className="text-[10px] uppercase tracking-widest text-amber-200/40">{label}</p>
-        <p className="text-sm text-amber-50/85">{value}</p>
+        <p className="text-[10px] uppercase tracking-widest text-gold-200/40">{label}</p>
+        <p className="text-sm text-cream/85">{value}</p>
       </div>
     </div>
   ) : null;
@@ -29,24 +29,24 @@ export default function TripSummaryCard({ yatra }) {
   )}`;
 
   return (
-    <div className="lg:sticky lg:top-24 rounded-2xl border border-amber-200/15 bg-[#0b1224]/95 backdrop-blur-md shadow-2xl overflow-hidden">
-      <div className="h-1 bg-gradient-to-r from-amber-400 via-orange-400 to-amber-400" />
+    <div className="rounded-2xl border border-gold-300/25 bg-navy-900/80 backdrop-blur-md shadow-[0_24px_60px_rgba(2,6,20,0.5)] overflow-hidden">
+      <div className="h-1 bg-gradient-to-r from-gold-500 via-gold-200 to-gold-500" />
       <div className="p-6">
         <div className="flex items-center justify-between gap-3">
-          <p className="text-xs uppercase tracking-widest text-amber-200/60">🪔 {t("tripSummary.tripSummary")}</p>
+          <p className="text-xs uppercase tracking-widest text-gold-200/60">🪔 {t("tripSummary.tripSummary")}</p>
           <SeatsLeftBadge seatsLeft={seatsLeft} totalSeats={yatra.totalSeats} />
         </div>
 
-        <div className="py-3 border-y border-amber-200/12 my-3">
-          <p className="text-xs text-amber-200/40">{t("tripSummary.startingFrom")}</p>
+        <div className="py-3 border-y border-gold-300/15 my-3">
+          <p className="text-xs text-gold-200/40">{t("tripSummary.startingFrom")}</p>
           <div className="flex items-baseline gap-2 flex-wrap">
             {originalPrice && (
-              <span className="text-base text-amber-200/40 line-through">{formatCurrency(originalPrice, yatra.price?.currency)}</span>
+              <span className="text-base text-gold-200/40 line-through">{formatCurrency(originalPrice, yatra.price?.currency)}</span>
             )}
-            <p className="text-4xl font-bold text-amber-50 leading-tight">{formatCurrency(actualPrice, yatra.price?.currency)}</p>
+            <p className="text-4xl font-bold text-cream leading-tight">{formatCurrency(actualPrice, yatra.price?.currency)}</p>
           </div>
           <div className="flex items-center gap-2">
-            <p className="text-xs text-amber-200/40">{yatra.price?.unit || "per person"}</p>
+            <p className="text-xs text-gold-200/40">{yatra.price?.unit || "per person"}</p>
             {originalPrice && <span className="text-[10px] font-bold text-green-400">{t("tripSummary.discountOff")}</span>}
           </div>
         </div>
@@ -74,7 +74,7 @@ export default function TripSummaryCard({ yatra }) {
           ) : null}
         </div>
 
-        <p className="text-center text-[11px] text-amber-200/40 mt-3">
+        <p className="text-center text-[11px] text-gold-200/40 mt-3">
           {t("tripSummary.freeToHold")}
         </p>
 
@@ -82,7 +82,7 @@ export default function TripSummaryCard({ yatra }) {
           href={wa}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-3 flex items-center justify-center gap-2 rounded-lg border border-amber-200/12 bg-amber-400/[0.04] py-2.5 text-sm text-amber-50/80 hover:bg-amber-400/[0.08] transition-colors"
+          className="mt-3 flex items-center justify-center gap-2 rounded-lg border border-gold-300/15 bg-gold-300/[0.04] py-2.5 text-sm text-cream/80 hover:bg-gold-300/[0.08] transition-colors"
         >
           💬 {t("tripSummary.askQuestion")}
         </a>

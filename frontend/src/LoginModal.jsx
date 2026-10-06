@@ -187,13 +187,13 @@ const LoginModal = ({ isOpen, onClose }) => {
     }
   };
 
-  const inputClass = "w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all";
-  const btnClass = "w-full py-3 rounded-xl bg-cyan-300 text-slate-950 font-semibold text-sm shadow-lg shadow-cyan-300/20 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed";
+  const inputClass = "w-full bg-navy-950/60 border border-gold-300/15 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-gold-300/70 focus:ring-1 focus:ring-gold-300/60 transition-all";
+  const btnClass = "w-full py-3 rounded-xl bg-gradient-to-r from-gold-200 to-gold-400 text-navy-950 hover:brightness-105 font-semibold text-sm shadow-lg shadow-gold-400/20 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed";
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4" onClick={onClose}>
       <div
-        className="relative bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl p-6 md:p-8 w-full max-w-sm max-h-[90vh] overflow-y-auto custom-scrollbar"
+        className="relative bg-navy-900 border border-gold-300/20 rounded-2xl shadow-2xl p-6 md:p-8 w-full max-w-sm max-h-[90vh] overflow-y-auto custom-scrollbar"
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -203,7 +203,7 @@ const LoginModal = ({ isOpen, onClose }) => {
         >&times;</button>
 
         <div className="text-center mb-6">
-          <p className="text-[11px] tracking-[0.38em] uppercase text-cyan-400/90 mb-2">{t('auth.appName')}</p>
+          <p className="text-[11px] tracking-[0.38em] uppercase text-gold-300 mb-2">{t('auth.appName')}</p>
           <h2 className="text-2xl font-semibold text-white">
             {view === 'login' && t('auth.loginTitle')}
             {view === 'signup' && t('auth.signupTitle')}
@@ -230,7 +230,7 @@ const LoginModal = ({ isOpen, onClose }) => {
                 </button>
               </div>
               <div className="flex justify-end">
-                <button type="button" onClick={() => switchView('forgot-password')} className="text-xs text-cyan-400 hover:text-cyan-300 cursor-pointer transition-colors">{t('auth.forgotPassword')}</button>
+                <button type="button" onClick={() => switchView('forgot-password')} className="text-xs text-gold-300 hover:text-gold-200 cursor-pointer transition-colors">{t('auth.forgotPassword')}</button>
               </div>
               <button type="submit" disabled={loading} className={btnClass}>
                 {loading ? t('auth.loggingIn') : t('auth.loginBtn')}
@@ -255,7 +255,7 @@ const LoginModal = ({ isOpen, onClose }) => {
             </div>
 
             <p className="text-center text-sm text-slate-400">
-              {t('auth.noAccount')} <button onClick={() => switchView('signup')} className="text-cyan-400 hover:text-cyan-300 font-medium cursor-pointer">{t('auth.signUp')}</button>
+              {t('auth.noAccount')} <button onClick={() => switchView('signup')} className="text-gold-300 hover:text-gold-200 font-medium cursor-pointer">{t('auth.signUp')}</button>
             </p>
           </>
         )}
@@ -302,7 +302,7 @@ const LoginModal = ({ isOpen, onClose }) => {
             </div>
 
             <p className="text-center text-sm text-slate-400 mt-4">
-              {t('auth.haveAccount')} <button onClick={() => switchView('login')} className="text-cyan-400 hover:text-cyan-300 font-medium cursor-pointer">{t('auth.loginLink')}</button>
+              {t('auth.haveAccount')} <button onClick={() => switchView('login')} className="text-gold-300 hover:text-gold-200 font-medium cursor-pointer">{t('auth.loginLink')}</button>
             </p>
           </>
         )}
@@ -322,7 +322,7 @@ const LoginModal = ({ isOpen, onClose }) => {
                   required
                   value={otp}
                   onChange={e => setOtp(e.target.value.replace(/[^0-9]/g, ''))}
-                  className="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-4 text-white text-2xl text-center tracking-[0.5em] focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all"
+                  className="w-full bg-navy-950/60 border border-gold-300/15 rounded-xl px-4 py-4 text-white text-2xl text-center tracking-[0.5em] focus:outline-none focus:border-gold-300/70 focus:ring-1 focus:ring-gold-300/60 transition-all"
                 />
               </div>
               <button type="submit" disabled={loading || otp.length !== 6} className={btnClass}>
@@ -338,7 +338,7 @@ const LoginModal = ({ isOpen, onClose }) => {
                 {resendTimer > 0 ? t('auth.resendOtpIn', { s: resendTimer }) : t('auth.resendOtp')}
               </button>
             </div>
-            <button onClick={() => switchView('login')} className="mt-4 text-xs text-cyan-400 hover:text-cyan-300 cursor-pointer">{t('auth.backToLogin')}</button>
+            <button onClick={() => switchView('login')} className="mt-4 text-xs text-gold-300 hover:text-gold-200 cursor-pointer">{t('auth.backToLogin')}</button>
           </div>
         )}
 
@@ -353,7 +353,7 @@ const LoginModal = ({ isOpen, onClose }) => {
               {loading ? t('auth.sendingOtp') : t('auth.sendOtp')}
             </button>
             <div className="text-center mt-4">
-              <button type="button" onClick={() => switchView('login')} className="text-sm text-cyan-400 hover:text-cyan-300 cursor-pointer">{t('auth.backToLogin')}</button>
+              <button type="button" onClick={() => switchView('login')} className="text-sm text-gold-300 hover:text-gold-200 cursor-pointer">{t('auth.backToLogin')}</button>
             </div>
           </form>
         )}
@@ -389,7 +389,7 @@ const LoginModal = ({ isOpen, onClose }) => {
               {loading ? t('auth.resetting') : t('auth.resetBtn')}
             </button>
             <div className="mt-4 text-center">
-              <button type="button" onClick={() => switchView('login')} className="text-sm text-cyan-400 hover:text-cyan-300 cursor-pointer">{t('auth.cancel')}</button>
+              <button type="button" onClick={() => switchView('login')} className="text-sm text-gold-300 hover:text-gold-200 cursor-pointer">{t('auth.cancel')}</button>
             </div>
           </form>
         )}
