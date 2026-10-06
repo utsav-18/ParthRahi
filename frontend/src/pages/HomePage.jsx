@@ -379,6 +379,30 @@ export default function HomePage() {
                 <blockquote className="mt-6 border-l-2 border-gold-300/60 pl-4 text-cream/90 italic leading-relaxed">
                   {t("founder.quote")}
                 </blockquote>
+
+                {/* Founder's certificate — opens full size in a new tab */}
+                <figure className="mt-8">
+                  <figcaption className="mb-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-gold-300">
+                    {t("founder.certTitle")}
+                  </figcaption>
+                  <a
+                    href="/Certificate.jpeg"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group block rounded-xl overflow-hidden border border-gold-300/25 bg-navy-950/60 transition-all hover:border-gold-300/50 hover:-translate-y-0.5"
+                    title={t("founder.certOpen")}
+                  >
+                    <img
+                      src="/Certificate.jpeg"
+                      alt={t("founder.certAlt")}
+                      width="1123"
+                      height="794"
+                      loading="lazy"
+                      className="w-full h-auto object-contain"
+                    />
+                  </a>
+                  <p className="mt-2 text-xs text-cream/50">{t("founder.certCaption")}</p>
+                </figure>
               </div>
             </div>
           </div>

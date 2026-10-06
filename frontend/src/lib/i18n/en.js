@@ -143,6 +143,10 @@ export default {
     badgeLlp: "LLP Registered",
     badgeStartup: "Startup India",
     badgeVerified: "Verified Drivers",
+    certTitle: "Certified in Tourism Management",
+    certCaption: "Tourism Management Assessment — LearnTube.ai, September 2026 · tap to view full size",
+    certAlt: "Certificate of Completion awarded to Aashish Kumar for the Tourism Management Assessment by LearnTube.ai",
+    certOpen: "View certificate full size",
   },
   bookRide: {
     kicker: "ParthRahi Mobility",
