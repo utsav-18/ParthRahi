@@ -145,12 +145,12 @@ export default function Layout() {
         </div>
       )}
 
-      {/* Single global Silk background — the ParthRahi signature. Only a light
-          navy wash sits on top so the silk stays visible behind every page;
-          sections use translucent panels rather than opaque fills. */}
+      {/* Single global Silk background — the ParthRahi signature. Deep dark
+          navy silk with a gentle wash so the blue waves stay rich and visible
+          with a slightly deeper shade. */}
       <div className="fixed inset-0 z-0 pointer-events-none">
-        <Silk speed={10} scale={1.3} color="#2b4fb5" noiseIntensity={1} rotation={0} />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(4,9,25,0.38)_0%,rgba(4,9,25,0.5)_55%,rgba(4,9,25,0.68)_100%)]" />
+        <Silk speed={10} scale={1.3} color="#153082" noiseIntensity={1} rotation={0} />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(4,9,25,0.47)_0%,rgba(4,9,25,0.60)_55%,rgba(4,9,25,0.76)_100%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_0%,rgba(234,199,107,0.08),transparent_55%)]" />
       </div>
 
