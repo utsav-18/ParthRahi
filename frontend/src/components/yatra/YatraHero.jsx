@@ -9,7 +9,7 @@ export default function YatraHero({ yatra }) {
   const { t } = useLanguage();
   const bg = yatra.heroImages?.[0];
   const dep = nextDeparture(yatra.departureDates);
-  const seatsLeft = yatra.seatsLeft ?? Math.max(0, (yatra.totalSeats || 0) - (yatra.seatsBooked || 0));
+  const seatsLeft = yatra.seatsLeft;
   const soldOut = seatsLeft <= 0 || yatra.status !== "published";
   const duration = durationLabel(yatra.durationDays, yatra.durationNights);
   const actualPrice = startingPrice(yatra.price);
@@ -47,7 +47,7 @@ export default function YatraHero({ yatra }) {
                 {duration}
               </span>
             )}
-            <SeatsLeftBadge seatsLeft={seatsLeft} totalSeats={yatra.totalSeats} />
+            <SeatsLeftBadge seatsLeft={seatsLeft} totalSeats={yatra.totalBookableSeats} />
           </div>
 
           <h1 className="text-4xl md:text-6xl font-bold text-cream leading-tight drop-shadow-[0_4px_20px_rgba(0,0,0,0.5)]">

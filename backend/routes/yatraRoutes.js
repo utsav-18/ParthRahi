@@ -1,6 +1,7 @@
 const express = require('express');
 const Yatra = require('../models/Yatra');
 const Testimonial = require('../models/Testimonial');
+const { getSeatAvailability } = require('../utils/seatAvailability');
 
 const router = express.Router();
 
@@ -23,7 +24,15 @@ router.get('/', async (req, res) => {
     }
 
     const yatras = await Yatra.find(query).sort({ createdAt: -1 });
-    res.json({ yatras }); // toJSON virtuals add seatsLeft
+    const withAvailability = await Promise.all(yatras.map(async (yatra) => {
+      const availability = await getSeatAvailability(yatra);
+      return {
+        ...yatra.toJSON(),
+        seatsLeft: availability.availableCount,
+        totalBookableSeats: availability.totalBookableCount,
+      };
+    }));
+    res.json({ yatras: withAvailability });
   } catch (error) {
     console.error('List yatras error:', error.message);
     res.status(500).json({ error: 'Failed to load yatras' });
@@ -39,7 +48,14 @@ router.get('/:slug', async (req, res) => {
     });
 
     if (!yatra) return res.status(404).json({ error: 'Yatra not found' });
-    res.json({ yatra });
+    const availability = await getSeatAvailability(yatra);
+    res.json({
+      yatra: {
+        ...yatra.toJSON(),
+        seatsLeft: availability.availableCount,
+        totalBookableSeats: availability.totalBookableCount,
+      },
+    });
   } catch (error) {
     console.error('Get yatra error:', error.message);
     res.status(500).json({ error: 'Failed to load yatra' });

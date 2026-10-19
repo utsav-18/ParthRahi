@@ -13,13 +13,19 @@ export default function useYatras() {
 
   useEffect(() => {
     let active = true;
-    api
+    const refresh = () => api
       .get("/api/yatras")
       .then((r) => active && setRaw(r.data.yatras || []))
       .catch(() => {})
       .finally(() => active && setLoading(false));
+    const onFocus = () => refresh();
+    refresh();
+    const timer = setInterval(refresh, 15000);
+    window.addEventListener("focus", onFocus);
     return () => {
       active = false;
+      clearInterval(timer);
+      window.removeEventListener("focus", onFocus);
     };
   }, []);
 

@@ -19,7 +19,7 @@ const Row = ({ icon, label, value }) =>
 
 export default function TripSummaryCard({ yatra }) {
   const { t } = useLanguage();
-  const seatsLeft = yatra.seatsLeft ?? Math.max(0, (yatra.totalSeats || 0) - (yatra.seatsBooked || 0));
+  const seatsLeft = yatra.seatsLeft;
   const soldOut = seatsLeft <= 0 || yatra.status !== "published";
   const actualPrice = startingPrice(yatra.price);
   const originalPrice = discountOriginalPrice(actualPrice);
@@ -34,7 +34,7 @@ export default function TripSummaryCard({ yatra }) {
       <div className="p-6">
         <div className="flex items-center justify-between gap-3">
           <p className="text-xs uppercase tracking-widest text-gold-200/60">🪔 {t("tripSummary.tripSummary")}</p>
-          <SeatsLeftBadge seatsLeft={seatsLeft} totalSeats={yatra.totalSeats} />
+          <SeatsLeftBadge seatsLeft={seatsLeft} totalSeats={yatra.totalBookableSeats} />
         </div>
 
         <div className="py-3 border-y border-gold-300/15 my-3">

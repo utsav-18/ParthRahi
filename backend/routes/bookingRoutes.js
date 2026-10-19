@@ -8,6 +8,7 @@ const Booking = require('../models/Booking');
 const SeatLock = require('../models/SeatLock');
 const { optionalAuth, requireAuth } = require('../middleware/auth');
 const { streamReceiptPdf } = require('../utils/receiptPdf');
+const { getLayout, getSeatAvailability } = require('../utils/seatAvailability');
 
 const router = express.Router();
 const HOLD_MINUTES = Number(process.env.SEAT_HOLD_MINUTES) || 5;
@@ -90,11 +91,6 @@ const profileBooking = (booking) => ({
     durationNights: booking.yatraId.durationNights,
   } : null,
 });
-
-const getLayout = (yatra) => {
-  if (Array.isArray(yatra.seatLayout) && yatra.seatLayout.length) return yatra.seatLayout;
-  return Array.from({ length: yatra.totalSeats }, (_, i) => ({ seatId: `S${i + 1}`, label: `S${i + 1}`, row: Math.floor(i / 4) + 1, column: (i % 4) + 1, type: 'seat' }));
-};
 
 // Sleeper price is optional on a Yatra — when the admin leaves it empty,
 // sleeper berths are charged at the normal seat price.
@@ -233,30 +229,7 @@ router.get('/availability/:slug', optionalAuth, async (req, res) => {
   try {
     const yatra = await Yatra.findOne({ slug: String(req.params.slug).toLowerCase(), status: { $in: ['published', 'closed'] } });
     if (!yatra) return res.status(404).json({ error: 'Yatra not found' });
-    // Keep blocked cells (e.g. the driver-side gap on a sleeper coach) in the
-    // layout so the frontend can render them in place — just leave them out
-    // of the bookable seat/state list below.
-    const layout = getLayout(yatra);
-    const bookableLayout = layout.filter((seat) => seat.type !== 'blocked');
-    const bookings = await Booking.find({ yatraId: yatra._id, bookingStatus: 'confirmed', seatIds: { $exists: true, $ne: [] } }).select('seatIds').lean();
-    const booked = new Set(bookings.flatMap((booking) => booking.seatIds || []));
-    const locks = await SeatLock.find({
-      yatraId: yatra._id,
-      $or: [
-        { status: 'booked' },
-        { status: 'permanently_locked' },
-        { status: 'locked', expiresAt: { $gt: new Date() } },
-      ],
-    }).select('seatId status').lean();
-    const permanent = new Set(locks.filter((lock) => lock.status === 'permanently_locked').map((lock) => lock.seatId));
-    const locked = new Set(locks.filter((lock) => lock.status === 'locked').map((lock) => lock.seatId));
-    res.json({
-      layout,
-      seats: bookableLayout.map((seat) => ({
-        seatId: seat.seatId,
-        state: booked.has(seat.seatId) ? 'booked' : permanent.has(seat.seatId) ? 'permanently_locked' : locked.has(seat.seatId) ? 'locked' : 'available',
-      })),
-    });
+    res.json(await getSeatAvailability(yatra));
   } catch (error) { console.error('Seat availability error:', error.message); res.status(500).json({ error: 'Failed to load seat availability' }); }
 });
 

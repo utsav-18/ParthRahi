@@ -293,15 +293,6 @@ function totalLine(counts, t) {
   return t("seatMap.totalSeatsOnly", { total: counts.bookable });
 }
 
-const legendSwatchClasses = {
-  available: "border-2 border-emerald-400 bg-white",
-  selected: "bg-amber-400 border-2 border-amber-500",
-  locked: "bg-red-50 border-2 border-red-200",
-  permanently_locked: "bg-red-100 border-2 border-red-500",
-  booked: "bg-slate-100 border-2 border-slate-200",
-  blocked: "bg-slate-100 border-2 border-dashed border-slate-300",
-};
-
 /**
  * mode="book"  (default) — customer chart. `onChange(nextSelectedIds)`.
  * mode="admin" — preview in the yatra editor. Every cell is clickable and
@@ -315,25 +306,6 @@ export default function SeatMap({ layout = [], states = {}, selected = [], onCha
   const selectedSet = new Set(managingLocks ? selected : admin ? [] : selected);
   const decks = groupLayout(layout);
   const counts = countLayout(layout);
-
-  const legend = [
-    ["available", t("seatMap.available")],
-    ...(admin && !managingLocks
-      ? []
-      : managingLocks
-      ? [
-          ["selected", t("seatMap.selected")],
-          ["permanently_locked", t("seatMap.permanentlyLocked")],
-          ["locked", t("seatMap.unavailable")],
-          ["booked", t("seatMap.booked")],
-        ]
-      : [
-          ["selected", t("seatMap.selected")],
-          ["locked", t("seatMap.unavailable")],
-          ["booked", t("seatMap.booked")],
-        ]),
-    ...(counts.blocked ? [["blocked", t("seatMap.blocked")]] : []),
-  ];
 
   const toggle = (seatId, state) => {
     if (admin && !managingLocks) {
@@ -352,15 +324,6 @@ export default function SeatMap({ layout = [], states = {}, selected = [], onCha
 
   return (
     <div className="space-y-3">
-      <div className={`flex flex-wrap gap-x-4 gap-y-2 text-xs ${mutedText}`}>
-        {legend.map(([key, label]) => (
-          <span key={key} className="inline-flex items-center gap-1.5">
-            <i className={`w-3 h-3 rounded-sm ${legendSwatchClasses[key]}`} />
-            {label}
-          </span>
-        ))}
-      </div>
-
       <div className="rounded-3xl border border-slate-200 bg-slate-50 p-3 sm:p-5 space-y-4">
         <div className="flex flex-col md:flex-row items-stretch md:items-start" style={{ gap: DECK_GAP }}>
           {decks.map((deck, i) => (

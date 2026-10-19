@@ -71,7 +71,7 @@ function FeaturedJourney({ yatra, t }) {
 
   const cover = yatra.heroImages?.[0];
   const dep = nextDeparture(yatra.departureDates);
-  const seatsLeft = yatra.seatsLeft ?? Math.max(0, (yatra.totalSeats || 0) - (yatra.seatsBooked || 0));
+  const seatsLeft = yatra.seatsLeft;
   const duration = durationLabel(yatra.durationDays, yatra.durationNights);
   // Same "from" price and UI-only 30% OFF reference as the listing card and
   // detail hero (lib/format.js) — display only, never used for payment.
@@ -97,7 +97,7 @@ function FeaturedJourney({ yatra, t }) {
             {t("home.nextDeparture")}
           </span>
           <span className="rounded-full bg-navy-950/75 backdrop-blur-sm">
-            <SeatsLeftBadge seatsLeft={seatsLeft} totalSeats={yatra.totalSeats} />
+            <SeatsLeftBadge seatsLeft={seatsLeft} totalSeats={yatra.totalBookableSeats} />
           </span>
         </div>
         <div className="absolute bottom-0 inset-x-0 p-5 sm:p-6">

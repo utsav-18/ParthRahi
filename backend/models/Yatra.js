@@ -140,10 +140,6 @@ const yatraSchema = new mongoose.Schema({
   },
 }, { timestamps: true });
 
-yatraSchema.virtual('seatsLeft').get(function () {
-  return Math.max(0, (this.totalSeats || 0) - (this.seatsBooked || 0));
-});
-
 yatraSchema.set('toJSON', { virtuals: true });
 yatraSchema.set('toObject', { virtuals: true });
 

@@ -64,6 +64,14 @@ export default function YatraDetailPage() {
       .catch((err) => active && setError(err.message))
       .finally(() => active && setLoading(false));
 
+    const refreshAvailability = () => api.get(`/api/bookings/availability/${slug}`).then((res) => {
+      if (!active) return;
+      const count = res.data.availableCount;
+      if (rawYatraRef.current) rawYatraRef.current = { ...rawYatraRef.current, seatsLeft: count };
+      setYatra((current) => current ? { ...current, seatsLeft: count } : current);
+    }).catch(() => {});
+    refreshAvailability();
+    const availabilityTimer = setInterval(refreshAvailability, 15000);
     api.get(`/api/yatras/${slug}/testimonials`).then((r) => active && setTestimonials(r.data.testimonials || [])).catch(() => {});
     api.get("/api/yatras").then((r) => {
       if (!active) return;
@@ -73,6 +81,7 @@ export default function YatraDetailPage() {
 
     return () => {
       active = false;
+      clearInterval(availabilityTimer);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- language changes are handled by the effect below, not a refetch
   }, [slug]);
@@ -113,7 +122,7 @@ export default function YatraDetailPage() {
     );
   }
 
-  const seatsLeft = yatra.seatsLeft ?? Math.max(0, (yatra.totalSeats || 0) - (yatra.seatsBooked || 0));
+  const seatsLeft = yatra.seatsLeft;
   const soldOut = seatsLeft <= 0 || yatra.status !== "published";
   const relatedYatras = related.filter((y) => y.slug !== yatra.slug).slice(0, 6);
   const galleryImages = (yatra.heroImages || []).filter(Boolean);

@@ -7,7 +7,7 @@ export default function YatraCard({ yatra }) {
   const { t } = useLanguage();
   const cover = yatra.heroImages?.[0];
   const dep = nextDeparture(yatra.departureDates);
-  const seatsLeft = yatra.seatsLeft ?? Math.max(0, (yatra.totalSeats || 0) - (yatra.seatsBooked || 0));
+  const seatsLeft = yatra.seatsLeft;
   const duration = durationLabel(yatra.durationDays, yatra.durationNights);
   const actualPrice = startingPrice(yatra.price);
   const originalPrice = discountOriginalPrice(actualPrice);
@@ -44,7 +44,7 @@ export default function YatraCard({ yatra }) {
         </div>
 
         <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between gap-2">
-          <SeatsLeftBadge seatsLeft={seatsLeft} totalSeats={yatra.totalSeats} />
+          <SeatsLeftBadge seatsLeft={seatsLeft} totalSeats={yatra.totalBookableSeats} />
           <div className="text-right">
             <p className="text-xs uppercase tracking-wider text-cream/70">{t("yatraCard.from")}</p>
             {originalPrice && (

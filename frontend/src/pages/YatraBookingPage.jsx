@@ -276,6 +276,7 @@ export default function YatraBookingPage() {
         handler: async (response) => {
           try {
             const verified = await api.post("/api/bookings/verify", { bookingReference: booking.bookingReference, holdToken, ...response });
+            await refreshSeats().catch(() => {});
             sessionStorage.removeItem(holdStorageKey);
             setActiveHold(null);
             setReservationExpiresAt(null);
@@ -339,7 +340,7 @@ export default function YatraBookingPage() {
               {yatra.startingPoint ? ` · 📍 ${yatra.startingPoint}` : ""}
             </p>
             <p className="text-xs text-gold-300/80 mt-0.5">
-              {availability?.seats?.filter((seat) => seat.state === "available").length ?? yatra.seatsLeft} {t("booking.seatsLeft")}
+              {availability?.availableCount ?? yatra.seatsLeft} {t("booking.seatsLeft")}
             </p>
           </div>
         </div>
