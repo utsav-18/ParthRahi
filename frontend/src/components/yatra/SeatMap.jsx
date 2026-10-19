@@ -68,6 +68,8 @@ const seatClasses = (state) =>
     ? "border-slate-200 bg-slate-100 text-slate-300 cursor-not-allowed"
     : state === "locked"
     ? "border-red-200 bg-red-50 text-red-300 cursor-not-allowed"
+    : state === "permanently_locked"
+    ? "border-red-500 bg-red-100 text-red-700 cursor-not-allowed"
     : "border-emerald-400 bg-white text-slate-700 hover:bg-emerald-50 cursor-pointer";
 
 function SeatCell({ seat, state, onToggle, berthType, admin, t }) {
@@ -100,14 +102,15 @@ function SeatCell({ seat, state, onToggle, berthType, admin, t }) {
   const isSleeper = berthType === "sleeper";
   const barClass = state === "selected" ? "bg-white/70" : state === "available" ? "bg-emerald-300" : "bg-current opacity-30";
   const glyphClass = state === "selected" ? "text-white/45" : state === "available" ? "text-emerald-200" : "text-current opacity-20";
-  const disabled = !admin && (state === "booked" || state === "locked");
+  const disabled = (!admin && (state === "booked" || state === "locked" || state === "permanently_locked"))
+    || (admin && (state === "booked" || state === "locked"));
 
   return (
     <button
       type="button"
       disabled={disabled}
       onClick={() => onToggle(seat.seatId, state)}
-      aria-label={`${seat.label} ${t(`seatMap.${isSleeper ? "sleeper" : "seater"}`)} ${t(`seatMap.${state === "locked" ? "unavailable" : state}`)}`}
+      aria-label={`${seat.label} ${t(`seatMap.${isSleeper ? "sleeper" : "seater"}`)} ${t(`seatMap.${state === "locked" ? "unavailable" : state === "permanently_locked" ? "permanentlyLocked" : state}`)}`}
       aria-pressed={state === "selected"}
       title={admin ? seat.seatId : undefined}
       style={cellStyle}
@@ -294,6 +297,7 @@ const legendSwatchClasses = {
   available: "border-2 border-emerald-400 bg-white",
   selected: "bg-amber-400 border-2 border-amber-500",
   locked: "bg-red-50 border-2 border-red-200",
+  permanently_locked: "bg-red-100 border-2 border-red-500",
   booked: "bg-slate-100 border-2 border-slate-200",
   blocked: "bg-slate-100 border-2 border-dashed border-slate-300",
 };
@@ -307,14 +311,22 @@ const legendSwatchClasses = {
 export default function SeatMap({ layout = [], states = {}, selected = [], onChange, onToggleBlocked, prices, mode = "book", tone = "dark" }) {
   const { t } = useLanguage();
   const admin = mode === "admin";
-  const selectedSet = new Set(admin ? [] : selected);
+  const managingLocks = mode === "manage";
+  const selectedSet = new Set(managingLocks ? selected : admin ? [] : selected);
   const decks = groupLayout(layout);
   const counts = countLayout(layout);
 
   const legend = [
     ["available", t("seatMap.available")],
-    ...(admin
+    ...(admin && !managingLocks
       ? []
+      : managingLocks
+      ? [
+          ["selected", t("seatMap.selected")],
+          ["permanently_locked", t("seatMap.permanentlyLocked")],
+          ["locked", t("seatMap.unavailable")],
+          ["booked", t("seatMap.booked")],
+        ]
       : [
           ["selected", t("seatMap.selected")],
           ["locked", t("seatMap.unavailable")],
@@ -324,7 +336,7 @@ export default function SeatMap({ layout = [], states = {}, selected = [], onCha
   ];
 
   const toggle = (seatId, state) => {
-    if (admin) {
+    if (admin && !managingLocks) {
       onToggleBlocked?.(seatId);
       return;
     }
@@ -352,7 +364,7 @@ export default function SeatMap({ layout = [], states = {}, selected = [], onCha
       <div className="rounded-3xl border border-slate-200 bg-slate-50 p-3 sm:p-5 space-y-4">
         <div className="flex flex-col md:flex-row items-stretch md:items-start" style={{ gap: DECK_GAP }}>
           {decks.map((deck, i) => (
-            <Deck key={deck.deck} deck={deck} isFirst={i === 0} states={admin ? {} : states} selectedSet={selectedSet} onToggle={toggle} prices={prices} admin={admin} t={t} />
+            <Deck key={deck.deck} deck={deck} isFirst={i === 0} states={admin && !managingLocks ? {} : states} selectedSet={selectedSet} onToggle={toggle} prices={prices} admin={admin} t={t} />
           ))}
         </div>
 

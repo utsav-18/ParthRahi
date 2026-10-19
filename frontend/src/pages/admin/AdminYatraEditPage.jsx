@@ -6,6 +6,7 @@ import AdminShell, { adminBtnPrimary, adminBtnGhost, adminInput } from "./AdminS
 import { ADMIN_BASE } from "../../lib/adminPath";
 import { countLayout } from "../../lib/seatLayout";
 import BusLayoutEditor from "./BusLayoutEditor";
+import SeatMap from "../../components/yatra/SeatMap";
 
 const EMPTY = {
   title: "", slug: "", tagline: "", category: "bus",
@@ -88,6 +89,10 @@ export default function AdminYatraEditPage() {
   // Set when a saved yatra's totalSeats disagreed with its layout and the
   // form corrected it on load (the field is read-only while a layout exists).
   const [seatCountFix, setSeatCountFix] = useState(null);
+  const [seatLockStates, setSeatLockStates] = useState({});
+  const [selectedLockSeats, setSelectedLockSeats] = useState([]);
+  const [seatLockSaving, setSeatLockSaving] = useState(false);
+  const [seatLockError, setSeatLockError] = useState("");
 
   useDocumentMeta({ title: isNew ? "Admin — New Yatra" : "Admin — Edit Yatra" });
 
@@ -107,6 +112,9 @@ export default function AdminYatraEditPage() {
           departureDates: (y.departureDates || []).map((d) => new Date(d).toISOString().slice(0, 10)),
         });
         setSavedSeatIds((y.seatLayout || []).map((seat) => seat.seatId));
+        api.get(`/api/admin/yatras/${id}/seat-locks`)
+          .then((lockRes) => setSeatLockStates(lockRes.data.states || {}))
+          .catch((err) => setSeatLockError(err.message));
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
@@ -119,6 +127,38 @@ export default function AdminYatraEditPage() {
     setForm((f) => ({ ...f, seatLayout, totalSeats: seatLayout.length ? String(countLayout(seatLayout).bookable) : f.totalSeats }));
   const layoutSeats = countLayout(form.seatLayout || []).bookable;
   const hasLayout = (form.seatLayout || []).length > 0;
+  const lockLayout = hasLayout
+    ? form.seatLayout
+    : Array.from({ length: Number(form.totalSeats) || 0 }, (_, i) => ({
+      seatId: `S${i + 1}`,
+      label: `S${i + 1}`,
+      row: Math.floor(i / 4) + 1,
+      column: (i % 4) + 1,
+      type: "seat",
+    }));
+
+  const refreshSeatLocks = async () => {
+    const res = await api.get(`/api/admin/yatras/${id}/seat-locks`);
+    setSeatLockStates(res.data.states || {});
+  };
+
+  const updatePermanentLocks = async () => {
+    const toLock = selectedLockSeats.filter((seatId) => !seatLockStates[seatId] || seatLockStates[seatId] === "available");
+    const toUnlock = selectedLockSeats.filter((seatId) => seatLockStates[seatId] === "permanently_locked");
+    if (!toLock.length && !toUnlock.length) return;
+    setSeatLockSaving(true);
+    setSeatLockError("");
+    try {
+      if (toLock.length) await api.post(`/api/admin/yatras/${id}/seat-locks`, { seatIds: toLock });
+      await Promise.all(toUnlock.map((seatId) => api.delete(`/api/admin/yatras/${id}/seat-locks/${encodeURIComponent(seatId)}`)));
+      await refreshSeatLocks();
+      setSelectedLockSeats([]);
+    } catch (err) {
+      setSeatLockError(err.message);
+    } finally {
+      setSeatLockSaving(false);
+    }
+  };
 
   const isValidPrice = (value) => Number.isFinite(Number(value)) && Number(value) > 0;
 
@@ -261,6 +301,39 @@ export default function AdminYatraEditPage() {
           prices={form.price}
           savedSeatIds={savedSeatIds}
         />
+
+        {!isNew && (
+          <section className="rounded-xl border border-red-400/20 bg-navy-900/70 p-5 space-y-4">
+            <div>
+              <p className="text-xs uppercase tracking-wide text-red-200/80">Permanent seat locks</p>
+              <p className="text-[11px] text-white/40 mt-1">
+                Select available seats to permanently remove them from customer booking. Booked and temporarily held seats cannot be selected.
+                Select a red seat to unlock it manually.
+              </p>
+            </div>
+            {seatLockError && <p className="text-red-300 text-sm">{seatLockError}</p>}
+            <SeatMap
+              mode="manage"
+              layout={lockLayout}
+              states={seatLockStates}
+              selected={selectedLockSeats}
+              prices={{ normal: form.price?.normalSeat, sleeper: form.price?.sleeperSeat || form.price?.normalSeat }}
+              tone="dark"
+              onChange={setSelectedLockSeats}
+            />
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                disabled={seatLockSaving || !selectedLockSeats.some((seatId) => !seatLockStates[seatId] || seatLockStates[seatId] === "available" || seatLockStates[seatId] === "permanently_locked")}
+                onClick={updatePermanentLocks}
+                className={adminBtnPrimary}
+              >
+                {seatLockSaving ? "Updating…" : "Update selected seat locks"}
+              </button>
+              <span className="text-xs text-white/40">{selectedLockSeats.length ? `${selectedLockSeats.length} seat(s) selected` : "No seats selected"}</span>
+            </div>
+          </section>
+        )}
 
         {/* Pricing */}
         <section className="rounded-xl border border-gold-300/12 bg-navy-900/70 p-5 space-y-4">

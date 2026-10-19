@@ -135,6 +135,72 @@ router.get('/yatras/:id', async (req, res) => {
   }
 });
 
+router.get('/yatras/:id/seat-locks', async (req, res) => {
+  try {
+    const yatra = await Yatra.findById(req.params.id).select('seatLayout totalSeats');
+    if (!yatra) return res.status(404).json({ error: 'Yatra not found' });
+    const now = new Date();
+    const bookings = await Booking.find({ yatraId: yatra._id, bookingStatus: 'confirmed', seatIds: { $exists: true, $ne: [] } }).select('seatIds').lean();
+    const locks = await SeatLock.find({
+      yatraId: yatra._id,
+      $or: [
+        { status: 'permanently_locked' },
+        { status: 'locked', expiresAt: { $gt: now } },
+      ],
+    }).select('seatId status').lean();
+    const states = {};
+    for (const booking of bookings) {
+      for (const seatId of booking.seatIds || []) states[seatId] = 'booked';
+    }
+    for (const lock of locks) {
+      if (states[lock.seatId] !== 'booked') states[lock.seatId] = lock.status === 'permanently_locked' ? 'permanently_locked' : 'locked';
+    }
+    res.json({ states });
+  } catch (e) {
+    console.error('Get admin seat locks error:', e.message);
+    res.status(500).json({ error: 'Failed to load seat availability' });
+  }
+});
+
+router.post('/yatras/:id/seat-locks', async (req, res) => {
+  const normalizedSeats = Array.isArray(req.body.seatIds) ? req.body.seatIds.map((seatId) => String(seatId).trim()) : [];
+  if (!normalizedSeats.length || new Set(normalizedSeats).size !== normalizedSeats.length) {
+    return res.status(400).json({ error: 'Select one or more unique seats' });
+  }
+  try {
+    const yatra = await Yatra.findById(req.params.id).select('seatLayout totalSeats');
+    if (!yatra) return res.status(404).json({ error: 'Yatra not found' });
+    const validSeats = new Set((yatra.seatLayout?.length ? yatra.seatLayout : Array.from({ length: yatra.totalSeats }, (_, i) => ({ seatId: `S${i + 1}`, type: 'seat' }))).filter((seat) => seat.type !== 'blocked').map((seat) => seat.seatId));
+    if (normalizedSeats.some((seatId) => !validSeats.has(seatId))) return res.status(400).json({ error: 'One or more selected seats are invalid for this yatra' });
+
+    const confirmed = await Booking.find({ yatraId: yatra._id, bookingStatus: 'confirmed', seatIds: { $in: normalizedSeats } }).select('seatIds').lean();
+    const booked = new Set(confirmed.flatMap((booking) => booking.seatIds || []));
+    if (normalizedSeats.some((seatId) => booked.has(seatId))) return res.status(409).json({ error: 'Booked seats cannot be permanently locked' });
+
+    await SeatLock.deleteMany({ yatraId: yatra._id, seatId: { $in: normalizedSeats }, status: 'locked', expiresAt: { $lte: new Date() } });
+    const activeTemporary = await SeatLock.find({ yatraId: yatra._id, seatId: { $in: normalizedSeats }, status: 'locked', expiresAt: { $gt: new Date() } }).select('seatId').lean();
+    if (activeTemporary.length) return res.status(409).json({ error: `Temporarily held seats cannot be locked: ${activeTemporary.map((lock) => lock.seatId).join(', ')}` });
+
+    await SeatLock.insertMany(normalizedSeats.map((seatId) => ({ yatraId: yatra._id, seatId, status: 'permanently_locked' })));
+    res.status(201).json({ seatIds: normalizedSeats });
+  } catch (e) {
+    if (e?.code === 11000) return res.status(409).json({ error: 'One or more selected seats are no longer available. Refresh and try again.' });
+    console.error('Create permanent seat locks error:', e.message);
+    res.status(500).json({ error: 'Failed to permanently lock seats' });
+  }
+});
+
+router.delete('/yatras/:id/seat-locks/:seatId', async (req, res) => {
+  try {
+    const result = await SeatLock.deleteOne({ yatraId: req.params.id, seatId: String(req.params.seatId).trim(), status: 'permanently_locked' });
+    if (!result.deletedCount) return res.status(404).json({ error: 'Permanent seat lock not found' });
+    res.json({ seatId: String(req.params.seatId).trim() });
+  } catch (e) {
+    console.error('Delete permanent seat lock error:', e.message);
+    res.status(500).json({ error: 'Failed to unlock seat' });
+  }
+});
+
 router.post('/yatras', async (req, res) => {
   try {
     const body = { ...req.body };
@@ -188,6 +254,8 @@ router.put('/yatras/:id', async (req, res) => {
       // only valid while totalSeats still covers them.)
       const confirmed = await Booking.find({ yatraId: req.params.id, bookingStatus: 'confirmed', seatIds: { $exists: true, $ne: [] } }).select('seatIds').lean();
       const confirmedSeats = new Set(confirmed.flatMap((booking) => booking.seatIds || []));
+      const permanentLocks = await SeatLock.find({ yatraId: req.params.id, status: 'permanently_locked' }).select('seatId').lean();
+      const permanentlyLockedSeats = new Set(permanentLocks.map((lock) => lock.seatId));
       const nextSeats = new Set(
         body.seatLayout.length
           ? body.seatLayout.filter((seat) => seat.type !== 'blocked').map((seat) => String(seat.seatId).trim())
@@ -195,6 +263,8 @@ router.put('/yatras/:id', async (req, res) => {
       );
       const removed = [...confirmedSeats].filter((seatId) => !nextSeats.has(seatId));
       if (removed.length) return res.status(409).json({ error: `Cannot remove or block confirmed seat(s): ${removed.join(', ')}` });
+      const removedPermanent = [...permanentlyLockedSeats].filter((seatId) => !nextSeats.has(seatId));
+      if (removedPermanent.length) return res.status(409).json({ error: `Unlock permanently locked seat(s) before removing or blocking them: ${removedPermanent.join(', ')}` });
     }
 
     if (body.slug) {
@@ -291,6 +361,12 @@ router.patch('/bookings/:id', async (req, res) => {
         seatIds: { $in: booking.seatIds },
       });
       if (clash) return res.status(409).json({ error: 'One or more seats are already confirmed in another booking' });
+      const permanentLock = await SeatLock.findOne({
+        yatraId: booking.yatraId,
+        seatId: { $in: booking.seatIds },
+        status: 'permanently_locked',
+      }).select('seatId').lean();
+      if (permanentLock) return res.status(409).json({ error: `Cannot confirm booking with permanently locked seat: ${permanentLock.seatId}` });
 
       for (const seatId of booking.seatIds) {
         await SeatLock.updateOne(

@@ -517,6 +517,7 @@ export default {
     available: "उपलब्ध",
     selected: "चयनित",
     unavailable: "अनुपलब्ध",
+    permanentlyLocked: "स्थायी रूप से लॉक",
     booked: "बुक हो चुकी",
     front: "आगे की ओर",
     chooseHint: "एक या अधिक उपलब्ध सीटें चुनें।",

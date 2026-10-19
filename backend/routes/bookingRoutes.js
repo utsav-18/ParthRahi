@@ -240,9 +240,23 @@ router.get('/availability/:slug', optionalAuth, async (req, res) => {
     const bookableLayout = layout.filter((seat) => seat.type !== 'blocked');
     const bookings = await Booking.find({ yatraId: yatra._id, bookingStatus: 'confirmed', seatIds: { $exists: true, $ne: [] } }).select('seatIds').lean();
     const booked = new Set(bookings.flatMap((booking) => booking.seatIds || []));
-    const locks = await SeatLock.find({ yatraId: yatra._id, $or: [{ status: 'booked' }, { status: 'locked', expiresAt: { $gt: new Date() } }] }).select('seatId').lean();
-    const locked = new Set(locks.map((lock) => lock.seatId));
-    res.json({ layout, seats: bookableLayout.map((seat) => ({ seatId: seat.seatId, state: booked.has(seat.seatId) ? 'booked' : locked.has(seat.seatId) ? 'locked' : 'available' })) });
+    const locks = await SeatLock.find({
+      yatraId: yatra._id,
+      $or: [
+        { status: 'booked' },
+        { status: 'permanently_locked' },
+        { status: 'locked', expiresAt: { $gt: new Date() } },
+      ],
+    }).select('seatId status').lean();
+    const permanent = new Set(locks.filter((lock) => lock.status === 'permanently_locked').map((lock) => lock.seatId));
+    const locked = new Set(locks.filter((lock) => lock.status === 'locked').map((lock) => lock.seatId));
+    res.json({
+      layout,
+      seats: bookableLayout.map((seat) => ({
+        seatId: seat.seatId,
+        state: booked.has(seat.seatId) ? 'booked' : permanent.has(seat.seatId) ? 'permanently_locked' : locked.has(seat.seatId) ? 'locked' : 'available',
+      })),
+    });
   } catch (error) { console.error('Seat availability error:', error.message); res.status(500).json({ error: 'Failed to load seat availability' }); }
 });
 

@@ -517,6 +517,7 @@ export default {
     available: "Available",
     selected: "Selected",
     unavailable: "Unavailable",
+    permanentlyLocked: "Permanently locked",
     booked: "Booked",
     front: "Front",
     chooseHint: "Choose one or more available seats.",
